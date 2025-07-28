@@ -1,7 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Layout from '@/components/Layout.vue'
+import App from '../App.vue'
+import Stock from '../components/StockSection.vue'
 
 const routes = [
+  {
+    path: '/',
+    name: 'App',
+    component: App,
+    meta: { requiresAuth: false }
+  },
   {
     path: '/',
     component: Layout,
@@ -40,8 +48,14 @@ const routes = [
     ]
   },
   {
+    path: '/assets/stock',
+    name: 'Stock',
+    component: Stock,
+    meta: { requiresAuth: false }
+  },
+  {
     path: '/:pathMatch(.*)*',
-    redirect: '/dashboard'
+    redirect: '/'
   }
 ]
 

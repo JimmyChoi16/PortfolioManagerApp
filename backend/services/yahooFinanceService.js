@@ -1,4 +1,5 @@
 const yahooFinance = require('yahoo-finance2').default;
+const axios = require('axios');
 
 class YahooFinanceService {
   static async getQuote(symbol) {
@@ -108,4 +109,57 @@ class YahooFinanceService {
   }
 }
 
-module.exports = YahooFinanceService;
+class SinaFinanceService {
+  /**
+   * symbols: ['AAPL', 'TSLA', ...]，美股需加 gb_ 前缀
+   * 支持美股、港股、A股、ETF等
+   */
+  static async getSinaQuotes(symbols) {
+    if (!symbols || !Array.isArray(symbols) || symbols.length === 0) return [];
+    // 新浪美股接口格式：gb_aapl,gb_tsla
+    const sinaSymbols = symbols.map(s => `gb_${s.toLowerCase()}`);
+    const url = `https://hq.sinajs.cn/list=${sinaSymbols.join(',')}`;
+    try {
+      const res = await axios.get(url, {
+        responseType: 'arraybuffer',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Referer': 'https://finance.sina.com.cn'
+        }
+      });
+      // 新浪返回GBK编码，需要转码
+      const iconv = require('iconv-lite');
+      const text = iconv.decode(res.data, 'GB18030');
+      // 解析数据
+      const lines = text.split(';');
+      const result = [];
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        // var hq_str_gb_aapl="Apple Inc.,192.32,1.23,0.65,191.00,193.00,1000000,2024-06-28 16:00:00";
+        const match = line.match(/var hq_str_gb_(\w+)=\"([^\"]*)\"/);
+        if (!match) continue;
+        const symbol = match[1].toUpperCase();
+        const fields = match[2].split(',');
+        if (fields.length < 8) continue;
+        result.push({
+          symbol,
+          name: fields[0],
+          currentPrice: parseFloat(fields[1]),
+          change: parseFloat(fields[2]),
+          changePercent: parseFloat(fields[3]),
+          open: parseFloat(fields[4]),
+          high: parseFloat(fields[5]),
+          volume: parseInt(fields[6]),
+          time: fields[7]
+        });
+      }
+      return result;
+    } catch (e) {
+      console.error('Sina quote fetch error:', e.message);
+      return [];
+    }
+  }
+}
+
+module.exports = { YahooFinanceService, SinaFinanceService };

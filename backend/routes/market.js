@@ -17,4 +17,7 @@ router.get('/historical/:symbol', marketController.getHistoricalData);
 // GET /api/market/trending - Get trending/popular stocks
 router.get('/trending', marketController.getTrendingStocks);
 
+// GET /api/market/public-quotes - Get public quotes for homepage
+router.get('/public-quotes', marketController.getPublicQuotes);
+
 module.exports = router;

@@ -10,7 +10,13 @@
     "build": "cd frontend && npm run build",
     "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install"
   },
-  "keywords": ["portfolio", "finance", "vue", "express", "mysql"],
+  "keywords": [
+    "portfolio",
+    "finance",
+    "vue",
+    "express",
+    "mysql"
+  ],
   "author": "Your Team",
   "license": "MIT",
   "devDependencies": {

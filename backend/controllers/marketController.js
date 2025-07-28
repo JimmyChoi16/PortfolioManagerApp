@@ -1,4 +1,4 @@
-const YahooFinanceService = require('../services/yahooFinanceService');
+const { YahooFinanceService, SinaFinanceService } = require('../services/yahooFinanceService');
 
 const marketController = {
   // Search for stocks/symbols
@@ -152,6 +152,28 @@ const marketController = {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch trending stocks',
+        error: error.message
+      });
+    }
+  },
+
+  // Get public quotes for homepage (no auth required)
+  async getPublicQuotes(req, res) {
+    try {
+      // 可根据需要调整默认展示的资产
+      const symbols = [
+        'AAPL', 'TSLA', 'SPY', 'MSFT', 'GOOGL', 'BND', 'QQQ', 'VTI', 'MCHI', 'AGG'
+      ];
+      const quotes = await SinaFinanceService.getSinaQuotes(symbols);
+      res.json({
+        success: true,
+        data: quotes
+      });
+    } catch (error) {
+      console.error('Error fetching public quotes:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch public quotes',
         error: error.message
       });
     }

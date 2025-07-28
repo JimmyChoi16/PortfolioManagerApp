@@ -16,6 +16,11 @@ const marketAPI = {
     return http.post('/market/quotes', { symbols })
   },
 
+  // Get public quotes for homepage
+  getMarketQuotes() {
+    return http.get('/market/public-quotes')
+  },
+
   // Get historical data
   getHistoricalData(symbol, period = '1mo', interval = '1d') {
     return http.get(`/market/historical/${symbol}?period=${period}&interval=${interval}`)
