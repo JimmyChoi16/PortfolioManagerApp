@@ -1,0 +1,245 @@
+const Holding = require('../models/Holding');
+const YahooFinanceService = require('../services/yahooFinanceService');
+const { validationResult } = require('express-validator');
+
+const holdingController = {
+  // Get all holdings
+  async getAllHoldings(req, res) {
+    try {
+      const holdings = await Holding.getAll();
+      res.json({
+        success: true,
+        data: holdings
+      });
+    } catch (error) {
+      console.error('Error fetching holdings:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch holdings',
+        error: error.message
+      });
+    }
+  },
+
+  // Get holding by ID
+  async getHoldingById(req, res) {
+    try {
+      const { id } = req.params;
+      const holding = await Holding.getById(id);
+      
+      if (!holding) {
+        return res.status(404).json({
+          success: false,
+          message: 'Holding not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: holding
+      });
+    } catch (error) {
+      console.error('Error fetching holding:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch holding',
+        error: error.message
+      });
+    }
+  },
+
+  // Create new holding
+  async createHolding(req, res) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          errors: errors.array()
+        });
+      }
+
+      const { symbol, name, type, quantity, purchase_price, purchase_date } = req.body;
+      
+      // Get current price from Yahoo Finance
+      let current_price = purchase_price;
+      try {
+        const quote = await YahooFinanceService.getQuote(symbol);
+        if (quote && quote.currentPrice) {
+          current_price = quote.currentPrice;
+        }
+      } catch (error) {
+        console.warn('Could not fetch current price, using purchase price');
+      }
+
+      const holdingData = {
+        symbol: symbol.toUpperCase(),
+        name,
+        type,
+        quantity: parseFloat(quantity),
+        purchase_price: parseFloat(purchase_price),
+        purchase_date,
+        current_price
+      };
+
+      const holdingId = await Holding.create(holdingData);
+      const newHolding = await Holding.getById(holdingId);
+
+      res.status(201).json({
+        success: true,
+        message: 'Holding created successfully',
+        data: newHolding
+      });
+    } catch (error) {
+      console.error('Error creating holding:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to create holding',
+        error: error.message
+      });
+    }
+  },
+
+  // Update holding
+  async updateHolding(req, res) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          errors: errors.array()
+        });
+      }
+
+      const { id } = req.params;
+      const { symbol, name, type, quantity, purchase_price, purchase_date, current_price } = req.body;
+
+      const holdingData = {
+        symbol: symbol.toUpperCase(),
+        name,
+        type,
+        quantity: parseFloat(quantity),
+        purchase_price: parseFloat(purchase_price),
+        purchase_date,
+        current_price: parseFloat(current_price)
+      };
+
+      const updated = await Holding.update(id, holdingData);
+      
+      if (!updated) {
+        return res.status(404).json({
+          success: false,
+          message: 'Holding not found'
+        });
+      }
+
+      const updatedHolding = await Holding.getById(id);
+      res.json({
+        success: true,
+        message: 'Holding updated successfully',
+        data: updatedHolding
+      });
+    } catch (error) {
+      console.error('Error updating holding:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update holding',
+        error: error.message
+      });
+    }
+  },
+
+  // Delete holding
+  async deleteHolding(req, res) {
+    try {
+      const { id } = req.params;
+      const deleted = await Holding.delete(id);
+      
+      if (!deleted) {
+        return res.status(404).json({
+          success: false,
+          message: 'Holding not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'Holding deleted successfully'
+      });
+    } catch (error) {
+      console.error('Error deleting holding:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete holding',
+        error: error.message
+      });
+    }
+  },
+
+  // Get portfolio summary
+  async getPortfolioSummary(req, res) {
+    try {
+      const portfolioData = await Holding.getPortfolioSummary();
+      res.json({
+        success: true,
+        data: portfolioData
+      });
+    } catch (error) {
+      console.error('Error fetching portfolio summary:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch portfolio summary',
+        error: error.message
+      });
+    }
+  },
+
+  // Get historical performance data
+  async getHistoricalData(req, res) {
+    try {
+      const historicalData = await Holding.getHistoricalData();
+      res.json({
+        success: true,
+        data: historicalData
+      });
+    } catch (error) {
+      console.error('Error fetching historical data:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch historical data',
+        error: error.message
+      });
+    }
+  },
+
+  // Update current prices for all holdings
+  async updateCurrentPrices(req, res) {
+    try {
+      const holdings = await Holding.getAll();
+      const symbols = [...new Set(holdings.map(h => h.symbol))];
+      
+      const quotes = await YahooFinanceService.getMultipleQuotes(symbols);
+      
+      for (const quote of quotes) {
+        await Holding.updateCurrentPrice(quote.symbol, quote.currentPrice);
+      }
+
+      res.json({
+        success: true,
+        message: `Updated prices for ${quotes.length} symbols`,
+        data: quotes
+      });
+    } catch (error) {
+      console.error('Error updating current prices:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update current prices',
+        error: error.message
+      });
+    }
+  }
+};
+
+module.exports = holdingController;
