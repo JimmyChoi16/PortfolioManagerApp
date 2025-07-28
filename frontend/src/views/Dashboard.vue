@@ -124,7 +124,7 @@
         </template>
         <div class="suggestions-content">
           <div class="suggestion-item">
-            <el-icon color="#409eff"><Lightbulb /></el-icon>
+            <el-icon color="#409eff"><InfoFilled /></el-icon>
             <div>
               <h4>Diversify into Tech ETFs</h4>
               <p>Consider adding QQQ to balance your individual stock holdings</p>
@@ -184,7 +184,7 @@ import {
   TrendCharts, 
   Grid, 
   Star, 
-  Lightbulb 
+  InfoFilled 
 } from '@element-plus/icons-vue'
 
 // Register ECharts components
