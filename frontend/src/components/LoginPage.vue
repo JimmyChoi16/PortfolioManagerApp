@@ -148,14 +148,14 @@ const handleSubmit = () => {
 }
 
 const handleSignUp = () => {
-  // TODO: Implement sign up logic
+  // TODO: Implement sign up logic -
   console.log('Sign up:', formData.value)
   // For now, just go back to home
   emit('goBack')
 }
 
 const handleSignIn = () => {
-  // TODO: Implement sign in logic
+  // TODO: Implement sign in logic -
   console.log('Sign in:', formData.value)
   // For now, just go back to home
   emit('goBack')
@@ -166,7 +166,7 @@ const goBackToHome = () => {
 }
 
 const forgotPassword = () => {
-  // TODO: Implement forgot password logic
+  // TODO: Implement forgot password logic -
   console.log('Forgot password for:', formData.value.email)
 }
 </script>
