@@ -10,6 +10,7 @@
     </div>
 
     <!-- Stock Categories Overview -->
+     <!-- TODO: Need to change to mock data, will show the real after login sucessfully -->
     <div class="stock-categories">
       <div class="category-card">
         <div class="category-icon">📈</div>

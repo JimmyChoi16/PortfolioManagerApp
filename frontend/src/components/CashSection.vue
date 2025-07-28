@@ -10,6 +10,7 @@
     </div>
 
     <!-- Cash Accounts Overview -->
+     <!-- TODO: Need to change to mock data, will show the real after login sucessfully -->
     <div class="cash-accounts">
       <div class="account-card">
         <div class="account-icon">🏦</div>

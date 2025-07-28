@@ -77,6 +77,7 @@
     </div>
 
     <!-- Bond Holdings Table -->
+     <!-- TODO: Need to change to mock data, will show the real after login sucessfully -->
     <div class="bond-holdings">
       <h2>Current Bond Holdings</h2>
       <div class="holdings-table">
