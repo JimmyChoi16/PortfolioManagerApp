@@ -13,35 +13,32 @@
           <template #dropdown>
             <el-dropdown-menu class="asset-menu">
               <el-dropdown-item @click="setActivePage('dashboard')" v-if="isLoggedIn">
-                📊
+    
                 <span>Dashboard</span>
               </el-dropdown-item>
               <el-dropdown-item @click="setActivePage('home')" v-if="!isLoggedIn">
-                🏠
+                
                 <span>Home</span>
               </el-dropdown-item>
               <el-dropdown-item @click="setActivePage('stock')">
-                📈
+                
                 <span>Stock</span>
               </el-dropdown-item>
               <el-dropdown-item @click="setActivePage('fund')">
-                💰
+                
                 <span>Fund</span>
               </el-dropdown-item>
               <el-dropdown-item @click="setActivePage('bond')">
-                💳
+                
                 <span>Bond</span>
               </el-dropdown-item>
               <el-dropdown-item @click="setActivePage('cash')">
-                💵
+                
                 <span>Cash</span>
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        
-        <el-button text @click="switchLang('en')" :class="{ active: lang === 'en' }">EN</el-button>
-        <el-button text @click="switchLang('zh')" :class="{ active: lang === 'zh' }">中文</el-button>
         
         <!-- Show login/logout button based on auth status -->
         <el-button 
@@ -171,7 +168,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
 import StockSection from './components/StockSection.vue'
 import FundSection from './components/FundSection.vue'
 import BondSection from './components/BondSection.vue'
@@ -180,8 +176,6 @@ import LoginPage from './components/LoginPage.vue'
 import Dashboard from './components/Dashboard.vue'
 
 const router = useRouter()
-const { locale } = useI18n()
-const lang = ref(locale.value)
 const activePage = ref('home')
 const showBanner = ref(false)
 const hoveredFeature = ref(null)
@@ -231,11 +225,6 @@ const features = ref([
 ])
 
 // Methods
-const switchLang = (l) => {
-  locale.value = l
-  lang.value = l
-}
-
 const goLogin = () => {
   activePage.value = 'login'
   localStorage.setItem('activePage', 'login')
