@@ -144,8 +144,9 @@ class SinaFinanceService {
         if (fields.length < 8) continue;
         const currentPrice = parseFloat(fields[1]);
         const change = parseFloat(fields[2]);
-        // 直接计算涨跌幅
-        const changePercent = currentPrice > 0 ? (change / (currentPrice - change)) * 100 : 0;
+        // 计算涨跌幅：change / (currentPrice - change) * 100
+        const changePercent = currentPrice > 0 && (currentPrice - change) > 0 ? 
+          (change / (currentPrice - change)) * 100 : 0;
         
         result.push({
           symbol,
