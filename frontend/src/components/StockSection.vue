@@ -428,20 +428,6 @@ const loadStockData = async () => {
       },
       {
         id: 5,
-        symbol: 'TSLA',
-        name: 'Tesla Inc.',
-        quantity: 15,
-        purchase_price: 180.00,
-        current_price: 325.59,
-        current_value: 4883.85,
-        purchase_value: 2700.00,
-        unrealized_gain: 2183.85,
-        gain_percent: 80.88,
-        sector: 'Automotive',
-        type: 'stock'
-      },
-      {
-        id: 6,
         symbol: 'AMZN',
         name: 'Amazon.com Inc.',
         quantity: 12,
@@ -455,7 +441,7 @@ const loadStockData = async () => {
         type: 'stock'
       },
       {
-        id: 7,
+        id: 6,
         symbol: 'META',
         name: 'Meta Platforms Inc.',
         quantity: 20,
@@ -469,7 +455,7 @@ const loadStockData = async () => {
         type: 'stock'
       },
       {
-        id: 8,
+        id: 7,
         symbol: 'NFLX',
         name: 'Netflix Inc.',
         quantity: 8,
@@ -483,7 +469,7 @@ const loadStockData = async () => {
         type: 'stock'
       },
       {
-        id: 9,
+        id: 8,
         symbol: 'JPM',
         name: 'JPMorgan Chase & Co.',
         quantity: 25,
@@ -497,7 +483,7 @@ const loadStockData = async () => {
         type: 'stock'
       },
       {
-        id: 10,
+        id: 9,
         symbol: 'JNJ',
         name: 'Johnson & Johnson',
         quantity: 30,
@@ -511,7 +497,7 @@ const loadStockData = async () => {
         type: 'stock'
       },
       {
-        id: 11,
+        id: 10,
         symbol: 'PG',
         name: 'Procter & Gamble Co.',
         quantity: 18,
@@ -525,7 +511,7 @@ const loadStockData = async () => {
         type: 'stock'
       },
       {
-        id: 12,
+        id: 11,
         symbol: 'V',
         name: 'Visa Inc.',
         quantity: 22,
