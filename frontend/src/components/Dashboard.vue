@@ -10,10 +10,10 @@
             <el-icon><Refresh /></el-icon>
             Refresh Data
           </el-button>
-          <el-button @click="logout">
+          <!-- <el-button @click="logout">
             <el-icon><SwitchButton /></el-icon>
             Logout
-          </el-button>
+          </el-button> -->
         </div>
       </div>
     </div>
@@ -95,31 +95,49 @@
         border
       >
         <el-table-column prop="symbol" label="Symbol" width="100" />
-        <el-table-column prop="name" label="Name" min-width="200" />
+        <el-table-column prop="name" label="Name" min-width="150" />
         <el-table-column prop="type" label="Type" width="100">
           <template #default="{ row }">
             <el-tag :type="getTypeTagType(row.type)">{{ row.type }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="quantity" label="Quantity" width="120" />
+        <el-table-column prop="sector" label="Sector" width="120">
+          <template #default="{ row }">
+            <span v-if="row.sector">{{ row.sector }}</span>
+            <span v-else class="text-muted">-</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="quantity" label="Quantity" width="100" />
+        <el-table-column prop="purchase_price" label="Purchase Price" width="120">
+          <template #default="{ row }">
+            ${{ formatNumber(row.purchase_price) }}
+          </template>
+        </el-table-column>
         <el-table-column prop="current_price" label="Current Price" width="120">
           <template #default="{ row }">
             ${{ formatNumber(row.current_price) }}
           </template>
         </el-table-column>
-        <el-table-column prop="current_value" label="Current Value" width="140">
+        <el-table-column prop="current_value" label="Current Value" width="130">
           <template #default="{ row }">
             ${{ formatNumber(row.current_value) }}
           </template>
         </el-table-column>
-        <el-table-column prop="gain_percent" label="Gain/Loss" width="120">
+        <el-table-column prop="unrealized_gain" label="Gain/Loss" width="120">
+          <template #default="{ row }">
+            <span :class="row.unrealized_gain >= 0 ? 'positive' : 'negative'">
+              {{ row.unrealized_gain >= 0 ? '+' : '' }}${{ formatNumber(row.unrealized_gain) }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="gain_percent" label="Gain/Loss %" width="120">
           <template #default="{ row }">
             <span :class="row.gain_percent >= 0 ? 'positive' : 'negative'">
               {{ row.gain_percent >= 0 ? '+' : '' }}{{ row.gain_percent }}%
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="Actions" width="200" fixed="right">
+        <el-table-column label="Actions" width="150" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="editHolding(row)">Edit</el-button>
             <el-button size="small" type="danger" @click="deleteHolding(row.id)">Delete</el-button>
@@ -199,24 +217,33 @@
       <el-tabs v-model="activeAnalysisTab">
         <el-tab-pane label="Allocation" name="allocation">
           <div v-if="allocationData.length > 0">
-            <div class="allocation-chart">
-              <div
-                v-for="item in allocationData"
-                :key="item.type"
-                class="allocation-item"
-              >
-                <div class="allocation-label">
-                  <span class="allocation-type">{{ item.type }}</span>
-                  <span class="allocation-count">({{ item.count }} holdings)</span>
-                </div>
-                <div class="allocation-bar">
+            <div class="analysis-grid">
+              <div class="chart-section">
+                <h3>Asset Allocation Chart</h3>
+                <AllocationPieChart :data="allocationData" />
+              </div>
+              <div class="details-section">
+                <h3>Allocation Details</h3>
+                <div class="allocation-chart">
                   <div
-                    class="allocation-fill"
-                    :style="{ width: item.percentage + '%' }"
-                  ></div>
-                </div>
-                <div class="allocation-value">
-                  ${{ formatNumber(item.total_value) }} ({{ item.percentage }}%)
+                    v-for="item in allocationData"
+                    :key="item.type"
+                    class="allocation-item"
+                  >
+                    <div class="allocation-label">
+                      <span class="allocation-type">{{ item.type }}</span>
+                      <span class="allocation-count">({{ item.count }} holdings)</span>
+                    </div>
+                    <div class="allocation-bar">
+                      <div
+                        class="allocation-fill"
+                        :style="{ width: item.percentage + '%' }"
+                      ></div>
+                    </div>
+                    <div class="allocation-value">
+                      ${{ formatNumber(item.total_value) }} ({{ item.percentage }}%)
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -224,50 +251,68 @@
         </el-tab-pane>
 
         <el-tab-pane label="Performance" name="performance">
-          <div v-if="performanceData" class="performance-summary">
-            <div class="performance-item">
-              <span class="label">Current Value:</span>
-              <span class="value">${{ formatNumber(performanceData.current_value) }}</span>
+          <div v-if="performanceData" class="analysis-grid">
+            <div class="chart-section">
+              <h3>Portfolio Value Trend</h3>
+              <PerformanceLineChart :data="historicalData" />
             </div>
-            <div class="performance-item">
-              <span class="label">Total Cost:</span>
-              <span class="value">${{ formatNumber(performanceData.total_cost) }}</span>
-            </div>
-            <div class="performance-item">
-              <span class="label">Total Gain/Loss:</span>
-              <span class="value" :class="performanceData.total_gain_loss >= 0 ? 'positive' : 'negative'">
-                ${{ formatNumber(performanceData.total_gain_loss) }}
-              </span>
-            </div>
-            <div class="performance-item">
-              <span class="label">Gain/Loss %:</span>
-              <span class="value" :class="performanceData.gain_loss_percent >= 0 ? 'positive' : 'negative'">
-                {{ performanceData.gain_loss_percent >= 0 ? '+' : '' }}{{ performanceData.gain_loss_percent }}%
-              </span>
+            <div class="details-section">
+              <h3>Performance Summary</h3>
+              <div class="performance-summary">
+                <div class="performance-item">
+                  <span class="label">Current Value:</span>
+                  <span class="value">${{ formatNumber(performanceData.current_value) }}</span>
+                </div>
+                <div class="performance-item">
+                  <span class="label">Total Cost:</span>
+                  <span class="value">${{ formatNumber(performanceData.total_cost) }}</span>
+                </div>
+                <div class="performance-item">
+                  <span class="label">Total Gain/Loss:</span>
+                  <span class="value" :class="performanceData.total_gain_loss >= 0 ? 'positive' : 'negative'">
+                    ${{ formatNumber(performanceData.total_gain_loss) }}
+                  </span>
+                </div>
+                <div class="performance-item">
+                  <span class="label">Gain/Loss %:</span>
+                  <span class="value" :class="performanceData.gain_loss_percent >= 0 ? 'positive' : 'negative'">
+                    {{ performanceData.gain_loss_percent >= 0 ? '+' : '' }}{{ performanceData.gain_loss_percent }}%
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </el-tab-pane>
 
         <el-tab-pane label="Sector Analysis" name="sector">
           <div v-if="sectorData.length > 0">
-            <div class="sector-chart">
-              <div
-                v-for="item in sectorData"
-                :key="item.sector"
-                class="sector-item"
-              >
-                <div class="sector-label">
-                  <span class="sector-name">{{ item.sector }}</span>
-                  <span class="sector-count">({{ item.count }} holdings)</span>
-                </div>
-                <div class="sector-bar">
+            <div class="analysis-grid">
+              <div class="chart-section">
+                <h3>Sector Distribution</h3>
+                <SectorPieChart :data="sectorData" />
+              </div>
+              <div class="details-section">
+                <h3>Sector Details</h3>
+                <div class="sector-chart">
                   <div
-                    class="sector-fill"
-                    :style="{ width: item.percentage + '%' }"
-                  ></div>
-                </div>
-                <div class="sector-value">
-                  ${{ formatNumber(item.total_value) }} ({{ item.percentage }}%)
+                    v-for="item in sectorData"
+                    :key="item.sector"
+                    class="sector-item"
+                  >
+                    <div class="sector-label">
+                      <span class="sector-name">{{ item.sector }}</span>
+                      <span class="sector-count">({{ item.count }} holdings)</span>
+                    </div>
+                    <div class="sector-bar">
+                      <div
+                        class="sector-fill"
+                        :style="{ width: item.percentage + '%' }"
+                      ></div>
+                    </div>
+                    <div class="sector-value">
+                      ${{ formatNumber(item.total_value) }} ({{ item.percentage }}%)
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -283,6 +328,9 @@ import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh, SwitchButton, Plus, DataAnalysis, Search } from '@element-plus/icons-vue'
 import portfolioAPI from '../api/portfolio.js'
+import AllocationPieChart from './charts/AllocationPieChart.vue'
+import SectorPieChart from './charts/SectorPieChart.vue'
+import PerformanceLineChart from './charts/PerformanceLineChart.vue'
 
 const emit = defineEmits(['goToAssetPage'])
 
@@ -301,6 +349,7 @@ const portfolioSummary = ref(null)
 const allocationData = ref([])
 const performanceData = ref(null)
 const sectorData = ref([])
+const historicalData = ref([])
 
 // Form data
 const holdingForm = ref({
@@ -347,7 +396,8 @@ const filteredHoldings = computed(() => {
   return holdings.value.filter(holding => 
     holding.symbol.toLowerCase().includes(query) ||
     holding.name.toLowerCase().includes(query) ||
-    holding.type.toLowerCase().includes(query)
+    holding.type.toLowerCase().includes(query) ||
+    (holding.sector && holding.sector.toLowerCase().includes(query))
   )
 })
 
@@ -360,12 +410,17 @@ const loadData = async () => {
       portfolioAPI.getPortfolioSummary()
     ])
     
-    if (holdingsRes.data.success) {
+    console.log('Holdings response:', holdingsRes)
+    console.log('Summary response:', summaryRes)
+    
+    if (holdingsRes.data && holdingsRes.data.success) {
       holdings.value = holdingsRes.data.data
+      console.log('Holdings loaded:', holdings.value)
     }
     
-    if (summaryRes.data.success) {
+    if (summaryRes.data && summaryRes.data.success) {
       portfolioSummary.value = summaryRes.data.data.summary
+      console.log('Summary loaded:', portfolioSummary.value)
     }
   } catch (error) {
     ElMessage.error('Failed to load portfolio data')
@@ -393,10 +448,11 @@ const updatePrices = async () => {
 const viewAnalysis = async () => {
   showAnalysis.value = true
   try {
-    const [allocationRes, performanceRes, sectorRes] = await Promise.all([
+    const [allocationRes, performanceRes, sectorRes, historicalRes] = await Promise.all([
       portfolioAPI.getAllocationAnalysis(),
       portfolioAPI.getPerformanceAnalysis(),
-      portfolioAPI.getSectorAnalysis()
+      portfolioAPI.getSectorAnalysis(),
+      portfolioAPI.getHistoricalData()
     ])
     
     if (allocationRes.data.success) {
@@ -409,6 +465,10 @@ const viewAnalysis = async () => {
     
     if (sectorRes.data.success) {
       sectorData.value = sectorRes.data.data
+    }
+    
+    if (historicalRes.data.success) {
+      historicalData.value = historicalRes.data.data
     }
   } catch (error) {
     ElMessage.error('Failed to load analysis data')
@@ -477,12 +537,12 @@ const deleteHolding = async (id) => {
   }
 }
 
-const logout = () => {
-  // Clear localStorage and emit logout event
-  localStorage.removeItem('isLoggedIn')
-  localStorage.removeItem('activePage')
-  emit('logout')
-}
+// const logout = () => {
+//   // Clear localStorage and emit logout event
+//   localStorage.removeItem('isLoggedIn')
+//   localStorage.removeItem('activePage')
+//   emit('logout')
+// }
 
 const getTypeTagType = (type) => {
   const types = {
@@ -737,6 +797,59 @@ onMounted(() => {
   color: #2c3e50;
 }
 
+.positive {
+  color: #27ae60;
+  font-weight: 600;
+}
+
+.negative {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+.text-muted {
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+/* Analysis Grid Layout */
+.analysis-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.chart-section {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e9ecef;
+}
+
+.chart-section h3 {
+  margin: 0 0 20px 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.details-section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e9ecef;
+}
+
+.details-section h3 {
+  margin: 0 0 20px 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-align: center;
+}
+
 @media (max-width: 768px) {
   .dashboard {
     padding: 20px 10px;
@@ -778,6 +891,16 @@ onMounted(() => {
   .allocation-value,
   .sector-value {
     text-align: left;
+  }
+  
+  .analysis-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .chart-section,
+  .details-section {
+    padding: 15px;
   }
 }
 </style> 

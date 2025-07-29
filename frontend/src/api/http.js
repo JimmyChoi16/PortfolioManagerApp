@@ -24,15 +24,8 @@ http.interceptors.request.use(
 // Response interceptor
 http.interceptors.response.use(
   (response) => {
-    // Return data directly if request was successful
-    if (response.data.success) {
-      return response.data
-    }
-    
-    // Handle API errors
-    const message = response.data.message || 'Request failed'
-    ElMessage.error(message)
-    return Promise.reject(new Error(message))
+    // Return the full response for components to handle
+    return response
   },
   (error) => {
     // Handle network errors
