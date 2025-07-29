@@ -70,6 +70,25 @@ CREATE TABLE IF NOT EXISTS simple_recommendations (
     INDEX idx_symbol (symbol)
 );
 
+CREATE TABLE portfolio (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    user_name VARCHAR(255) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE portfolio_holding (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    portfolio_id INTEGER NOT NULL,
+    holding_id INTEGER NOT NULL,
+    allocation_percent DECIMAL(5,2),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (portfolio_id) REFERENCES portfolio(id),
+    FOREIGN KEY (holding_id) REFERENCES holding(id)
+);
+
 -- Insert initial portfolio summary record
 INSERT INTO portfolio_summary (total_value, daily_change, daily_change_percent, total_holdings) 
 VALUES (107125.00, 7675.00, 7.72, 4) 

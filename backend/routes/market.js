@@ -8,9 +8,6 @@ router.get('/search', marketController.searchSymbols);
 // GET /api/market/quote/:symbol - Get quote for specific symbol
 router.get('/quote/:symbol', marketController.getQuote);
 
-// POST /api/market/quotes - Get quotes for multiple symbols
-router.post('/quotes', marketController.getMultipleQuotes);
-
 // GET /api/market/historical/:symbol - Get historical data for symbol
 router.get('/historical/:symbol', marketController.getHistoricalData);
 
@@ -28,5 +25,10 @@ router.get('/recommendations', marketController.getRecommendations);
 
 // GET /api/market/recommendations/:symbol - Get recommendation for specific symbol
 router.get('/recommendations/:symbol', marketController.getRecommendationBySymbol);
+
+// US stocks batch quotes
+router.post('/quotes/us', marketController.getUsMultipleQuotes)
+// CN stocks batch quotes
+router.post('/quotes/cn', marketController.getCnMultipleQuotes)
 
 module.exports = router;

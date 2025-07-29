@@ -1,3 +1,4 @@
+// TODO: Haven't implemented CRUD for stock holdings yet.
 <template>
   <div class="stock-section">
     <!-- Login Warning -->
@@ -44,8 +45,155 @@
       </el-button>
     </div>
 
+    <!-- Performance Metrics Title and Cards -->
+    <h2 style="margin-bottom: 12px;">Performance Metrics</h2>
+    <div class="performance-cards" style="margin-bottom: 32px;">
+      <div class="performance-card" @click="showCagrDialog = true" style="cursor:pointer;">
+        <div class="card-icon">📈</div>
+        <div class="card-content">
+          <h4>CAGR</h4>
+          <p class="card-value">{{ (cagr * 100).toFixed(2) }}%</p>
+          <span class="card-subtitle">Annualized Return</span>
+        </div>
+      </div>
+      <div class="performance-card" @click="showSharpeDialog = true" style="cursor:pointer;">
+        <div class="card-icon">📊</div>
+        <div class="card-content">
+          <h4>Sharpe Ratio</h4>
+          <p class="card-value">{{ sharpe.toFixed(2) }}</p>
+          <span class="card-subtitle">Risk-adjusted</span>
+        </div>
+      </div>
+      <div class="performance-card" @click="showDrawdownDialog = true" style="cursor:pointer;">
+        <div class="card-icon">📉</div>
+        <div class="card-content">
+          <h4>Max Drawdown</h4>
+          <p class="card-value">{{ (maxDrawdown * 100).toFixed(2) }}%</p>
+          <span class="card-subtitle">Worst Loss</span>
+        </div>
+      </div>
+    </div>
+    <!-- CAGR Dialog -->
+    <el-dialog v-model="showCagrDialog" title="CAGR - Historical Net Value" width="700px">
+      <PerformanceLineChart :data="effectiveHistoricalData" />
+    </el-dialog>
+    <!-- Sharpe Ratio Dialog -->
+    <el-dialog v-model="showSharpeDialog" title="Sharpe Ratio - Daily Returns Distribution" width="700px" @close="onSharpeDialogClose">
+      <div style="height:350px;width:100%;">
+        <canvas v-if="showSharpeDialog" ref="sharpeChart"></canvas>
+        <div v-else-if="!dailyReturns.length" style="text-align:center;color:#aaa;">No data available</div>
+      </div>
+    </el-dialog>
+    <!-- Max Drawdown Dialog -->
+    <el-dialog v-model="showDrawdownDialog" title="Max Drawdown - Net Value Curve" width="700px" @close="onDrawdownDialogClose">
+      <div style="height:350px;width:100%;">
+        <canvas v-if="showDrawdownDialog" ref="drawdownChart"></canvas>
+        <div v-else-if="!drawdownChartData.data.length" style="text-align:center;color:#aaa;">No data available</div>
+      </div>
+    </el-dialog>
+    <!-- Stock Portfolio Performance (move below metrics) -->
+    <div class="portfolio-performance" v-if="stockPerformance">
+      <h2>Stock Portfolio Performance</h2>
+      <div class="performance-cards">
+        <div class="performance-card">
+          <div class="card-icon">📊</div>
+          <div class="card-content">
+            <h4>Total Value</h4>
+            <p class="card-value">${{ formatNumber(stockPerformance.total_value) }}</p>
+            <span class="card-change" :class="stockPerformance.total_gain >= 0 ? 'positive' : 'negative'">
+              {{ stockPerformance.total_gain >= 0 ? '+' : '' }}${{ formatNumber(stockPerformance.total_gain) }}
+              ({{ stockPerformance.avg_gain_percent >= 0 ? '+' : '' }}{{ stockPerformance.avg_gain_percent }}%)
+            </span>
+          </div>
+        </div>
+
+        <div class="performance-card">
+          <div class="card-icon">📈</div>
+          <div class="card-content">
+            <h4>Total Holdings</h4>
+            <p class="card-value">{{ stockPerformance.total_holdings }}</p>
+            <span class="card-subtitle">Stock positions</span>
+          </div>
+        </div>
+
+        <div class="performance-card">
+          <div class="card-icon">🎯</div>
+          <div class="card-content">
+            <h4>Best Performer</h4>
+            <p class="card-value">{{ bestPerformer?.symbol || 'N/A' }}</p>
+            <span class="card-change positive" v-if="bestPerformer">
+              +{{ bestPerformer.gain_percent }}%
+            </span>
+          </div>
+        </div>
+
+        <div class="performance-card">
+          <div class="card-icon">📉</div>
+          <div class="card-content">
+            <h4>Worst Performer</h4>
+            <p class="card-value">{{ worstPerformer?.symbol || 'N/A' }}</p>
+            <span class="card-change negative" v-if="worstPerformer">
+              {{ worstPerformer.gain_percent }}%
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Your Real-time Stock Holdings -->
+    <div class="holdings-data" v-if="stockHoldings.length > 0 && isLoggedIn">
+      <h2>Your Real-time Stock Holdings</h2>
+      <div class="market-table-wrapper">
+        <table class="market-table">
+          <thead>
+            <tr>
+              <th>Symbol</th>
+              <th>Name</th>
+              <th>Quantity</th>
+              <th>Purchase Price</th>
+              <th>Current Price</th>
+              <th>Current Value</th>
+              <th>Gain/Loss</th>
+              <th>Gain/Loss %</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in pagedComputedStockHoldings" :key="item.symbol" @mouseover="hoveredRow = item.symbol"
+              @mouseleave="hoveredRow = null" :class="[
+                { hovered: hoveredRow === item.symbol },
+                rowFlash[item.symbol] === 'up' ? 'flash-up' : '',
+                rowFlash[item.symbol] === 'down' ? 'flash-down' : ''
+              ]">
+              <td>{{ item.symbol }}</td>
+              <td>{{ item.name }}</td>
+              <td>{{ formatNumber(item.quantity) }}</td>
+              <td>${{ formatNumber(item.purchase_price) }}</td>
+              <td>${{ formatNumber(item.current_price) }}</td>
+              <td>${{ formatNumber(item.current_value) }}</td>
+              <td :class="{ up: item.unrealized_gain > 0, down: item.unrealized_gain < 0 }">
+                {{ item.unrealized_gain > 0 ? '+' : '' }}${{ formatNumber(item.unrealized_gain) }}
+              </td>
+              <td :class="{ up: item.gain_percent > 0, down: item.gain_percent < 0 }">
+                {{ item.gain_percent > 0 ? '+' : '' }}{{ item.gain_percent }}%
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Holdings Pagination -->
+      <div class="pagination" v-if="holdingsTotalPages > 1">
+        <el-button @click="holdingsPrevPage" :disabled="holdingsCurrentPage === 1" size="small">
+          Previous
+        </el-button>
+        <span>Page {{ holdingsCurrentPage }} of {{ holdingsTotalPages }}</span>
+        <el-button @click="holdingsNextPage" :disabled="holdingsCurrentPage === holdingsTotalPages" size="small">
+          Next
+        </el-button>
+      </div>
+    </div>
+
     <!-- Real-time Market Data -->
-    <div class="market-data">
+    <div class="market-data" v-if="!isLoggedIn">
       <div class="market-data">
         <div class="market-header">
           <h2>Real-time Market Data</h2>
@@ -117,134 +265,19 @@
           </div>
         </div>
       </div>
-
-      <!-- Your Stock Holdings -->
-      <div class="holdings-data" v-if="stockHoldings.length > 0">
-        <h2>Your Stock Holdings</h2>
-        <div class="market-table-wrapper">
-          <table class="market-table">
-            <thead>
-              <tr>
-                <th>Symbol</th>
-                <th>Name</th>
-                <th>Quantity</th>
-                <th>Current Price</th>
-                <th>Current Value</th>
-                <th>Gain/Loss</th>
-                <th>Gain/Loss %</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in pagedStockHoldings" :key="item.symbol" @mouseover="hoveredRow = item.symbol"
-                @mouseleave="hoveredRow = null" :class="[
-                  { hovered: hoveredRow === item.symbol },
-                  rowFlash[item.symbol] === 'up' ? 'flash-up' : '',
-                  rowFlash[item.symbol] === 'down' ? 'flash-down' : ''
-                ]">
-                <td>{{ item.symbol }}</td>
-                <td>{{ item.name }}</td>
-                <td>{{ formatNumber(item.quantity) }}</td>
-                <td>${{ formatNumber(item.current_price) }}</td>
-                <td>${{ formatNumber(item.current_value) }}</td>
-                <td :class="{ up: item.unrealized_gain > 0, down: item.unrealized_gain < 0 }">
-                  {{ item.unrealized_gain > 0 ? '+' : '' }}${{ formatNumber(item.unrealized_gain) }}
-                </td>
-                <td :class="{ up: item.gain_percent > 0, down: item.gain_percent < 0 }">
-                  {{ item.gain_percent > 0 ? '+' : '' }}{{ item.gain_percent }}%
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Holdings Pagination -->
-        <div class="pagination" v-if="holdingsTotalPages > 1">
-          <el-button @click="holdingsPrevPage" :disabled="holdingsCurrentPage === 1" size="small">
-            Previous
-          </el-button>
-          <span>Page {{ holdingsCurrentPage }} of {{ holdingsTotalPages }}</span>
-          <el-button @click="holdingsNextPage" :disabled="holdingsCurrentPage === holdingsTotalPages" size="small">
-            Next
-          </el-button>
-        </div>
-      </div>
-
-      <!-- Portfolio Performance -->
-      <div class="portfolio-performance" v-if="stockPerformance">
-        <h2>Stock Portfolio Performance</h2>
-        <div class="performance-cards">
-          <div class="performance-card">
-            <div class="card-icon">📊</div>
-            <div class="card-content">
-              <h4>Total Value</h4>
-              <p class="card-value">${{ formatNumber(stockPerformance.total_value) }}</p>
-              <span class="card-change" :class="stockPerformance.total_gain >= 0 ? 'positive' : 'negative'">
-                {{ stockPerformance.total_gain >= 0 ? '+' : '' }}${{ formatNumber(stockPerformance.total_gain) }}
-                ({{ stockPerformance.avg_gain_percent >= 0 ? '+' : '' }}{{ stockPerformance.avg_gain_percent }}%)
-              </span>
-            </div>
-          </div>
-
-          <div class="performance-card">
-            <div class="card-icon">📈</div>
-            <div class="card-content">
-              <h4>Total Holdings</h4>
-              <p class="card-value">{{ stockPerformance.total_holdings }}</p>
-              <span class="card-subtitle">Stock positions</span>
-            </div>
-          </div>
-
-          <div class="performance-card">
-            <div class="card-icon">🎯</div>
-            <div class="card-content">
-              <h4>Best Performer</h4>
-              <p class="card-value">{{ bestPerformer?.symbol || 'N/A' }}</p>
-              <span class="card-change positive" v-if="bestPerformer">
-                +{{ bestPerformer.gain_percent }}%
-              </span>
-            </div>
-          </div>
-
-          <div class="performance-card">
-            <div class="card-icon">📉</div>
-            <div class="card-content">
-              <h4>Worst Performer</h4>
-              <p class="card-value">{{ worstPerformer?.symbol || 'N/A' }}</p>
-              <span class="card-change negative" v-if="worstPerformer">
-                {{ worstPerformer.gain_percent }}%
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Stock Allocation Chart -->
-      <div class="stock-allocation" v-if="stockAllocation.length > 0">
-        <h2>Stock Allocation by Sector</h2>
-        <div class="allocation-chart">
-          <div v-for="item in stockAllocation" :key="item.sector" class="allocation-item">
-            <div class="allocation-label">
-              <span class="allocation-sector">{{ item.sector || 'Other' }}</span>
-              <span class="allocation-count">({{ item.count }} holdings)</span>
-            </div>
-            <div class="allocation-bar">
-              <div class="allocation-fill" :style="{ width: item.percentage + '%' }"></div>
-            </div>
-            <div class="allocation-value">
-              ${{ formatNumber(item.total_value) }} ({{ item.percentage }}%)
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { Plus, Refresh, Loading } from '@element-plus/icons-vue'
 import portfolioAPI from '../api/portfolio.js'
 import marketAPI from '../api/market.js'
+import http from '../api/http.js'
+import PerformanceLineChart from './charts/PerformanceLineChart.vue'
+import { Chart, registerables } from 'chart.js'
+Chart.register(...registerables)
 
 const props = defineProps({
   isLoggedIn: {
@@ -268,8 +301,114 @@ const holdingsCurrentPage = ref(1)
 const holdingsPageSize = 10
 const marketType = ref('us') // 'us' or 'cn'
 
+// Lifecycle
+let holdingsPriceTimer = null
+const REFRESH_INTERVAL_MS = 10000 // Global refresh interval in milliseconds
+
+const historicalData = ref([])
+// Static mock data for unauthenticated users
+const staticMockHistoricalData = [
+  { date: '2025-01-01', total_value: 100000 },
+  { date: '2025-02-01', total_value: 108333 },
+  { date: '2025-03-01', total_value: 117361 },
+  { date: '2025-04-01', total_value: 127141 },
+  { date: '2025-05-01', total_value: 137736 },
+  { date: '2025-06-01', total_value: 149212 },
+  { date: '2025-07-01', total_value: 161646 },
+  { date: '2025-07-30', total_value: 175116 }
+]
+const staticMockCagr = 0.13 // 13% annualized return
+
+const effectiveHistoricalData = computed(() => props.isLoggedIn ? historicalData.value : staticMockHistoricalData)
+
+const cagr = computed(() => {
+  if (!props.isLoggedIn) {
+    return staticMockCagr
+  }
+  const data = effectiveHistoricalData.value
+  if (!data || data.length < 2) return 0
+  const startValue = data[0].total_value
+  const endValue = data[data.length - 1].total_value
+  const years = (new Date(data[data.length - 1].date) - new Date(data[0].date)) / (365 * 24 * 3600 * 1000)
+  if (startValue <= 0 || years <= 0) return 0
+  return Math.pow(endValue / startValue, 1 / years) - 1
+})
+const sharpe = computed(() => {
+  const data = effectiveHistoricalData.value
+  if (!data || data.length < 2) return 0
+  const returns = []
+  for (let i = 1; i < data.length; i++) {
+    returns.push((data[i].total_value / data[i - 1].total_value) - 1)
+  }
+  const avgReturn = returns.reduce((a, b) => a + b, 0) / returns.length
+  const stdDev = Math.sqrt(returns.reduce((a, b) => a + Math.pow(b - avgReturn, 2), 0) / returns.length)
+  const riskFreeRate = 0.02
+  return stdDev > 0 ? (cagr.value - riskFreeRate) / (stdDev * Math.sqrt(252)) : 0
+})
+const maxDrawdown = computed(() => {
+  const data = effectiveHistoricalData.value
+  if (!data || data.length < 2) return 0
+  let maxDd = 0, peak = data[0].total_value
+  for (let i = 1; i < data.length; i++) {
+    if (data[i].total_value > peak) peak = data[i].total_value
+    const drawdown = (peak - data[i].total_value) / peak
+    if (drawdown > maxDd) maxDd = drawdown
+  }
+  return maxDd
+})
+const dailyReturns = computed(() => {
+  const data = effectiveHistoricalData.value
+  if (!data || data.length < 2) return []
+  const arr = []
+  for (let i = 1; i < data.length; i++) {
+    arr.push((data[i].total_value / data[i - 1].total_value) - 1)
+  }
+  return arr
+})
+const drawdownChartData = computed(() => {
+  const data = effectiveHistoricalData.value
+  if (!data || data.length < 2) return { labels: [], data: [], drawdownArea: [] }
+  let peak = data[0].total_value
+  let maxDd = 0, maxDdStart = 0, maxDdEnd = 0
+  const drawdowns = []
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].total_value > peak) peak = data[i].total_value
+    const dd = (peak - data[i].total_value) / peak
+    drawdowns.push(dd)
+    if (dd > maxDd) {
+      maxDd = dd
+      maxDdEnd = i
+    }
+  }
+  peak = data[0].total_value
+  for (let i = 0; i <= maxDdEnd; i++) {
+    if (data[i].total_value >= peak) {
+      peak = data[i].total_value
+      maxDdStart = i
+    }
+  }
+  return {
+    labels: data.map(d => d.date),
+    data: data.map(d => d.total_value),
+    drawdownArea: [maxDdStart, maxDdEnd]
+  }
+})
+
+const showCagrDialog = ref(false)
+const showSharpeDialog = ref(false)
+const showDrawdownDialog = ref(false)
+
 // Computed properties
 const stockPerformance = computed(() => {
+  if (!props.isLoggedIn) {
+    // mock performance for not logged in
+    return {
+      total_value: 150000,
+      total_gain: 50000,
+      avg_gain_percent: 50,
+      total_holdings: 5
+    }
+  }
   if (stockHoldings.value.length === 0) return null
 
   const totalValue = stockHoldings.value.reduce((sum, item) => {
@@ -344,6 +483,56 @@ const worstPerformer = computed(() => {
   })
 })
 
+const holdingsRealtimePrices = ref({})
+
+const fetchHoldingsRealtimePrices = async () => {
+  if (!stockHoldings.value.length) return
+  const usSymbols = stockHoldings.value.filter(h => !/^S[HZ]/i.test(h.symbol)).map(h => h.symbol)
+  const cnSymbols = stockHoldings.value.filter(h => /^S[HZ]/i.test(h.symbol)).map(h => h.symbol)
+  let usPrices = {}, cnPrices = {}
+  if (usSymbols.length) {
+    const resUs = await marketAPI.getUsMultipleQuotes(usSymbols)
+    if (resUs.data && resUs.data.data) {
+      for (const item of resUs.data.data) {
+        usPrices[item.symbol] = item.currentPrice
+      }
+    }
+  }
+  if (cnSymbols.length) {
+    const resCn = await marketAPI.getCnMultipleQuotes(cnSymbols)
+    if (resCn.data && resCn.data.data) {
+      for (const item of resCn.data.data) {
+        cnPrices[item.symbol] = item.currentPrice
+      }
+    }
+  }
+  holdingsRealtimePrices.value = { ...usPrices, ...cnPrices }
+}
+
+watch(stockHoldings, () => {
+  fetchHoldingsRealtimePrices()
+})
+
+const computedStockHoldings = computed(() => {
+  const result = stockHoldings.value.map(h => {
+    const realPrice = holdingsRealtimePrices.value[h.symbol]
+    const current_price = (realPrice !== undefined && realPrice !== null) ? realPrice : h.purchase_price
+    const current_value = current_price * h.quantity
+    const purchase_value = h.purchase_price * h.quantity
+    const unrealized_gain = current_value - purchase_value
+    const gain_percent = purchase_value > 0 ? (unrealized_gain / purchase_value) * 100 : 0
+    return {
+      ...h,
+      current_price,
+      current_value,
+      unrealized_gain,
+      gain_percent: gain_percent.toFixed(2)
+    }
+  })
+  console.log('computedStockHoldings:', result)
+  return result
+})
+
 const totalPages = computed(() => Math.ceil(marketData.value.length / pageSize))
 const pagedMarketData = computed(() => {
   const start = (currentPage.value - 1) * pageSize
@@ -363,6 +552,11 @@ const holdingsTotalPages = computed(() => Math.ceil(stockHoldings.value.length /
 const pagedStockHoldings = computed(() => {
   const start = (holdingsCurrentPage.value - 1) * holdingsPageSize
   return stockHoldings.value.slice(start, start + holdingsPageSize)
+})
+
+const pagedComputedStockHoldings = computed(() => {
+  const start = (holdingsCurrentPage.value - 1) * holdingsPageSize
+  return computedStockHoldings.value.slice(start, start + holdingsPageSize)
 })
 
 // Methods
@@ -603,6 +797,51 @@ const fetchMarketData = async () => {
   }
 }
 
+const fetchHistoricalData = async () => {
+  // Only fetch from backend if user is logged in
+  if (!props.isLoggedIn) {
+    console.log('User not logged in, using mock data')
+    return
+  }
+  
+  try {
+    const res = await http.get('/holdings/historical')
+    if (res.data && res.data.data && res.data.data.length > 1) {
+      historicalData.value = res.data.data.sort((a, b) => new Date(a.date) - new Date(b.date))
+      console.log('historicalData after fetch:', historicalData.value)
+      // Calculate metrics
+      const data = historicalData.value
+      const initialValue = data[0].total_value
+      const finalValue = data[data.length - 1].total_value
+      const years = (new Date(data[data.length - 1].date) - new Date(data[0].date)) / (365 * 24 * 3600 * 1000)
+      // cagr.value = years > 0 ? Math.pow(finalValue / initialValue, 1 / years) - 1 : 0
+      // Daily returns
+      // const returns = []
+      // for (let i = 1; i < data.length; i++) {
+      //   returns.push((data[i].total_value / data[i - 1].total_value) - 1)
+      // }
+      // const avgReturn = returns.reduce((a, b) => a + b, 0) / returns.length
+      // const stdDev = Math.sqrt(returns.reduce((a, b) => a + Math.pow(b - avgReturn, 2), 0) / returns.length)
+      // const riskFreeRate = 0.02
+      // sharpe.value = stdDev > 0 ? (cagr.value - riskFreeRate) / (stdDev * Math.sqrt(252)) : 0
+      // Max Drawdown
+      // let maxDd = 0, peak = initialValue
+      // for (let i = 1; i < data.length; i++) {
+      //   if (data[i].total_value > peak) peak = data[i].total_value
+      //   const drawdown = (peak - data[i].total_value) / peak
+      //   if (drawdown > maxDd) maxDd = drawdown
+      // }
+      // maxDrawdown.value = maxDd
+    }
+  } catch (e) {
+    historicalData.value = []
+    console.log('Error fetching historical data:', e)
+    // cagr.value = 0
+    // sharpe.value = 0
+    // maxDrawdown.value = 0
+  }
+}
+
 watch(marketType, () => {
   currentPage.value = 1
   fetchMarketData()
@@ -657,18 +896,130 @@ const holdingsNextPage = () => {
   if (holdingsCurrentPage.value < holdingsTotalPages.value) holdingsCurrentPage.value++
 }
 
-// Lifecycle
 onMounted(() => {
   loadStockData()
   fetchMarketData()
-  // Update data every 10 seconds for real-time feel
+  fetchHistoricalData()
+  fetchHoldingsRealtimePrices()
+  // Update market data every REFRESH_INTERVAL_MS for real-time feel
   timer.value = setInterval(() => {
     fetchMarketData()
-  }, 10000)
+    fetchHoldingsRealtimePrices()
+  }, REFRESH_INTERVAL_MS)
 })
 
 onUnmounted(() => {
   if (timer.value) clearInterval(timer.value)
+  if (holdingsPriceTimer) clearInterval(holdingsPriceTimer)
+})
+
+const sharpeChart = ref(null)
+const drawdownChart = ref(null)
+let sharpeChartInstance = null
+let drawdownChartInstance = null
+
+const onSharpeDialogClose = () => {
+  if (sharpeChartInstance) {
+    sharpeChartInstance.destroy()
+    sharpeChartInstance = null
+  }
+}
+const onDrawdownDialogClose = () => {
+  if (drawdownChartInstance) {
+    drawdownChartInstance.destroy()
+    drawdownChartInstance = null
+  }
+}
+
+watch(showSharpeDialog, async (val) => {
+  if (val) {
+    await nextTick()
+    if (sharpeChartInstance) sharpeChartInstance.destroy()
+    if (!sharpeChart.value) return
+    const ctx = sharpeChart.value.getContext('2d')
+    const returns = dailyReturns.value.map(x => (x * 100).toFixed(2))
+    const bins = Array(21).fill(0)
+    const min = -10, max = 10, step = 1
+    for (let r of returns) {
+      const idx = Math.max(0, Math.min(bins.length - 1, Math.floor((r - min) / step)))
+      bins[idx]++
+    }
+    sharpeChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: Array.from({length: bins.length}, (_, i) => `${min + i * step}%`),
+        datasets: [{
+          label: 'Frequency',
+          data: bins,
+          backgroundColor: '#667eea',
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { title: { display: true, text: 'Daily Return (%)' } },
+          y: { title: { display: true, text: 'Frequency' }, beginAtZero: true }
+        }
+      }
+    })
+  } else {
+    onSharpeDialogClose()
+  }
+})
+
+watch(showDrawdownDialog, async (val) => {
+  if (val) {
+    await nextTick()
+    if (drawdownChartInstance) drawdownChartInstance.destroy()
+    if (!drawdownChart.value) return
+    const ctx = drawdownChart.value.getContext('2d')
+    const chartData = drawdownChartData.value
+    drawdownChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: chartData.labels,
+        datasets: [
+          {
+            label: 'Net Value',
+            data: chartData.data,
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102,126,234,0.08)',
+            borderWidth: 3,
+            fill: true,
+            pointRadius: 0,
+            segment: {
+              backgroundColor: ctx => {
+                const i = ctx.p0DataIndex
+                if (i >= chartData.drawdownArea[0] && i <= chartData.drawdownArea[1]) return 'rgba(245,87,108,0.2)'
+                return undefined
+              }
+            }
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: {
+            title: { display: true, text: 'Date' },
+            ticks: {
+              callback: function(value, index, ticks) {
+                const label = chartData.labels[index]
+                if (!label) return ''
+                // Format as YYYY-MM-DD
+                return label.slice(0, 10)
+              }
+            }
+          },
+          y: { title: { display: true, text: 'Net Value' }, beginAtZero: false }
+        }
+      }
+    })
+  } else {
+    onDrawdownDialogClose()
+  }
 })
 </script>
 

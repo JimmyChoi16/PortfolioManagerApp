@@ -30,7 +30,7 @@ const createChart = () => {
   const chartData = {
     labels: props.data.map(item => {
       const date = new Date(item.date)
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      return date.toISOString().slice(0, 10) // YYYY-MM-DD format
     }),
     datasets: [{
       label: 'Portfolio Value',

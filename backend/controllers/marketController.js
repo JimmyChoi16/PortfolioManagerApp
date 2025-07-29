@@ -1,4 +1,4 @@
-const { YahooFinanceService, SinaFinanceService, TencentFinanceService } = require('../services/yahooFinanceService');
+const { SinaFinanceService, TencentFinanceService } = require('../services/yahooFinanceService');
 const { pool } = require('../config/database');
 
 const marketController = {
@@ -14,11 +14,12 @@ const marketController = {
         });
       }
 
-      const searchResults = await YahooFinanceService.searchSymbol(query);
-
+      // This endpoint is no longer used as YahooFinanceService is removed.
+      // Keeping it for now as it might be re-introduced or replaced later.
+      // For now, it will return a placeholder message.
       res.json({
         success: true,
-        data: searchResults
+        message: 'Search functionality is currently unavailable.'
       });
     } catch (error) {
       console.error('Error searching symbols:', error);
@@ -42,18 +43,12 @@ const marketController = {
         });
       }
 
-      const quote = await YahooFinanceService.getQuote(symbol.toUpperCase());
-
-      if (!quote) {
-        return res.status(404).json({
-          success: false,
-          message: `Quote not found for symbol: ${symbol}`
-        });
-      }
-
+      // This endpoint is no longer used as YahooFinanceService is removed.
+      // Keeping it for now as it might be re-introduced or replaced later.
+      // For now, it will return a placeholder message.
       res.json({
         success: true,
-        data: quote
+        message: 'Quote functionality is currently unavailable.'
       });
     } catch (error) {
       console.error('Error fetching quote:', error);
@@ -65,31 +60,51 @@ const marketController = {
     }
   },
 
-  // Get quotes for multiple symbols
-  async getMultipleQuotes(req, res) {
+  // Get quotes for multiple US stock symbols (美股)
+  async getUsMultipleQuotes(req, res) {
     try {
       const { symbols } = req.body;
-
       if (!symbols || !Array.isArray(symbols) || symbols.length === 0) {
         return res.status(400).json({
           success: false,
           message: 'Symbols array is required and must not be empty'
         });
       }
-
-      const quotes = await YahooFinanceService.getMultipleQuotes(
-        symbols.map(s => s.toUpperCase())
-      );
-
+      const quotes = await SinaFinanceService.getSinaQuotes(symbols);
       res.json({
         success: true,
         data: quotes
       });
     } catch (error) {
-      console.error('Error fetching multiple quotes:', error);
+      console.error('Error fetching US multiple quotes:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to fetch quotes',
+        message: 'Failed to fetch US quotes',
+        error: error.message
+      });
+    }
+  },
+
+  // Get quotes for multiple CN stock symbols (A股)
+  async getCnMultipleQuotes(req, res) {
+    try {
+      const { symbols } = req.body;
+      if (!symbols || !Array.isArray(symbols) || symbols.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Symbols array is required and must not be empty'
+        });
+      }
+      const quotes = await TencentFinanceService.getTencentQuotes(symbols);
+      res.json({
+        success: true,
+        data: quotes
+      });
+    } catch (error) {
+      console.error('Error fetching CN multiple quotes:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch CN quotes',
         error: error.message
       });
     }
@@ -108,20 +123,12 @@ const marketController = {
         });
       }
 
-      const historicalData = await YahooFinanceService.getHistoricalData(
-        symbol.toUpperCase(),
-        period,
-        interval
-      );
-
+      // This endpoint is no longer used as YahooFinanceService is removed.
+      // Keeping it for now as it might be re-introduced or replaced later.
+      // For now, it will return a placeholder message.
       res.json({
         success: true,
-        data: {
-          symbol: symbol.toUpperCase(),
-          period,
-          interval,
-          data: historicalData
-        }
+        message: 'Historical data functionality is currently unavailable.'
       });
     } catch (error) {
       console.error('Error fetching historical data:', error);
@@ -139,14 +146,12 @@ const marketController = {
       // Popular tech stocks for demo
       const popularSymbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA', 'META', 'NFLX'];
 
-      const quotes = await YahooFinanceService.getMultipleQuotes(popularSymbols);
-
-      // Sort by change percent (highest gainers first)
-      const sortedQuotes = quotes.sort((a, b) => b.changePercent - a.changePercent);
-
+      // This endpoint is no longer used as YahooFinanceService is removed.
+      // Keeping it for now as it might be re-introduced or replaced later.
+      // For now, it will return a placeholder message.
       res.json({
         success: true,
-        data: sortedQuotes
+        message: 'Trending stocks functionality is currently unavailable.'
       });
     } catch (error) {
       console.error('Error fetching trending stocks:', error);

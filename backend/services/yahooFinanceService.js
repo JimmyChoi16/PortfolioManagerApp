@@ -1,5 +1,6 @@
 const yahooFinance = require('yahoo-finance2').default;
 const axios = require('axios');
+const usCnCompanyNames = require('./usCnCompanyNames');
 
 class YahooFinanceService {
   static async getQuote(symbol) {
@@ -150,7 +151,7 @@ class SinaFinanceService {
 
         result.push({
           symbol,
-          name: fields[0],
+          name: /^[A-Za-z0-9 .,&-]+$/.test(fields[0]) ? fields[0] : (usCnCompanyNames[symbol] || symbol),
           currentPrice: currentPrice,
           change: change,
           changePercent: parseFloat(changePercent.toFixed(2)),
@@ -171,22 +172,30 @@ class SinaFinanceService {
 class TencentFinanceService {
   static async getTencentQuotes(symbols) {
     if (!symbols || !Array.isArray(symbols) || symbols.length === 0) return [];
-    const url = `https://qt.gtimg.cn/q=${symbols.join(',')}`;
+    // Convert SH/SZ symbols to Tencent format (lowercase, sh/sz prefix)
+    const tencentSymbols = symbols.map(s => {
+      const upper = s.toUpperCase();
+      if (upper.startsWith('SH')) return 'sh' + upper.slice(2);
+      if (upper.startsWith('SZ')) return 'sz' + upper.slice(2);
+      return s.toLowerCase();
+    });
+    const url = `https://qt.gtimg.cn/q=${tencentSymbols.join(',')}`;
     try {
-
       const axios = require('axios');
       const iconv = require('iconv-lite');
       const res = await axios.get(url, { responseType: 'arraybuffer' });
       const text = iconv.decode(res.data, 'GBK');
       const lines = text.split(';');
       const result = [];
-
       for (let line of lines) {
         line = line.trim();
         if (!line) continue;
-        const match = line.match(/v_([a-z0-9]+)=\"([^\"]*)\"/);
+        const match = line.match(/v_([a-z0-9]+)="([^"]*)"/);
         if (!match) continue;
-        const symbol = match[1].toUpperCase();
+        let symbol = match[1].toUpperCase();
+        // Convert back to SH/SZ format for frontend matching
+        if (symbol.startsWith('SH')) symbol = 'SH' + symbol.slice(2);
+        if (symbol.startsWith('SZ')) symbol = 'SZ' + symbol.slice(2);
         const fields = match[2].split('~');
         if (fields.length < 35) continue;
         result.push({

@@ -11,9 +11,13 @@ const marketAPI = {
     return http.get(`/market/quote/${symbol}`)
   },
 
-  // Get quotes for multiple symbols
-  getMultipleQuotes(symbols) {
-    return http.post('/market/quotes', { symbols })
+  // Get quotes for multiple US stock symbols
+  getUsMultipleQuotes(symbols) {
+    return http.post('/market/quotes/us', { symbols })
+  },
+  // Get quotes for multiple CN stock symbols
+  getCnMultipleQuotes(symbols) {
+    return http.post('/market/quotes/cn', { symbols })
   },
 
   // Get historical data
