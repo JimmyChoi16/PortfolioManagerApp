@@ -2,12 +2,8 @@
   <div class="stock-section">
     <!-- Login Warning -->
     <div v-if="!isLoggedIn" class="login-warning">
-      <el-alert
-        title="⚠️ You are not logged in. All data shown is for demonstration purposes only."
-        type="warning"
-        :closable="false"
-        show-icon
-      />
+      <el-alert title="⚠️ You are not logged in. All data shown is for demonstration purposes only." type="warning"
+        :closable="false" show-icon />
     </div>
 
     <!-- Header -->
@@ -18,11 +14,7 @@
 
     <!-- Stock Categories Overview -->
     <div class="stock-categories" v-if="stockAllocation.length > 0">
-      <div 
-        v-for="category in stockAllocation" 
-        :key="category.sector"
-        class="category-card"
-      >
+      <div v-for="category in stockAllocation" :key="category.sector" class="category-card">
         <div class="category-icon">📈</div>
         <h3>{{ category.sector || 'Other' }}</h3>
         <p>{{ getSectorDescription(category.sector) }}</p>
@@ -45,211 +37,202 @@
       <h3>No Stock Holdings</h3>
       <p>You don't have any stock holdings yet. Add some stocks to get started!</p>
       <el-button type="primary" @click="goToDashboard">
-        <el-icon><Plus /></el-icon>
+        <el-icon>
+          <Plus />
+        </el-icon>
         Add Stock Holding
       </el-button>
     </div>
 
     <!-- Real-time Market Data -->
     <div class="market-data">
-      <div class="market-header">
-        <h2>Real-time Market Data</h2>
-        <el-button @click="fetchMarketData" :loading="marketDataLoading" size="small">
-          <el-icon><Refresh /></el-icon>
-          Refresh
-        </el-button>
-      </div>
-      <div class="market-table-wrapper">
-        <table class="market-table">
-          <thead>
-            <tr>
-              <th>Symbol</th>
-              <th>Name</th>
-              <th>Price</th>
-              <th>Change</th>
-              <th>Change %</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="marketDataLoading && pagedMarketData.length === 0">
-              <td colspan="5" style="text-align: center; padding: 40px;">
-                <el-icon class="is-loading"><Loading /></el-icon>
-                <span style="margin-left: 8px;">Loading market data...</span>
-              </td>
-            </tr>
-            <tr v-else-if="!marketDataLoading && pagedMarketData.length === 0">
-              <td colspan="5" style="text-align: center; padding: 40px; color: #7f8c8d;">
-                <div>No market data available</div>
-                <div style="font-size: 0.9rem; margin-top: 8px;">Try refreshing the data</div>
-              </td>
-            </tr>
-            <tr
-              v-for="item in pagedMarketData"
-              :key="item.symbol"
-              @mouseover="hoveredRow = item.symbol"
-              @mouseleave="hoveredRow = null"
-              :class="[
-                { hovered: hoveredRow === item.symbol },
-                rowFlash[item.symbol] === 'up' ? 'flash-up' : '',
-                rowFlash[item.symbol] === 'down' ? 'flash-down' : ''
-              ]"
-            >
-              <td>{{ item.symbol }}</td>
-              <td>{{ item.name }}</td>
-              <td>${{ formatNumber(item.currentPrice) }}</td>
-              <td :class="{ up: item.change > 0, down: item.change < 0 }">
-                {{ item.change > 0 ? '+' : '' }}{{ formatNumber(item.change) }}
-              </td>
-              <td :class="{ up: item.change > 0, down: item.change < 0 }">
-                {{ item.change > 0 ? '+' : '' }}{{ formatNumber(item.changePercent) }}%
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        
-        <!-- Pagination -->
-        <div class="pagination">
-          <button @click="prevPage" :disabled="currentPage === 1">Previous</button>
-          <span>Page {{ currentPage }} of {{ totalPages }}</span>
-          <button @click="nextPage" :disabled="currentPage === totalPages">Next</button>
+      <div class="market-data">
+        <div class="market-header">
+          <h2>Real-time Market Data</h2>
+          <div class="market-type-toggle">
+            <button :class="['market-type-btn', marketType === 'us' ? 'active' : '']" @click="marketType = 'us'">
+              US Stocks/ETF
+            </button>
+            <button :class="['market-type-btn', marketType === 'cn' ? 'active' : '']" @click="marketType = 'cn'">
+              China A-Shares
+            </button>
+          </div>
+          <el-button @click="fetchMarketData" :loading="marketDataLoading" size="small">
+            <el-icon>
+              <Refresh />
+            </el-icon>
+            Refresh
+          </el-button>
         </div>
-      </div>
-    </div>
+        <div class="market-table-wrapper">
+          <table class="market-table">
+            <thead>
+              <tr>
+                <th>Symbol</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Change</th>
+                <th>Change %</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="marketDataLoading && pagedMarketData.length === 0">
+                <td colspan="5" style="text-align: center; padding: 40px;">
+                  <el-icon class="is-loading">
+                    <Loading />
+                  </el-icon>
+                  <span style="margin-left: 8px;">Loading market data...</span>
+                </td>
+              </tr>
+              <tr v-else-if="!marketDataLoading && pagedMarketData.length === 0">
+                <td colspan="5" style="text-align: center; padding: 40px; color: #7f8c8d;">
+                  <div>No market data available</div>
+                  <div style="font-size: 0.9rem; margin-top: 8px;">Try refreshing the data</div>
+                </td>
+              </tr>
+              <tr v-for="item in pagedMarketData" :key="item.symbol" @mouseover="hoveredRow = item.symbol"
+                @mouseleave="hoveredRow = null" :class="[
+                  { hovered: hoveredRow === item.symbol },
+                  rowFlash[item.symbol] === 'up' ? 'flash-up' : '',
+                  rowFlash[item.symbol] === 'down' ? 'flash-down' : ''
+                ]">
+                <td>{{ item.symbol }}</td>
+                <td>{{ item.name }}</td>
+                <td>${{ formatNumber(item.currentPrice) }}</td>
+                <td :class="{ up: item.change > 0, down: item.change < 0 }">
+                  {{ item.change > 0 ? '+' : '' }}{{ formatNumber(item.change) }}
+                </td>
+                <td :class="{ up: item.change > 0, down: item.change < 0 }">
+                  {{ item.change > 0 ? '+' : '' }}{{ formatNumber(item.changePercent) }}%
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
-    <!-- Your Stock Holdings -->
-    <div class="holdings-data" v-if="stockHoldings.length > 0">
-      <h2>Your Stock Holdings</h2>
-      <div class="market-table-wrapper">
-        <table class="market-table">
-          <thead>
-            <tr>
-              <th>Symbol</th>
-              <th>Name</th>
-              <th>Quantity</th>
-              <th>Current Price</th>
-              <th>Current Value</th>
-              <th>Gain/Loss</th>
-              <th>Gain/Loss %</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="item in pagedStockHoldings"
-              :key="item.symbol"
-              @mouseover="hoveredRow = item.symbol"
-              @mouseleave="hoveredRow = null"
-              :class="[
-                { hovered: hoveredRow === item.symbol },
-                rowFlash[item.symbol] === 'up' ? 'flash-up' : '',
-                rowFlash[item.symbol] === 'down' ? 'flash-down' : ''
-              ]"
-            >
-              <td>{{ item.symbol }}</td>
-              <td>{{ item.name }}</td>
-              <td>{{ formatNumber(item.quantity) }}</td>
-              <td>${{ formatNumber(item.current_price) }}</td>
-              <td>${{ formatNumber(item.current_value) }}</td>
-              <td :class="{ up: item.unrealized_gain > 0, down: item.unrealized_gain < 0 }">
-                {{ item.unrealized_gain > 0 ? '+' : '' }}${{ formatNumber(item.unrealized_gain) }}
-              </td>
-              <td :class="{ up: item.gain_percent > 0, down: item.gain_percent < 0 }">
-                {{ item.gain_percent > 0 ? '+' : '' }}{{ item.gain_percent }}%
-              </td>
-            </tr>
-          </tbody>
-        </table>
+          <!-- Pagination -->
+          <div class="pagination">
+            <button @click="prevPage" :disabled="currentPage === 1">Previous</button>
+            <span>Page {{ currentPage }} of {{ totalPages }}</span>
+            <button @click="nextPage" :disabled="currentPage === totalPages">Next</button>
+          </div>
+        </div>
       </div>
-      
-      <!-- Holdings Pagination -->
-      <div class="pagination" v-if="holdingsTotalPages > 1">
-        <el-button 
-          @click="holdingsPrevPage" 
-          :disabled="holdingsCurrentPage === 1"
-          size="small"
-        >
-          Previous
-        </el-button>
-        <span>Page {{ holdingsCurrentPage }} of {{ holdingsTotalPages }}</span>
-        <el-button 
-          @click="holdingsNextPage" 
-          :disabled="holdingsCurrentPage === holdingsTotalPages"
-          size="small"
-        >
-          Next
-        </el-button>
-      </div>
-    </div>
 
-    <!-- Portfolio Performance -->
-    <div class="portfolio-performance" v-if="stockPerformance">
-      <h2>Stock Portfolio Performance</h2>
-      <div class="performance-cards">
-        <div class="performance-card">
-          <div class="card-icon">📊</div>
-          <div class="card-content">
-            <h4>Total Value</h4>
-            <p class="card-value">${{ formatNumber(stockPerformance.total_value) }}</p>
-            <span class="card-change" :class="stockPerformance.total_gain >= 0 ? 'positive' : 'negative'">
-              {{ stockPerformance.total_gain >= 0 ? '+' : '' }}${{ formatNumber(stockPerformance.total_gain) }}
-              ({{ stockPerformance.avg_gain_percent >= 0 ? '+' : '' }}{{ stockPerformance.avg_gain_percent }}%)
-            </span>
-          </div>
+      <!-- Your Stock Holdings -->
+      <div class="holdings-data" v-if="stockHoldings.length > 0">
+        <h2>Your Stock Holdings</h2>
+        <div class="market-table-wrapper">
+          <table class="market-table">
+            <thead>
+              <tr>
+                <th>Symbol</th>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Current Price</th>
+                <th>Current Value</th>
+                <th>Gain/Loss</th>
+                <th>Gain/Loss %</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in pagedStockHoldings" :key="item.symbol" @mouseover="hoveredRow = item.symbol"
+                @mouseleave="hoveredRow = null" :class="[
+                  { hovered: hoveredRow === item.symbol },
+                  rowFlash[item.symbol] === 'up' ? 'flash-up' : '',
+                  rowFlash[item.symbol] === 'down' ? 'flash-down' : ''
+                ]">
+                <td>{{ item.symbol }}</td>
+                <td>{{ item.name }}</td>
+                <td>{{ formatNumber(item.quantity) }}</td>
+                <td>${{ formatNumber(item.current_price) }}</td>
+                <td>${{ formatNumber(item.current_value) }}</td>
+                <td :class="{ up: item.unrealized_gain > 0, down: item.unrealized_gain < 0 }">
+                  {{ item.unrealized_gain > 0 ? '+' : '' }}${{ formatNumber(item.unrealized_gain) }}
+                </td>
+                <td :class="{ up: item.gain_percent > 0, down: item.gain_percent < 0 }">
+                  {{ item.gain_percent > 0 ? '+' : '' }}{{ item.gain_percent }}%
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        
-        <div class="performance-card">
-          <div class="card-icon">📈</div>
-          <div class="card-content">
-            <h4>Total Holdings</h4>
-            <p class="card-value">{{ stockPerformance.total_holdings }}</p>
-            <span class="card-subtitle">Stock positions</span>
-          </div>
+
+        <!-- Holdings Pagination -->
+        <div class="pagination" v-if="holdingsTotalPages > 1">
+          <el-button @click="holdingsPrevPage" :disabled="holdingsCurrentPage === 1" size="small">
+            Previous
+          </el-button>
+          <span>Page {{ holdingsCurrentPage }} of {{ holdingsTotalPages }}</span>
+          <el-button @click="holdingsNextPage" :disabled="holdingsCurrentPage === holdingsTotalPages" size="small">
+            Next
+          </el-button>
         </div>
-        
-        <div class="performance-card">
-          <div class="card-icon">🎯</div>
-          <div class="card-content">
-            <h4>Best Performer</h4>
-            <p class="card-value">{{ bestPerformer?.symbol || 'N/A' }}</p>
-            <span class="card-change positive" v-if="bestPerformer">
-              +{{ bestPerformer.gain_percent }}%
-            </span>
+      </div>
+
+      <!-- Portfolio Performance -->
+      <div class="portfolio-performance" v-if="stockPerformance">
+        <h2>Stock Portfolio Performance</h2>
+        <div class="performance-cards">
+          <div class="performance-card">
+            <div class="card-icon">📊</div>
+            <div class="card-content">
+              <h4>Total Value</h4>
+              <p class="card-value">${{ formatNumber(stockPerformance.total_value) }}</p>
+              <span class="card-change" :class="stockPerformance.total_gain >= 0 ? 'positive' : 'negative'">
+                {{ stockPerformance.total_gain >= 0 ? '+' : '' }}${{ formatNumber(stockPerformance.total_gain) }}
+                ({{ stockPerformance.avg_gain_percent >= 0 ? '+' : '' }}{{ stockPerformance.avg_gain_percent }}%)
+              </span>
+            </div>
           </div>
-        </div>
-        
-        <div class="performance-card">
-          <div class="card-icon">📉</div>
-          <div class="card-content">
-            <h4>Worst Performer</h4>
-            <p class="card-value">{{ worstPerformer?.symbol || 'N/A' }}</p>
-            <span class="card-change negative" v-if="worstPerformer">
-              {{ worstPerformer.gain_percent }}%
-            </span>
+
+          <div class="performance-card">
+            <div class="card-icon">📈</div>
+            <div class="card-content">
+              <h4>Total Holdings</h4>
+              <p class="card-value">{{ stockPerformance.total_holdings }}</p>
+              <span class="card-subtitle">Stock positions</span>
+            </div>
+          </div>
+
+          <div class="performance-card">
+            <div class="card-icon">🎯</div>
+            <div class="card-content">
+              <h4>Best Performer</h4>
+              <p class="card-value">{{ bestPerformer?.symbol || 'N/A' }}</p>
+              <span class="card-change positive" v-if="bestPerformer">
+                +{{ bestPerformer.gain_percent }}%
+              </span>
+            </div>
+          </div>
+
+          <div class="performance-card">
+            <div class="card-icon">📉</div>
+            <div class="card-content">
+              <h4>Worst Performer</h4>
+              <p class="card-value">{{ worstPerformer?.symbol || 'N/A' }}</p>
+              <span class="card-change negative" v-if="worstPerformer">
+                {{ worstPerformer.gain_percent }}%
+              </span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Stock Allocation Chart -->
-    <div class="stock-allocation" v-if="stockAllocation.length > 0">
-      <h2>Stock Allocation by Sector</h2>
-      <div class="allocation-chart">
-        <div
-          v-for="item in stockAllocation"
-          :key="item.sector"
-          class="allocation-item"
-        >
-          <div class="allocation-label">
-            <span class="allocation-sector">{{ item.sector || 'Other' }}</span>
-            <span class="allocation-count">({{ item.count }} holdings)</span>
-          </div>
-          <div class="allocation-bar">
-            <div
-              class="allocation-fill"
-              :style="{ width: item.percentage + '%' }"
-            ></div>
-          </div>
-          <div class="allocation-value">
-            ${{ formatNumber(item.total_value) }} ({{ item.percentage }}%)
+      <!-- Stock Allocation Chart -->
+      <div class="stock-allocation" v-if="stockAllocation.length > 0">
+        <h2>Stock Allocation by Sector</h2>
+        <div class="allocation-chart">
+          <div v-for="item in stockAllocation" :key="item.sector" class="allocation-item">
+            <div class="allocation-label">
+              <span class="allocation-sector">{{ item.sector || 'Other' }}</span>
+              <span class="allocation-count">({{ item.count }} holdings)</span>
+            </div>
+            <div class="allocation-bar">
+              <div class="allocation-fill" :style="{ width: item.percentage + '%' }"></div>
+            </div>
+            <div class="allocation-value">
+              ${{ formatNumber(item.total_value) }} ({{ item.percentage }}%)
+            </div>
           </div>
         </div>
       </div>
@@ -258,7 +241,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { Plus, Refresh, Loading } from '@element-plus/icons-vue'
 import portfolioAPI from '../api/portfolio.js'
 import marketAPI from '../api/market.js'
@@ -283,27 +266,28 @@ const pageSize = 10
 const marketDataLoading = ref(false)
 const holdingsCurrentPage = ref(1)
 const holdingsPageSize = 10
+const marketType = ref('us') // 'us' or 'cn'
 
 // Computed properties
 const stockPerformance = computed(() => {
   if (stockHoldings.value.length === 0) return null
-  
+
   const totalValue = stockHoldings.value.reduce((sum, item) => {
     const currentValue = parseFloat(item.current_value) || 0
     return sum + currentValue
   }, 0)
-  
+
   const totalGain = stockHoldings.value.reduce((sum, item) => {
     const unrealizedGain = parseFloat(item.unrealized_gain) || 0
     return sum + unrealizedGain
   }, 0)
-  
-  const avgGainPercent = stockHoldings.value.length > 0 ? 
+
+  const avgGainPercent = stockHoldings.value.length > 0 ?
     stockHoldings.value.reduce((sum, item) => {
       const gainPercent = parseFloat(item.gain_percent) || 0
       return sum + gainPercent
     }, 0) / stockHoldings.value.length : 0
-  
+
   return {
     total_value: totalValue,
     total_gain: totalGain,
@@ -314,7 +298,7 @@ const stockPerformance = computed(() => {
 
 const stockAllocation = computed(() => {
   const allocation = {}
-  
+
   stockHoldings.value.forEach(holding => {
     const sector = holding.sector || 'Other'
     if (!allocation[sector]) {
@@ -328,12 +312,12 @@ const stockAllocation = computed(() => {
     const currentValue = parseFloat(holding.current_value) || 0
     allocation[sector].total_value += currentValue
   })
-  
+
   const totalValue = stockHoldings.value.reduce((sum, item) => {
     const currentValue = parseFloat(item.current_value) || 0
     return sum + currentValue
   }, 0)
-  
+
   return Object.values(allocation)
     .map(item => ({
       ...item,
@@ -578,26 +562,31 @@ const loadStockData = async () => {
 const fetchMarketData = async () => {
   marketDataLoading.value = true
   try {
-    const res = await marketAPI.getPublicQuotes()
+    let res
+    if (marketType.value === 'us') {
+      res = await marketAPI.getUsStockQuotes()
+    } else {
+      res = await marketAPI.getCnStockQuotes()
+    }
     console.log('marketAPI.getPublicQuotes() response:', res)
-    
+
     if (res.data && res.data.success && res.data.data) {
       const newData = res.data.data
       console.log('newData length:', newData.length)
       console.log('newData[0]:', newData[0])
-      
+
       // 检查数据格式并确保所有必要字段都存在
       const validData = newData.filter(item => {
-        return item && 
-               item.symbol && 
-               item.name && 
-               typeof item.currentPrice === 'number' &&
-               typeof item.change === 'number' &&
-               typeof item.changePercent === 'number'
+        return item &&
+          item.symbol &&
+          item.name &&
+          typeof item.currentPrice === 'number' &&
+          typeof item.change === 'number' &&
+          typeof item.changePercent === 'number'
       })
-      
+
       console.log('validData length:', validData.length)
-      
+
       // 高亮逻辑
       const newFlash = {}
       validData.forEach(item => {
@@ -627,6 +616,11 @@ const fetchMarketData = async () => {
     marketDataLoading.value = false
   }
 }
+
+watch(marketType, () => {
+  currentPage.value = 1
+  fetchMarketData()
+})
 
 const updatePrices = async () => {
   try {
@@ -693,6 +687,37 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.market-type-toggle {
+  display: flex;
+  gap: 8px;
+  margin-right: 16px;
+}
+
+.market-type-btn {
+  background: #f8f9fa;
+  border: 1px solid #d1d5db;
+  color: #2c3e50;
+  font-weight: 600;
+  padding: 6px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  outline: none;
+}
+
+.market-type-btn.active {
+  background: #667eea;
+  color: #fff;
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
+}
+
+.market-type-btn:hover:not(.active) {
+  background: #e0e7ff;
+  color: #2c3e50;
+  border-color: #a5b4fc;
+}
+
 .stock-section {
   max-width: 1200px;
   margin: 0 auto;
@@ -828,31 +853,31 @@ onUnmounted(() => {
   .stock-categories {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .section-header h1 {
     font-size: 2rem;
   }
-  
+
   .performance-cards {
     grid-template-columns: 1fr;
   }
-  
+
   .market-table-wrapper {
     overflow-x: auto;
   }
-  
+
   .market-table {
     min-width: 600px;
   }
-  
+
   .allocation-item {
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
   }
-  
+
   .allocation-value {
     text-align: left;
   }
 }
-</style> 
+</style>

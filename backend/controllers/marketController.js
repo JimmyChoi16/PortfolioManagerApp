@@ -1,4 +1,4 @@
-const { YahooFinanceService, SinaFinanceService } = require('../services/yahooFinanceService');
+const { YahooFinanceService, SinaFinanceService, TencentFinanceService } = require('../services/yahooFinanceService');
 const { pool } = require('../config/database');
 
 const marketController = {
@@ -6,7 +6,7 @@ const marketController = {
   async searchSymbols(req, res) {
     try {
       const { query } = req.query;
-      
+
       if (!query || query.length < 2) {
         return res.status(400).json({
           success: false,
@@ -15,7 +15,7 @@ const marketController = {
       }
 
       const searchResults = await YahooFinanceService.searchSymbol(query);
-      
+
       res.json({
         success: true,
         data: searchResults
@@ -34,7 +34,7 @@ const marketController = {
   async getQuote(req, res) {
     try {
       const { symbol } = req.params;
-      
+
       if (!symbol) {
         return res.status(400).json({
           success: false,
@@ -43,7 +43,7 @@ const marketController = {
       }
 
       const quote = await YahooFinanceService.getQuote(symbol.toUpperCase());
-      
+
       if (!quote) {
         return res.status(404).json({
           success: false,
@@ -69,7 +69,7 @@ const marketController = {
   async getMultipleQuotes(req, res) {
     try {
       const { symbols } = req.body;
-      
+
       if (!symbols || !Array.isArray(symbols) || symbols.length === 0) {
         return res.status(400).json({
           success: false,
@@ -80,7 +80,7 @@ const marketController = {
       const quotes = await YahooFinanceService.getMultipleQuotes(
         symbols.map(s => s.toUpperCase())
       );
-      
+
       res.json({
         success: true,
         data: quotes
@@ -100,7 +100,7 @@ const marketController = {
     try {
       const { symbol } = req.params;
       const { period = '1mo', interval = '1d' } = req.query;
-      
+
       if (!symbol) {
         return res.status(400).json({
           success: false,
@@ -113,7 +113,7 @@ const marketController = {
         period,
         interval
       );
-      
+
       res.json({
         success: true,
         data: {
@@ -138,12 +138,12 @@ const marketController = {
     try {
       // Popular tech stocks for demo
       const popularSymbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA', 'META', 'NFLX'];
-      
+
       const quotes = await YahooFinanceService.getMultipleQuotes(popularSymbols);
-      
+
       // Sort by change percent (highest gainers first)
       const sortedQuotes = quotes.sort((a, b) => b.changePercent - a.changePercent);
-      
+
       res.json({
         success: true,
         data: sortedQuotes
@@ -158,10 +158,9 @@ const marketController = {
     }
   },
 
-  // Get public quotes for homepage (no auth required)
-  async getPublicQuotes(req, res) {
+  // Get US stock quotes for homepage (no auth required)
+  async getUsStockQuotes(req, res) {
     try {
-      // 可根据需要调整默认展示的资产
       const symbols = [
         'AAPL', 'TSLA', 'SPY', 'MSFT', 'GOOGL', 'BND', 'QQQ', 'VTI', 'MCHI', 'AGG'
       ];
@@ -171,10 +170,32 @@ const marketController = {
         data: quotes
       });
     } catch (error) {
-      console.error('Error fetching public quotes:', error);
+      console.error('Error fetching US stock quotes:', error);
       res.status(500).json({
         success: false,
-        message: 'Failed to fetch public quotes',
+        message: 'Failed to fetch US stock quotes',
+        error: error.message
+      });
+    }
+  },
+
+  // Get CN (A-share) stock quotes for homepage
+  async getCnStockQuotes(req, res) {
+    try {
+      const symbols = [
+        'sh600519', 'sh601318', 'sh600036', 'sh601166', 'sz000858',
+        'sh601888', 'sz000333', 'sh600276', 'sh601398', 'sh601988'
+      ];
+      const quotes = await TencentFinanceService.getTencentQuotes(symbols);
+      res.json({
+        success: true,
+        data: quotes
+      });
+    } catch (error) {
+      console.error('Error fetching CN stock quotes:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch CN stock quotes',
         error: error.message
       });
     }
@@ -188,7 +209,7 @@ const marketController = {
         WHERE (expires_at IS NULL OR expires_at > NOW()) 
         ORDER BY created_at DESC
       `);
-      
+
       res.json({
         success: true,
         data: rows
@@ -207,14 +228,14 @@ const marketController = {
   async getRecommendationBySymbol(req, res) {
     try {
       const { symbol } = req.params;
-      
+
       const [rows] = await pool.execute(`
         SELECT * FROM simple_recommendations 
         WHERE symbol = ? AND (expires_at IS NULL OR expires_at > NOW())
         ORDER BY created_at DESC 
         LIMIT 1
       `, [symbol.toUpperCase()]);
-      
+
       if (rows.length === 0) {
         return res.status(404).json({
           success: false,

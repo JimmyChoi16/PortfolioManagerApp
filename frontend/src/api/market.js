@@ -26,9 +26,13 @@ const marketAPI = {
     return http.get('/market/trending')
   },
 
-  // Get public quotes
-  getPublicQuotes() {
-    return http.get('/market/public-quotes')
+  // Get US stock quotes
+  getUsStockQuotes() {
+    return http.get('/market/us-stock-quotes')
+  },
+  // Get CN (A股) stock quotes
+  getCnStockQuotes() {
+    return http.get('/market/cn-stock-quotes')
   },
 
   // Recommendations

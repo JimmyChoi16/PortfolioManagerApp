@@ -17,8 +17,10 @@ router.get('/historical/:symbol', marketController.getHistoricalData);
 // GET /api/market/trending - Get trending/popular stocks
 router.get('/trending', marketController.getTrendingStocks);
 
-// GET /api/market/public-quotes - Get public quotes for homepage
-router.get('/public-quotes', marketController.getPublicQuotes);
+// GET /api/market/us-stock-quotes - Get US stock quotes for homepage
+router.get('/us-stock-quotes', marketController.getUsStockQuotes);
+// GET /api/market/cn-stock-quotes - Get CN (A股) stock quotes for homepage
+router.get('/cn-stock-quotes', marketController.getCnStockQuotes);
 
 // Recommendations endpoints
 // GET /api/market/recommendations - Get all active recommendations

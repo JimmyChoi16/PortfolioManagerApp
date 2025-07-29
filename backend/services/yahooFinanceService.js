@@ -7,15 +7,15 @@ class YahooFinanceService {
       const quote = await yahooFinance.quoteSummary(symbol, {
         modules: ['price', 'summaryDetail']
       });
-      
+
       if (quote && quote.price) {
         return {
           symbol: symbol,
           name: quote.price.shortName || quote.price.longName || symbol,
           currentPrice: quote.price.regularMarketPrice || 0,
           change: quote.price.regularMarketChange || 0,
-          changePercent: quote.price.regularMarketChangePercent ? 
-                        (quote.price.regularMarketChangePercent * 100) : 0,
+          changePercent: quote.price.regularMarketChangePercent ?
+            (quote.price.regularMarketChangePercent * 100) : 0,
           volume: quote.price.regularMarketVolume || 0,
           marketCap: quote.summaryDetail?.marketCap || 0,
           currency: quote.price.currency || 'USD'
@@ -25,28 +25,28 @@ class YahooFinanceService {
     } catch (error) {
       console.error(`Error fetching quote for ${symbol}:`, error.message);
       return null;
-    }
-  }
+    };
+  };
 
   static async getMultipleQuotes(symbols) {
     try {
       const quotes = await Promise.allSettled(
         symbols.map(symbol => this.getQuote(symbol))
       );
-      
+
       return quotes
         .filter(result => result.status === 'fulfilled' && result.value)
         .map(result => result.value);
     } catch (error) {
       console.error('Error fetching multiple quotes:', error.message);
       return [];
-    }
-  }
+    };
+  };
 
   static async searchSymbol(query) {
     try {
       const searchResult = await yahooFinance.search(query);
-      
+
       if (searchResult && searchResult.quotes) {
         return searchResult.quotes
           .filter(quote => quote.typeDisp === 'Equity' || quote.typeDisp === 'ETF')
@@ -72,7 +72,7 @@ class YahooFinanceService {
         period2: new Date(),
         interval: interval
       });
-      
+
       if (result && result.length > 0) {
         return result.map(item => ({
           date: item.date,
@@ -103,7 +103,7 @@ class YahooFinanceService {
       '5y': 1825,
       '10y': 3650
     };
-    
+
     const days = periods[period] || 30;
     return new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
   }
@@ -145,9 +145,9 @@ class SinaFinanceService {
         const currentPrice = parseFloat(fields[1]);
         const change = parseFloat(fields[2]);
         // 计算涨跌幅：change / (currentPrice - change) * 100
-        const changePercent = currentPrice > 0 && (currentPrice - change) > 0 ? 
+        const changePercent = currentPrice > 0 && (currentPrice - change) > 0 ?
           (change / (currentPrice - change)) * 100 : 0;
-        
+
         result.push({
           symbol,
           name: fields[0],
@@ -168,4 +168,51 @@ class SinaFinanceService {
   }
 }
 
-module.exports = { YahooFinanceService, SinaFinanceService };
+class TencentFinanceService {
+  static async getTencentQuotes(symbols) {
+    if (!symbols || !Array.isArray(symbols) || symbols.length === 0) return [];
+    const url = `https://qt.gtimg.cn/q=${symbols.join(',')}`;
+    try {
+
+      const axios = require('axios');
+      const iconv = require('iconv-lite');
+      const res = await axios.get(url, { responseType: 'arraybuffer' });
+      const text = iconv.decode(res.data, 'GBK');
+      const lines = text.split(';');
+      const result = [];
+
+      for (let line of lines) {
+        line = line.trim();
+        if (!line) continue;
+        const match = line.match(/v_([a-z0-9]+)=\"([^\"]*)\"/);
+        if (!match) continue;
+        const symbol = match[1].toUpperCase();
+        const fields = match[2].split('~');
+        if (fields.length < 35) continue;
+        result.push({
+          symbol,
+          name: fields[1],
+          currentPrice: parseFloat(fields[3]),
+          change: parseFloat(fields[31]),
+          changePercent: parseFloat(fields[32]),
+          open: parseFloat(fields[5]),
+          high: parseFloat(fields[33]),
+          low: parseFloat(fields[34]),
+          volume: parseInt(fields[6]),
+          time: fields[30]
+        });
+      }
+      return result;
+    } catch (e) {
+      console.error('Tencent quote fetch error:', e.message);
+      return [];
+    }
+  }
+}
+
+module.exports = {
+  YahooFinanceService,
+  SinaFinanceService,
+  TencentFinanceService
+};
+
