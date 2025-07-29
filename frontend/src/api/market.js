@@ -3,22 +3,17 @@ import http from './http'
 const marketAPI = {
   // Search symbols
   searchSymbols(query) {
-    return http.get(`/market/search?query=${encodeURIComponent(query)}`)
+    return http.get(`/market/search?query=${query}`)
   },
 
-  // Get single quote
+  // Get quote for specific symbol
   getQuote(symbol) {
     return http.get(`/market/quote/${symbol}`)
   },
 
-  // Get multiple quotes
+  // Get quotes for multiple symbols
   getMultipleQuotes(symbols) {
     return http.post('/market/quotes', { symbols })
-  },
-
-  // Get public quotes for homepage
-  getMarketQuotes() {
-    return http.get('/market/public-quotes')
   },
 
   // Get historical data
@@ -29,6 +24,20 @@ const marketAPI = {
   // Get trending stocks
   getTrendingStocks() {
     return http.get('/market/trending')
+  },
+
+  // Get public quotes
+  getPublicQuotes() {
+    return http.get('/market/public-quotes')
+  },
+
+  // Recommendations
+  getRecommendations() {
+    return http.get('/market/recommendations')
+  },
+
+  getRecommendationBySymbol(symbol) {
+    return http.get(`/market/recommendations/${symbol}`)
   }
 }
 

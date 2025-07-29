@@ -142,16 +142,21 @@ class SinaFinanceService {
         const symbol = match[1].toUpperCase();
         const fields = match[2].split(',');
         if (fields.length < 8) continue;
+        const currentPrice = parseFloat(fields[1]);
+        const change = parseFloat(fields[2]);
+        // 直接计算涨跌幅
+        const changePercent = currentPrice > 0 ? (change / (currentPrice - change)) * 100 : 0;
+        
         result.push({
           symbol,
           name: fields[0],
-          currentPrice: parseFloat(fields[1]),
-          change: parseFloat(fields[2]),
-          changePercent: parseFloat(fields[3]),
+          currentPrice: currentPrice,
+          change: change,
+          changePercent: parseFloat(changePercent.toFixed(2)),
           open: parseFloat(fields[4]),
           high: parseFloat(fields[5]),
           volume: parseInt(fields[6]),
-          time: fields[7]
+          time: fields[3] // 时间在第4个字段
         });
       }
       return result;

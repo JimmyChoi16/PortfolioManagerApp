@@ -35,6 +35,23 @@ const portfolioAPI = {
   // Update current prices
   updateCurrentPrices() {
     return http.post('/holdings/update-prices')
+  },
+
+  // Analysis endpoints
+  getAllocationAnalysis() {
+    return http.get('/holdings/analysis/allocation')
+  },
+
+  getPerformanceAnalysis() {
+    return http.get('/holdings/analysis/performance')
+  },
+
+  getSectorAnalysis() {
+    return http.get('/holdings/analysis/sector')
+  },
+
+  getDetailedHistoryAnalysis() {
+    return http.get('/holdings/analysis/history')
   }
 }
 

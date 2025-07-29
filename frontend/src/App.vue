@@ -4,45 +4,87 @@
     <el-header height="70px" class="app-navbar">
       <div class="logo" @click="goHome" style="cursor: pointer;">PortfolioManager</div>
       <div class="nav-actions">
-        <el-dropdown trigger="click" class="asset-dropdown">
-          <el-button class="asset-btn">
-            <span>Asset Categories</span>
-            <el-icon class="el-icon--right"><ArrowDown /></el-icon>
-          </el-button>
-          <template #dropdown>
-            <el-dropdown-menu class="asset-menu">
-              <el-dropdown-item @click="activePage = 'stock'">
-                <!-- <el-icon><TrendCharts /></el-icon> -->
-                 📈
-                <span>Stock</span>
-              </el-dropdown-item>
-              <el-dropdown-item @click="activePage = 'fund'">
-                <!-- <el-icon><PieChart /></el-icon> -->
-                 💰
-                <span>Fund</span>
-              </el-dropdown-item>
-              <el-dropdown-item @click="activePage = 'bond'">
-                <!-- <el-icon><Money /></el-icon> -->
-                 💳
-                <span>Bond</span>
-              </el-dropdown-item>
-              <el-dropdown-item @click="activePage = 'cash'">
-                <!-- <el-icon><Wallet /></el-icon> -->
-                 💵
-                <span>Cash</span>
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
+        <!-- Show asset dropdown only when logged in -->
+        <template v-if="isLoggedIn">
+          <el-dropdown trigger="click" class="asset-dropdown">
+            <el-button class="asset-btn">
+              <span>Asset Categories</span>
+              <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu class="asset-menu">
+                <el-dropdown-item @click="activePage = 'dashboard'">
+                  📊
+                  <span>Dashboard</span>
+                </el-dropdown-item>
+                <el-dropdown-item @click="activePage = 'stock'">
+                  📈
+                  <span>Stock</span>
+                </el-dropdown-item>
+                <el-dropdown-item @click="activePage = 'fund'">
+                  💰
+                  <span>Fund</span>
+                </el-dropdown-item>
+                <el-dropdown-item @click="activePage = 'bond'">
+                  💳
+                  <span>Bond</span>
+                </el-dropdown-item>
+                <el-dropdown-item @click="activePage = 'cash'">
+                  💵
+                  <span>Cash</span>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </template>
+        
         <el-button text @click="switchLang('en')" :class="{ active: lang === 'en' }">EN</el-button>
         <el-button text @click="switchLang('zh')" :class="{ active: lang === 'zh' }">中文</el-button>
-        <el-button type="primary" class="login-btn" @click="goLogin">Login</el-button>
+        
+        <!-- Show login/logout button based on auth status -->
+        <el-button 
+          v-if="!isLoggedIn" 
+          type="primary" 
+          class="login-btn" 
+          @click="goLogin"
+        >
+          Login
+        </el-button>
+        <el-button 
+          v-else 
+          @click="logout" 
+          class="logout-btn"
+        >
+          Logout
+        </el-button>
       </div>
     </el-header>
 
     <el-main class="app-main">
-      <!-- 首页内容 -->
-      <template v-if="activePage === 'home'">
+      <!-- Dashboard (logged in) -->
+      <template v-if="isLoggedIn && activePage === 'dashboard'">
+        <Dashboard @logout="handleLogout" />
+      </template>
+      
+      <!-- Asset Pages (logged in) -->
+      <template v-else-if="isLoggedIn && activePage === 'stock'">
+        <StockSection />
+      </template>
+      
+      <template v-else-if="isLoggedIn && activePage === 'fund'">
+        <FundSection />
+      </template>
+      
+      <template v-else-if="isLoggedIn && activePage === 'bond'">
+        <BondSection />
+      </template>
+      
+      <template v-else-if="isLoggedIn && activePage === 'cash'">
+        <CashSection />
+      </template>
+      
+      <!-- Home Page (not logged in) -->
+      <template v-else-if="!isLoggedIn && activePage === 'home'">
         <!-- Banner Section -->
         <section class="section-banner">
           <div class="section-content">
@@ -110,33 +152,11 @@
             </transition>
           </div>
         </section>
-
-
-      </template>
-
-      <!-- Stock Page -->
-      <template v-else-if="activePage === 'stock'">
-        <StockSection />
-      </template>
-      
-      <!-- Fund Page -->
-      <template v-else-if="activePage === 'fund'">
-        <FundSection />
-      </template>
-      
-      <!-- Bond Page -->
-      <template v-else-if="activePage === 'bond'">
-        <BondSection />
-      </template>
-      
-      <!-- Cash Page -->
-      <template v-else-if="activePage === 'cash'">
-        <CashSection />
       </template>
       
       <!-- Login Page -->
-      <template v-else-if="activePage === 'login'">
-        <LoginPage @goBack="goHome" />
+      <template v-else-if="!isLoggedIn && activePage === 'login'">
+        <LoginPage @goBack="goHome" @loginSuccess="handleLoginSuccess" />
       </template>
     </el-main>
 
@@ -155,6 +175,7 @@ import FundSection from './components/FundSection.vue'
 import BondSection from './components/BondSection.vue'
 import CashSection from './components/CashSection.vue'
 import LoginPage from './components/LoginPage.vue'
+import Dashboard from './components/Dashboard.vue'
 
 const router = useRouter()
 const { locale } = useI18n()
@@ -164,6 +185,7 @@ const showBanner = ref(false)
 const hoveredFeature = ref(null)
 const showModal = ref(false)
 const modalIndex = ref(0)
+const isLoggedIn = ref(false)
 
 // Features data
 const features = ref([
@@ -193,8 +215,6 @@ const features = ref([
   }
 ])
 
-
-
 // Methods
 const switchLang = (l) => {
   locale.value = l
@@ -203,10 +223,37 @@ const switchLang = (l) => {
 
 const goLogin = () => {
   activePage.value = 'login'
+  localStorage.setItem('activePage', 'login')
 }
 
 const goHome = () => {
+  if (isLoggedIn.value) {
+    activePage.value = 'dashboard'
+    localStorage.setItem('activePage', 'dashboard')
+  } else {
+    activePage.value = 'home'
+    localStorage.setItem('activePage', 'home')
+  }
+}
+
+const handleLoginSuccess = () => {
+  isLoggedIn.value = true
+  activePage.value = 'dashboard'
+  // Save login state to localStorage
+  localStorage.setItem('isLoggedIn', 'true')
+  localStorage.setItem('activePage', 'dashboard')
+}
+
+const handleLogout = () => {
+  isLoggedIn.value = false
   activePage.value = 'home'
+  // Clear login state from localStorage
+  localStorage.removeItem('isLoggedIn')
+  localStorage.removeItem('activePage')
+}
+
+const logout = () => {
+  handleLogout()
 }
 
 const openFeature = (index) => {
@@ -220,6 +267,18 @@ const closeModal = () => {
 
 // Lifecycle
 onMounted(() => {
+  // Restore login state from localStorage
+  const savedLoginState = localStorage.getItem('isLoggedIn')
+  const savedPage = localStorage.getItem('activePage')
+  
+  if (savedLoginState === 'true') {
+    isLoggedIn.value = true
+    activePage.value = savedPage || 'dashboard'
+  } else {
+    isLoggedIn.value = false
+    activePage.value = savedPage || 'home'
+  }
+  
   setTimeout(() => { showBanner.value = true }, 200)
 })
 </script>
@@ -256,8 +315,6 @@ onMounted(() => {
 .logo:hover {
   color: #0071e3;
 }
-
-/* Removed old nav-menu styles */
 
 .nav-actions {
   display: flex;
@@ -321,6 +378,20 @@ onMounted(() => {
   font-weight: 500;
 }
 
+.logout-btn {
+  border-radius: 20px;
+  font-weight: 500;
+  background: #f8f9fa;
+  border: 1px solid #e1e8ed;
+  color: #2c3e50;
+}
+
+.logout-btn:hover {
+  background: #e9ecef;
+  border-color: #0071e3;
+  color: #0071e3;
+}
+
 .app-main {
   flex: 1;
   padding: 0;
@@ -382,8 +453,6 @@ onMounted(() => {
   background: linear-gradient(120deg, #f7faff 0%, #eaf3fc 100%);
   padding: 80px 0 60px 0;
 }
-
-
 
 .section-content {
   max-width: 1100px;
@@ -586,8 +655,6 @@ onMounted(() => {
 .modal-privacy {
   background: linear-gradient(120deg, #eafbe7 0%, #e3f7f7 100%);
 }
-
-
 
 /* Animations */
 .fade-slide-enter-active, .fade-slide-leave-active {

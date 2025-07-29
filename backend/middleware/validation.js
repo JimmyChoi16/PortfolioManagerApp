@@ -38,7 +38,17 @@ const validationRules = {
           throw new Error('Purchase date cannot be in the future');
         }
         return true;
-      })
+      }),
+    
+    body('sector')
+      .optional()
+      .isLength({ max: 50 })
+      .withMessage('Sector must be 50 characters or less'),
+    
+    body('notes')
+      .optional()
+      .isLength({ max: 1000 })
+      .withMessage('Notes must be 1000 characters or less')
   ],
 
   updateHolding: [
@@ -82,7 +92,17 @@ const validationRules = {
           throw new Error('Purchase date cannot be in the future');
         }
         return true;
-      })
+      }),
+    
+    body('sector')
+      .optional()
+      .isLength({ max: 50 })
+      .withMessage('Sector must be 50 characters or less'),
+    
+    body('notes')
+      .optional()
+      .isLength({ max: 1000 })
+      .withMessage('Notes must be 1000 characters or less')
   ]
 };
 

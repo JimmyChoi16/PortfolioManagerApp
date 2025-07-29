@@ -61,8 +61,9 @@
               </label>
             </div>
 
-            <button type="submit" class="auth-btn">
-              {{ isSignIn ? 'Sign In' : 'Sign Up' }}
+            <button type="submit" class="auth-btn" :disabled="loading">
+              <span v-if="loading">Loading...</span>
+              <span v-else>{{ isSignIn ? 'Sign In' : 'Sign Up' }}</span>
             </button>
           </form>
 
@@ -115,10 +116,11 @@
 <script setup>
 import { ref } from 'vue'
 
-const emit = defineEmits(['goBack'])
+const emit = defineEmits(['goBack', 'loginSuccess'])
 
-const isSignIn = ref(false)
+const isSignIn = ref(true)
 const showPassword = ref(false)
+const loading = ref(false)
 const formData = ref({
   email: '',
   password: '',
@@ -139,26 +141,42 @@ const toggleMode = () => {
   }
 }
 
-const handleSubmit = () => {
-  if (isSignIn.value) {
-    handleSignIn()
-  } else {
-    handleSignUp()
+const handleSubmit = async () => {
+  loading.value = true
+  
+  try {
+    if (isSignIn.value) {
+      await handleSignIn()
+    } else {
+      await handleSignUp()
+    }
+  } catch (error) {
+    console.error('Auth error:', error)
+  } finally {
+    loading.value = false
   }
 }
 
-const handleSignUp = () => {
-  // TODO: Implement sign up logic -
+const handleSignUp = async () => {
+  // Simulate sign up process
+  await new Promise(resolve => setTimeout(resolve, 1000))
+  
+  // For demo purposes, treat sign up as successful
   console.log('Sign up:', formData.value)
-  // For now, just go back to home
-  emit('goBack')
+  
+  // Emit login success to go to dashboard
+  emit('loginSuccess')
 }
 
-const handleSignIn = () => {
-  // TODO: Implement sign in logic -
+const handleSignIn = async () => {
+  // Simulate sign in process
+  await new Promise(resolve => setTimeout(resolve, 1000))
+  
+  // For demo purposes, treat sign in as successful
   console.log('Sign in:', formData.value)
-  // For now, just go back to home
-  emit('goBack')
+  
+  // Emit login success to go to dashboard
+  emit('loginSuccess')
 }
 
 const goBackToHome = () => {
@@ -166,7 +184,7 @@ const goBackToHome = () => {
 }
 
 const forgotPassword = () => {
-  // TODO: Implement forgot password logic -
+  // TODO: Implement forgot password logic
   console.log('Forgot password for:', formData.value.email)
 }
 </script>
@@ -310,8 +328,13 @@ const forgotPassword = () => {
   transition: background 0.3s ease;
 }
 
-.auth-btn:hover {
+.auth-btn:hover:not(:disabled) {
   background: #5a6fd8;
+}
+
+.auth-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
 }
 
 /* Social Auth */

@@ -1,4 +1,5 @@
 const { YahooFinanceService, SinaFinanceService } = require('../services/yahooFinanceService');
+const { pool } = require('../config/database');
 
 const marketController = {
   // Search for stocks/symbols
@@ -174,6 +175,62 @@ const marketController = {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch public quotes',
+        error: error.message
+      });
+    }
+  },
+
+  // Get all active recommendations
+  async getRecommendations(req, res) {
+    try {
+      const [rows] = await pool.execute(`
+        SELECT * FROM simple_recommendations 
+        WHERE (expires_at IS NULL OR expires_at > NOW()) 
+        ORDER BY created_at DESC
+      `);
+      
+      res.json({
+        success: true,
+        data: rows
+      });
+    } catch (error) {
+      console.error('Error fetching recommendations:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch recommendations',
+        error: error.message
+      });
+    }
+  },
+
+  // Get recommendation for specific symbol
+  async getRecommendationBySymbol(req, res) {
+    try {
+      const { symbol } = req.params;
+      
+      const [rows] = await pool.execute(`
+        SELECT * FROM simple_recommendations 
+        WHERE symbol = ? AND (expires_at IS NULL OR expires_at > NOW())
+        ORDER BY created_at DESC 
+        LIMIT 1
+      `, [symbol.toUpperCase()]);
+      
+      if (rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: `No active recommendation found for symbol: ${symbol}`
+        });
+      }
+
+      res.json({
+        success: true,
+        data: rows[0]
+      });
+    } catch (error) {
+      console.error('Error fetching recommendation:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch recommendation',
         error: error.message
       });
     }

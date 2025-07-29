@@ -20,4 +20,11 @@ router.get('/trending', marketController.getTrendingStocks);
 // GET /api/market/public-quotes - Get public quotes for homepage
 router.get('/public-quotes', marketController.getPublicQuotes);
 
+// Recommendations endpoints
+// GET /api/market/recommendations - Get all active recommendations
+router.get('/recommendations', marketController.getRecommendations);
+
+// GET /api/market/recommendations/:symbol - Get recommendation for specific symbol
+router.get('/recommendations/:symbol', marketController.getRecommendationBySymbol);
+
 module.exports = router;

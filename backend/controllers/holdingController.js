@@ -1,5 +1,5 @@
 const Holding = require('../models/Holding');
-const YahooFinanceService = require('../services/yahooFinanceService');
+const { YahooFinanceService } = require('../services/yahooFinanceService');
 const { validationResult } = require('express-validator');
 
 const holdingController = {
@@ -60,7 +60,7 @@ const holdingController = {
         });
       }
 
-      const { symbol, name, type, quantity, purchase_price, purchase_date } = req.body;
+      const { symbol, name, type, quantity, purchase_price, purchase_date, sector, notes } = req.body;
       
       // Get current price from Yahoo Finance
       let current_price = purchase_price;
@@ -80,7 +80,9 @@ const holdingController = {
         quantity: parseFloat(quantity),
         purchase_price: parseFloat(purchase_price),
         purchase_date,
-        current_price
+        current_price,
+        sector,
+        notes
       };
 
       const holdingId = await Holding.create(holdingData);
@@ -114,7 +116,7 @@ const holdingController = {
       }
 
       const { id } = req.params;
-      const { symbol, name, type, quantity, purchase_price, purchase_date, current_price } = req.body;
+      const { symbol, name, type, quantity, purchase_price, purchase_date, current_price, sector, notes } = req.body;
 
       const holdingData = {
         symbol: symbol.toUpperCase(),
@@ -123,7 +125,9 @@ const holdingController = {
         quantity: parseFloat(quantity),
         purchase_price: parseFloat(purchase_price),
         purchase_date,
-        current_price: parseFloat(current_price)
+        current_price: parseFloat(current_price),
+        sector,
+        notes
       };
 
       const updated = await Holding.update(id, holdingData);
@@ -236,6 +240,78 @@ const holdingController = {
       res.status(500).json({
         success: false,
         message: 'Failed to update current prices',
+        error: error.message
+      });
+    }
+  },
+
+  // Get asset allocation analysis
+  async getAllocationAnalysis(req, res) {
+    try {
+      const allocationData = await Holding.getAllocationAnalysis();
+      res.json({
+        success: true,
+        data: allocationData
+      });
+    } catch (error) {
+      console.error('Error fetching allocation analysis:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch allocation analysis',
+        error: error.message
+      });
+    }
+  },
+
+  // Get performance analysis
+  async getPerformanceAnalysis(req, res) {
+    try {
+      const performanceData = await Holding.getPerformanceAnalysis();
+      res.json({
+        success: true,
+        data: performanceData
+      });
+    } catch (error) {
+      console.error('Error fetching performance analysis:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch performance analysis',
+        error: error.message
+      });
+    }
+  },
+
+  // Get sector analysis
+  async getSectorAnalysis(req, res) {
+    try {
+      const sectorData = await Holding.getSectorAnalysis();
+      res.json({
+        success: true,
+        data: sectorData
+      });
+    } catch (error) {
+      console.error('Error fetching sector analysis:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch sector analysis',
+        error: error.message
+      });
+    }
+  },
+
+  // Get detailed historical analysis
+  async getDetailedHistoryAnalysis(req, res) {
+    try {
+      const historyData = await Holding.getDetailedHistoryAnalysis();
+      res.json({
+        success: true,
+        data: historyData
+      });
+    } catch (error) {
+      console.error('Error fetching detailed history analysis:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch detailed history analysis',
         error: error.message
       });
     }
