@@ -23,7 +23,6 @@
         :key="category.sector"
         class="category-card"
       >
-        <div class="category-icon">📈</div>
         <h3>{{ category.sector || 'Other' }}</h3>
         <p>{{ getSectorDescription(category.sector) }}</p>
         <div class="category-metrics">
@@ -185,7 +184,9 @@
       <h2>Stock Portfolio Performance</h2>
       <div class="performance-cards">
         <div class="performance-card">
-          <div class="card-icon">📊</div>
+          <div class="card-icon">
+            <img class="performance-icon-img" src="@/assets/bar_chart.png" alt="Bar Chart" />
+          </div>
           <div class="card-content">
             <h4>Total Value</h4>
             <p class="card-value">${{ formatNumber(stockPerformance.total_value) }}</p>
@@ -197,7 +198,9 @@
         </div>
         
         <div class="performance-card">
-          <div class="card-icon">📈</div>
+          <div class="card-icon">
+            <img class="performance-icon-img" src="@/assets/line_chart.png" alt="Line Chart" />
+          </div>
           <div class="card-content">
             <h4>Total Holdings</h4>
             <p class="card-value">{{ stockPerformance.total_holdings }}</p>
@@ -205,8 +208,11 @@
           </div>
         </div>
         
-        <div class="performance-card">
-          <div class="card-icon">🎯</div>
+        <div class="performance-card"> 
+          <div class="card-icon">
+            <img class="performance-icon-img" src="@/assets/trophy-line.png" alt="Trophy line" />
+          </div>
+          
           <div class="card-content">
             <h4>Best Performer</h4>
             <p class="card-value">{{ bestPerformer?.symbol || 'N/A' }}</p>
@@ -217,7 +223,9 @@
         </div>
         
         <div class="performance-card">
-          <div class="card-icon">📉</div>
+          <div class="card-icon">
+            <img class="performance-icon-img" src="@/assets/loss.png" alt="Loss" />
+          </div>
           <div class="card-content">
             <h4>Worst Performer</h4>
             <p class="card-value">{{ worstPerformer?.symbol || 'N/A' }}</p>
@@ -725,6 +733,14 @@ onUnmounted(() => {
   margin-bottom: 16px;
 }
 
+.category-icon-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 8px auto;
+}
+
 .category-card h3 {
   font-size: 1.4rem;
   font-weight: 600;
@@ -822,6 +838,14 @@ onUnmounted(() => {
   text-align: right;
   font-weight: 600;
   color: #2c3e50;
+}
+
+.performance-icon-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 8px auto;
 }
 
 @media (max-width: 768px) {

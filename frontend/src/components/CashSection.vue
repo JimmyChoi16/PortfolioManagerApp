@@ -20,7 +20,9 @@
      <!-- TODO: Need to change to mock data, will show the real after login sucessfully -->
     <div class="card-grid-4">
       <div class="gradient-card green">
-        <div class="card-icon">🏦</div>
+        <div class="card-icon">
+          <img class="cash-icon-img" src="@/assets/govern.png" alt="High-Yield Savings" />
+        </div>
         <h3>High-Yield Savings</h3>
         <p>Earn competitive interest on your emergency fund</p>
         <div class="metrics">
@@ -36,7 +38,9 @@
       </div>
       
       <div class="gradient-card green">
-        <div class="card-icon">💳</div>
+        <div class="card-icon">
+          <img class="cash-icon-img" src="@/assets/card.png" alt="Checking Account" />
+        </div>
         <h3>Checking Account</h3>
         <p>Daily transactions and bill payments</p>
         <div class="metrics">
@@ -52,7 +56,9 @@
       </div>
       
       <div class="gradient-card green">
-        <div class="card-icon">📈</div>
+        <div class="card-icon">
+          <img class="cash-icon-img" src="@/assets/line_chart.png" alt="Money Market" />
+        </div>
         <h3>Money Market</h3>
         <p>Higher yields with check-writing privileges</p>
         <div class="metrics">
@@ -68,7 +74,9 @@
       </div>
       
       <div class="gradient-card green">
-        <div class="card-icon">🌍</div>
+        <div class="card-icon">
+          <img class="cash-icon-img" src="@/assets/earth.png" alt="Foreign Currency" />
+        </div>
         <h3>Foreign Currency</h3>
         <p>Multi-currency accounts for international exposure</p>
         <div class="metrics">
@@ -89,7 +97,10 @@
       <h2>Cash Flow Analysis</h2>
       <div class="flow-summary">
         <div class="flow-item income">
-          <div class="flow-icon">💰</div>
+          <div class="flow-icon">
+            <img class="flow-icon-img" src="@/assets/money.png" alt="Monthly Income" />
+            <div class="flow-divider"></div>
+          </div>
           <div class="flow-details">
             <h4>Monthly Income</h4>
             <p class="amount positive">+$8,500</p>
@@ -98,7 +109,10 @@
         </div>
         
         <div class="flow-item expenses">
-          <div class="flow-icon">💸</div>
+          <div class="flow-icon">
+            <img class="flow-icon-img" src="@/assets/cash.png" alt="Monthly Expenses" />
+            <div class="flow-divider"></div>
+          </div>
           <div class="flow-details">
             <h4>Monthly Expenses</h4>
             <p class="amount negative">-$4,200</p>
@@ -107,7 +121,10 @@
         </div>
         
         <div class="flow-item savings">
-          <div class="flow-icon">📊</div>
+          <div class="flow-icon">
+            <img class="flow-icon-img" src="@/assets/bar_chart.png" alt="Net Savings" />
+            <div class="flow-divider"></div>
+          </div>
           <div class="flow-details">
             <h4>Net Savings</h4>
             <p class="amount positive">+$4,300</p>
@@ -318,8 +335,24 @@ const props = defineProps({
 }
 
 .flow-icon {
-  font-size: 2.5rem;
-  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flow-icon-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  display: block;
+}
+.flow-divider {
+  width: 1.5px;
+  height: 40px;
+  background: #e0e0e0;
+  margin-left: 12px;
+  align-self: center;
+  display: inline-block;
 }
 
 .flow-details h4 {
@@ -509,6 +542,15 @@ const props = defineProps({
 .chart-placeholder span {
   font-size: 1rem;
   opacity: 0.8;
+}
+
+.cash-icon-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 8px auto;
+  filter: brightness(0) invert(1);
 }
 
 @media (max-width: 768px) {
