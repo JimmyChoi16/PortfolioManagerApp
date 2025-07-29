@@ -1,5 +1,15 @@
 <template>
   <div class="stock-section">
+    <!-- Login Warning -->
+    <div v-if="!isLoggedIn" class="login-warning">
+      <el-alert
+        title="⚠️ You are not logged in. All data shown is for demonstration purposes only."
+        type="warning"
+        :closable="false"
+        show-icon
+      />
+    </div>
+
     <!-- Header -->
     <div class="section-header">
       <h1>Stock Portfolio</h1>
@@ -42,7 +52,13 @@
 
     <!-- Real-time Market Data -->
     <div class="market-data">
-      <h2>Real-time Market Data</h2>
+      <div class="market-header">
+        <h2>Real-time Market Data</h2>
+        <el-button @click="fetchMarketData" :loading="marketDataLoading" size="small">
+          <el-icon><Refresh /></el-icon>
+          Refresh
+        </el-button>
+      </div>
       <div class="market-table-wrapper">
         <table class="market-table">
           <thead>
@@ -55,6 +71,12 @@
             </tr>
           </thead>
           <tbody>
+            <tr v-if="marketDataLoading && pagedMarketData.length === 0">
+              <td colspan="5" style="text-align: center; padding: 40px;">
+                <el-icon class="is-loading"><Loading /></el-icon>
+                <span style="margin-left: 8px;">Loading market data...</span>
+              </td>
+            </tr>
             <tr
               v-for="item in pagedMarketData"
               :key="item.symbol"
@@ -212,9 +234,16 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { Plus } from '@element-plus/icons-vue'
+import { Plus, Refresh, Loading } from '@element-plus/icons-vue'
 import portfolioAPI from '../api/portfolio.js'
 import marketAPI from '../api/market.js'
+
+const props = defineProps({
+  isLoggedIn: {
+    type: Boolean,
+    default: false
+  }
+})
 
 const emit = defineEmits(['goToDashboard'])
 
@@ -226,6 +255,7 @@ const prevDataMap = ref({})
 const timer = ref(null)
 const currentPage = ref(1)
 const pageSize = 10
+const marketDataLoading = ref(false)
 
 // Computed properties
 const stockPerformance = computed(() => {
@@ -300,6 +330,55 @@ const pagedMarketData = computed(() => {
 
 // Methods
 const loadStockData = async () => {
+  if (!props.isLoggedIn) {
+    // Mock data for non-logged in users
+    stockHoldings.value = [
+      {
+        id: 1,
+        symbol: 'AAPL',
+        name: 'Apple Inc.',
+        quantity: 10,
+        purchase_price: 150.00,
+        current_price: 214.05,
+        current_value: 2140.50,
+        purchase_value: 1500.00,
+        unrealized_gain: 640.50,
+        gain_percent: 42.70,
+        sector: 'Technology',
+        type: 'stock'
+      },
+      {
+        id: 2,
+        symbol: 'MSFT',
+        name: 'Microsoft Corporation',
+        quantity: 5,
+        purchase_price: 200.00,
+        current_price: 512.50,
+        current_value: 2562.50,
+        purchase_value: 1000.00,
+        unrealized_gain: 1562.50,
+        gain_percent: 156.25,
+        sector: 'Technology',
+        type: 'stock'
+      },
+      {
+        id: 3,
+        symbol: 'GOOGL',
+        name: 'Alphabet Inc.',
+        quantity: 8,
+        purchase_price: 180.00,
+        current_price: 192.58,
+        current_value: 1540.64,
+        purchase_value: 1440.00,
+        unrealized_gain: 100.64,
+        gain_percent: 6.99,
+        sector: 'Technology',
+        type: 'stock'
+      }
+    ]
+    return
+  }
+
   try {
     const response = await portfolioAPI.getHoldings()
     if (response.data.success) {
@@ -313,6 +392,7 @@ const loadStockData = async () => {
 }
 
 const fetchMarketData = async () => {
+  marketDataLoading.value = true
   try {
     const res = await marketAPI.getPublicQuotes()
     console.log('marketAPI.getPublicQuotes() response:', res)
@@ -349,14 +429,18 @@ const fetchMarketData = async () => {
         setTimeout(() => { rowFlash.value = {} }, 1000)
       }
       prevDataMap.value = Object.fromEntries(newData.map(i => [i.symbol, i.currentPrice]))
-      marketData.value = newData
+      // Force Vue reactivity by creating a new array
+      marketData.value = [...newData]
       console.log('marketData.value set to:', marketData.value)
+      console.log('marketData.value length:', marketData.value.length)
     } else {
       console.log('API response not successful:', res)
     }
   } catch (e) {
     console.error('Error fetching market data:', e)
     marketData.value = []
+  } finally {
+    marketDataLoading.value = false
   }
 }
 
@@ -405,11 +489,10 @@ const nextPage = () => {
 onMounted(() => {
   loadStockData()
   fetchMarketData()
-  // Update data every 30 seconds
+  // Update data every 10 seconds for real-time feel
   timer.value = setInterval(() => {
-    updatePrices()
     fetchMarketData()
-  }, 30000)
+  }, 10000)
 })
 
 onUnmounted(() => {
@@ -422,55 +505,6 @@ onUnmounted(() => {
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
-}
-
-.section-header {
-  text-align: center;
-  margin-bottom: 50px;
-}
-
-.section-header h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin-bottom: 16px;
-}
-
-.section-header p {
-  font-size: 1.2rem;
-  color: #7f8c8d;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 80px 20px;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  margin-bottom: 50px;
-}
-
-.empty-icon {
-  font-size: 4rem;
-  margin-bottom: 24px;
-}
-
-.empty-state h3 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 16px;
-}
-
-.empty-state p {
-  font-size: 1.1rem;
-  color: #7f8c8d;
-  margin-bottom: 32px;
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .stock-categories {
@@ -518,23 +552,6 @@ onUnmounted(() => {
   gap: 16px;
 }
 
-.metric {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.metric .label {
-  font-size: 0.85rem;
-  opacity: 0.8;
-  margin-bottom: 4px;
-}
-
-.metric .value {
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-
 .positive {
   color: #27ae60;
 }
@@ -543,183 +560,7 @@ onUnmounted(() => {
   color: #e74c3c;
 }
 
-.market-data,
-.holdings-data {
-  margin-bottom: 50px;
-}
-
-.market-data h2,
-.holdings-data h2 {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 24px;
-  text-align: center;
-}
-
-.market-table-wrapper {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
-
-.market-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 1rem;
-}
-
-.market-table th,
-.market-table td {
-  padding: 16px 20px;
-  text-align: left;
-  border-bottom: 1px solid #ecf0f1;
-}
-
-.market-table th {
-  background: #f8f9fa;
-  font-weight: 600;
-  color: #2c3e50;
-  font-size: 0.95rem;
-}
-
-.market-table tr {
-  transition: background 0.18s;
-}
-
-.market-table tr.hovered {
-  background: #f8f9fa;
-}
-
-.market-table td.up {
-  color: #27ae60;
-  font-weight: 600;
-}
-
-.market-table td.down {
-  color: #e74c3c;
-  font-weight: 600;
-}
-
-.flash-up {
-  animation: flashUp 1s;
-  background: #e6fbe6 !important;
-}
-
-.flash-down {
-  animation: flashDown 1s;
-  background: #ffeaea !important;
-}
-
-@keyframes flashUp {
-  0% { background: #e6fbe6; }
-  100% { background: transparent; }
-}
-
-@keyframes flashDown {
-  0% { background: #ffeaea; }
-  100% { background: transparent; }
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  padding: 20px;
-  background: #f8f9fa;
-}
-
-.pagination button {
-  background: #667eea;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 16px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.pagination button:hover:not(:disabled) {
-  background: #5a6fd8;
-}
-
-.pagination button:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-.pagination span {
-  font-weight: 600;
-  color: #2c3e50;
-}
-
-.portfolio-performance {
-  margin-bottom: 50px;
-}
-
-.portfolio-performance h2 {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 32px;
-  text-align: center;
-}
-
-.performance-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 24px;
-}
-
-.performance-card {
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  transition: transform 0.3s ease;
-}
-
-.performance-card:hover {
-  transform: translateY(-4px);
-}
-
-.card-icon {
-  font-size: 2.5rem;
-  flex-shrink: 0;
-}
-
-.card-content h4 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 8px;
-}
-
-.card-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin-bottom: 4px;
-}
-
-.card-change {
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.card-change.positive {
-  color: #27ae60;
-}
-
-.card-change.negative {
-  color: #e74c3c;
-}
+/* Component-specific styles only */
 
 .card-subtitle {
   font-size: 0.9rem;

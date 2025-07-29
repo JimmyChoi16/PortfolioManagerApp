@@ -1,0 +1,452 @@
+/* Common Styles for Portfolio Manager Components */
+
+/* ===== SECTION HEADERS ===== */
+.section-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.section-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 16px;
+}
+
+.section-header h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.section-header p {
+  font-size: 1.2rem;
+  color: #7f8c8d;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* ===== EMPTY STATES ===== */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  margin-bottom: 50px;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 24px;
+}
+
+.empty-state h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 16px;
+}
+
+.empty-state p {
+  font-size: 1.1rem;
+  color: #7f8c8d;
+  margin-bottom: 32px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ===== MARKET TABLES ===== */
+.market-data,
+.holdings-data {
+  margin-bottom: 50px;
+}
+
+.market-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.market-header h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.market-table-wrapper {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.market-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.market-table th,
+.market-table td {
+  padding: 16px 20px;
+  text-align: left;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.market-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.95rem;
+}
+
+.market-table tr {
+  transition: background 0.18s;
+}
+
+.market-table tr.hovered {
+  background: #f8f9fa;
+}
+
+.market-table td.up {
+  color: #27ae60;
+  font-weight: 600;
+}
+
+.market-table td.down {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+/* ===== FLASH ANIMATIONS ===== */
+.flash-up {
+  animation: flashUp 1s;
+  background: #e6fbe6 !important;
+}
+
+.flash-down {
+  animation: flashDown 1s;
+  background: #ffeaea !important;
+}
+
+@keyframes flashUp {
+  0% { background: #e6fbe6; }
+  100% { background: transparent; }
+}
+
+@keyframes flashDown {
+  0% { background: #ffeaea; }
+  100% { background: transparent; }
+}
+
+/* ===== PAGINATION ===== */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: #f8f9fa;
+}
+
+.pagination button {
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #5a6fd8;
+}
+
+.pagination button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* ===== CARD GRIDS ===== */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+  margin-bottom: 50px;
+}
+
+.card-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 50px;
+}
+
+/* ===== GRADIENT CARDS ===== */
+.gradient-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 32px 24px;
+  border-radius: 16px;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.gradient-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.3);
+}
+
+.gradient-card.green {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.gradient-card.green:hover {
+  box-shadow: 0 12px 32px rgba(17, 153, 142, 0.3);
+}
+
+.card-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.gradient-card h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.gradient-card p {
+  font-size: 1rem;
+  opacity: 0.9;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+/* ===== METRICS ===== */
+.metrics {
+  display: flex;
+  justify-content: space-around;
+  gap: 16px;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.metric .label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 4px;
+}
+
+.metric .value {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* ===== PERFORMANCE CARDS ===== */
+.portfolio-performance {
+  margin-bottom: 50px;
+}
+
+.performance-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.performance-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: transform 0.3s ease;
+}
+
+.performance-card:hover {
+  transform: translateY(-4px);
+}
+
+.performance-card .card-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.performance-card .card-content h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+
+.performance-card .card-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 4px;
+}
+
+.performance-card .card-change {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.performance-card .card-change.positive {
+  color: #27ae60;
+}
+
+.performance-card .card-change.negative {
+  color: #e74c3c;
+}
+
+/* ===== ALLOCATION BARS ===== */
+.allocation-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.allocation-label {
+  display: flex;
+  flex-direction: column;
+  min-width: 120px;
+}
+
+.allocation-sector {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.allocation-count {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+}
+
+.allocation-bar {
+  flex: 1;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.allocation-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.allocation-value {
+  font-weight: 600;
+  color: #2c3e50;
+  min-width: 100px;
+  text-align: right;
+}
+
+/* ===== LOGIN WARNING ===== */
+.login-warning {
+  margin-bottom: 30px;
+}
+
+/* ===== UTILITY CLASSES ===== */
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.mb-20 {
+  margin-bottom: 20px;
+}
+
+.mb-30 {
+  margin-bottom: 30px;
+}
+
+.mb-50 {
+  margin-bottom: 50px;
+}
+
+.mt-20 {
+  margin-top: 20px;
+}
+
+.mt-30 {
+  margin-top: 30px;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+  .card-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .market-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  
+  .allocation-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .allocation-label {
+    min-width: auto;
+  }
+  
+  .allocation-value {
+    min-width: auto;
+    text-align: left;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-grid-4 {
+    grid-template-columns: 1fr;
+  }
+  
+  .section-header h1 {
+    font-size: 2rem;
+  }
+  
+  .section-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .gradient-card {
+    padding: 24px 16px;
+  }
+} 

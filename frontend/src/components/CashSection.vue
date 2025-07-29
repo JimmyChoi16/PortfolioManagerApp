@@ -1,22 +1,29 @@
 <template>
   <div class="cash-section">
+    <!-- Login Warning -->
+    <div v-if="!isLoggedIn" class="login-warning">
+      <el-alert
+        title="⚠️ You are not logged in. All data shown is for demonstration purposes only."
+        type="warning"
+        :closable="false"
+        show-icon
+      />
+    </div>
+
     <!-- Header -->
     <div class="section-header">
       <h1>Cash Management</h1>
       <p>Optimize your cash positions with high-yield accounts and smart liquidity management</p>
-      <div class="login-notice">
-        <p>⚠️ You are not logged in. All data shown is for demonstration purposes only.</p>
-      </div>
     </div>
 
     <!-- Cash Accounts Overview -->
      <!-- TODO: Need to change to mock data, will show the real after login sucessfully -->
-    <div class="cash-accounts">
-      <div class="account-card">
-        <div class="account-icon">🏦</div>
+    <div class="card-grid-4">
+      <div class="gradient-card green">
+        <div class="card-icon">🏦</div>
         <h3>High-Yield Savings</h3>
         <p>Earn competitive interest on your emergency fund</p>
-        <div class="account-metrics">
+        <div class="metrics">
           <div class="metric">
             <span class="label">Balance</span>
             <span class="value">$25,000</span>
@@ -28,11 +35,11 @@
         </div>
       </div>
       
-      <div class="account-card">
-        <div class="account-icon">💳</div>
+      <div class="gradient-card green">
+        <div class="card-icon">💳</div>
         <h3>Checking Account</h3>
         <p>Daily transactions and bill payments</p>
-        <div class="account-metrics">
+        <div class="metrics">
           <div class="metric">
             <span class="label">Balance</span>
             <span class="value">$8,500</span>
@@ -44,11 +51,11 @@
         </div>
       </div>
       
-      <div class="account-card">
-        <div class="account-icon">📈</div>
+      <div class="gradient-card green">
+        <div class="card-icon">📈</div>
         <h3>Money Market</h3>
         <p>Higher yields with check-writing privileges</p>
-        <div class="account-metrics">
+        <div class="metrics">
           <div class="metric">
             <span class="label">Balance</span>
             <span class="value">$15,000</span>
@@ -60,11 +67,11 @@
         </div>
       </div>
       
-      <div class="account-card">
-        <div class="account-icon">🌍</div>
+      <div class="gradient-card green">
+        <div class="card-icon">🌍</div>
         <h3>Foreign Currency</h3>
         <p>Multi-currency accounts for international exposure</p>
-        <div class="account-metrics">
+        <div class="metrics">
           <div class="metric">
             <span class="label">Balance</span>
             <span class="value">€5,000</span>
@@ -200,7 +207,12 @@
 </template>
 
 <script setup>
-// Cash section component logic will be added here
+const props = defineProps({
+  isLoggedIn: {
+    type: Boolean,
+    default: false
+  }
+})
 </script>
 
 <style scoped>
@@ -208,43 +220,6 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
-}
-
-.section-header {
-  text-align: center;
-  margin-bottom: 50px;
-}
-
-.section-header h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin-bottom: 16px;
-}
-
-.section-header p {
-  font-size: 1.2rem;
-  color: #7f8c8d;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.login-notice {
-  margin-top: 20px;
-  padding: 12px 20px;
-  background: #fff3cd;
-  border: 1px solid #ffeaa7;
-  border-radius: 8px;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.login-notice p {
-  margin: 0;
-  color: #856404;
-  font-size: 0.9rem;
-  font-weight: 500;
 }
 
 .cash-accounts {

@@ -4,39 +4,41 @@
     <el-header height="70px" class="app-navbar">
       <div class="logo" @click="goHome" style="cursor: pointer;">PortfolioManager</div>
       <div class="nav-actions">
-        <!-- Show asset dropdown only when logged in -->
-        <template v-if="isLoggedIn">
-          <el-dropdown trigger="click" class="asset-dropdown">
-            <el-button class="asset-btn">
-              <span>Asset Categories</span>
-              <el-icon class="el-icon--right"><ArrowDown /></el-icon>
-            </el-button>
-            <template #dropdown>
-              <el-dropdown-menu class="asset-menu">
-                <el-dropdown-item @click="activePage = 'dashboard'">
-                  📊
-                  <span>Dashboard</span>
-                </el-dropdown-item>
-                <el-dropdown-item @click="activePage = 'stock'">
-                  📈
-                  <span>Stock</span>
-                </el-dropdown-item>
-                <el-dropdown-item @click="activePage = 'fund'">
-                  💰
-                  <span>Fund</span>
-                </el-dropdown-item>
-                <el-dropdown-item @click="activePage = 'bond'">
-                  💳
-                  <span>Bond</span>
-                </el-dropdown-item>
-                <el-dropdown-item @click="activePage = 'cash'">
-                  💵
-                  <span>Cash</span>
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </template>
+        <!-- Asset dropdown - always visible -->
+        <el-dropdown trigger="click" class="asset-dropdown">
+          <el-button class="asset-btn" :title="'Current: ' + currentPageDisplay + ' - Click to change'">
+            <span>{{ currentPageDisplay }}</span>
+            <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu class="asset-menu">
+              <el-dropdown-item @click="setActivePage('dashboard')" v-if="isLoggedIn">
+                📊
+                <span>Dashboard</span>
+              </el-dropdown-item>
+              <el-dropdown-item @click="setActivePage('home')" v-if="!isLoggedIn">
+                🏠
+                <span>Home</span>
+              </el-dropdown-item>
+              <el-dropdown-item @click="setActivePage('stock')">
+                📈
+                <span>Stock</span>
+              </el-dropdown-item>
+              <el-dropdown-item @click="setActivePage('fund')">
+                💰
+                <span>Fund</span>
+              </el-dropdown-item>
+              <el-dropdown-item @click="setActivePage('bond')">
+                💳
+                <span>Bond</span>
+              </el-dropdown-item>
+              <el-dropdown-item @click="setActivePage('cash')">
+                💵
+                <span>Cash</span>
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
         
         <el-button text @click="switchLang('en')" :class="{ active: lang === 'en' }">EN</el-button>
         <el-button text @click="switchLang('zh')" :class="{ active: lang === 'zh' }">中文</el-button>
@@ -61,30 +63,30 @@
     </el-header>
 
     <el-main class="app-main">
-      <!-- Dashboard (logged in) -->
+      <!-- Dashboard (logged in only) -->
       <template v-if="isLoggedIn && activePage === 'dashboard'">
         <Dashboard @logout="handleLogout" />
       </template>
       
-      <!-- Asset Pages (logged in) -->
-      <template v-else-if="isLoggedIn && activePage === 'stock'">
-        <StockSection />
+      <!-- Asset Pages (both logged in and not logged in) -->
+      <template v-else-if="activePage === 'stock'">
+        <StockSection :isLoggedIn="isLoggedIn" />
       </template>
       
-      <template v-else-if="isLoggedIn && activePage === 'fund'">
-        <FundSection />
+      <template v-else-if="activePage === 'fund'">
+        <FundSection :isLoggedIn="isLoggedIn" />
       </template>
       
-      <template v-else-if="isLoggedIn && activePage === 'bond'">
-        <BondSection />
+      <template v-else-if="activePage === 'bond'">
+        <BondSection :isLoggedIn="isLoggedIn" />
       </template>
       
-      <template v-else-if="isLoggedIn && activePage === 'cash'">
-        <CashSection />
+      <template v-else-if="activePage === 'cash'">
+        <CashSection :isLoggedIn="isLoggedIn" />
       </template>
       
       <!-- Home Page (not logged in) -->
-      <template v-else-if="!isLoggedIn && activePage === 'home'">
+      <template v-else-if="activePage === 'home'">
         <!-- Banner Section -->
         <section class="section-banner">
           <div class="section-content">
@@ -167,7 +169,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import StockSection from './components/StockSection.vue'
@@ -186,6 +188,19 @@ const hoveredFeature = ref(null)
 const showModal = ref(false)
 const modalIndex = ref(0)
 const isLoggedIn = ref(false)
+
+// Computed properties
+const currentPageDisplay = computed(() => {
+  const pageMap = {
+    'dashboard': 'Dashboard',
+    'home': 'Home',
+    'stock': 'Stock',
+    'fund': 'Fund',
+    'bond': 'Bond',
+    'cash': 'Cash'
+  }
+  return pageMap[activePage.value] || 'Asset Categories'
+})
 
 // Features data
 const features = ref([
@@ -231,6 +246,7 @@ const goHome = () => {
     activePage.value = 'dashboard'
     localStorage.setItem('activePage', 'dashboard')
   } else {
+    // Allow non-logged in users to access all pages
     activePage.value = 'home'
     localStorage.setItem('activePage', 'home')
   }
@@ -249,11 +265,16 @@ const handleLogout = () => {
   activePage.value = 'home'
   // Clear login state from localStorage
   localStorage.removeItem('isLoggedIn')
-  localStorage.removeItem('activePage')
+  localStorage.setItem('activePage', 'home')
 }
 
 const logout = () => {
   handleLogout()
+}
+
+const setActivePage = (page) => {
+  activePage.value = page
+  localStorage.setItem('activePage', page)
 }
 
 const openFeature = (index) => {
@@ -276,6 +297,7 @@ onMounted(() => {
     activePage.value = savedPage || 'dashboard'
   } else {
     isLoggedIn.value = false
+    // Allow non-logged in users to access all pages, default to home
     activePage.value = savedPage || 'home'
   }
   
@@ -336,6 +358,13 @@ onMounted(() => {
   border-radius: 20px;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  min-width: 120px;
+  position: relative;
+}
+
+.asset-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .asset-btn:hover {

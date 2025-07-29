@@ -1,21 +1,28 @@
 <template>
   <div class="bond-section">
+    <!-- Login Warning -->
+    <div v-if="!isLoggedIn" class="login-warning">
+      <el-alert
+        title="⚠️ You are not logged in. All data shown is for demonstration purposes only."
+        type="warning"
+        :closable="false"
+        show-icon
+      />
+    </div>
+
     <!-- Header -->
     <div class="section-header">
       <h1>Bond Portfolio</h1>
       <p>Manage your fixed income investments with comprehensive bond analysis</p>
-      <div class="login-notice">
-        <p>⚠️ You are not logged in. All data shown is for demonstration purposes only.</p>
-      </div>
     </div>
 
     <!-- Bond Types Overview -->
-    <div class="bond-types">
-      <div class="bond-type-card">
-        <div class="type-icon">🏛️</div>
+    <div class="card-grid-4">
+      <div class="gradient-card green">
+        <div class="card-icon">🏛️</div>
         <h3>Government Bonds</h3>
         <p>U.S. Treasury securities with guaranteed returns</p>
-        <div class="bond-metrics">
+        <div class="metrics">
           <div class="metric">
             <span class="label">Yield</span>
             <span class="value">4.25%</span>
@@ -27,11 +34,11 @@
         </div>
       </div>
       
-      <div class="bond-type-card">
-        <div class="type-icon">🏢</div>
+      <div class="gradient-card green">
+        <div class="card-icon">🏢</div>
         <h3>Corporate Bonds</h3>
         <p>Investment-grade corporate debt securities</p>
-        <div class="bond-metrics">
+        <div class="metrics">
           <div class="metric">
             <span class="label">Yield</span>
             <span class="value">5.8%</span>
@@ -43,11 +50,11 @@
         </div>
       </div>
       
-      <div class="bond-type-card">
-        <div class="type-icon">🏘️</div>
+      <div class="gradient-card green">
+        <div class="card-icon">🏘️</div>
         <h3>Municipal Bonds</h3>
         <p>Tax-advantaged state and local government debt</p>
-        <div class="bond-metrics">
+        <div class="metrics">
           <div class="metric">
             <span class="label">Yield</span>
             <span class="value">3.9%</span>
@@ -59,11 +66,11 @@
         </div>
       </div>
       
-      <div class="bond-type-card">
-        <div class="type-icon">🌍</div>
+      <div class="gradient-card green">
+        <div class="card-icon">🌍</div>
         <h3>International Bonds</h3>
         <p>Global fixed income diversification</p>
-        <div class="bond-metrics">
+        <div class="metrics">
           <div class="metric">
             <span class="label">Yield</span>
             <span class="value">3.2%</span>
@@ -178,7 +185,12 @@
 </template>
 
 <script setup>
-// Bond section component logic will be added here
+const props = defineProps({
+  isLoggedIn: {
+    type: Boolean,
+    default: false
+  }
+})
 </script>
 
 <style scoped>
@@ -188,104 +200,7 @@
   padding: 40px 20px;
 }
 
-.section-header {
-  text-align: center;
-  margin-bottom: 50px;
-}
-
-.section-header h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin-bottom: 16px;
-}
-
-.section-header p {
-  font-size: 1.2rem;
-  color: #7f8c8d;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.login-notice {
-  margin-top: 20px;
-  padding: 12px 20px;
-  background: #fff3cd;
-  border: 1px solid #ffeaa7;
-  border-radius: 8px;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.login-notice p {
-  margin: 0;
-  color: #856404;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.bond-types {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-  margin-bottom: 50px;
-}
-
-.bond-type-card {
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-  color: white;
-  padding: 32px 24px;
-  border-radius: 16px;
-  text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.bond-type-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 32px rgba(17, 153, 142, 0.3);
-}
-
-.type-icon {
-  font-size: 3rem;
-  margin-bottom: 16px;
-}
-
-.bond-type-card h3 {
-  font-size: 1.4rem;
-  font-weight: 600;
-  margin-bottom: 12px;
-}
-
-.bond-type-card p {
-  font-size: 1rem;
-  opacity: 0.9;
-  margin-bottom: 20px;
-  line-height: 1.5;
-}
-
-.bond-metrics {
-  display: flex;
-  justify-content: space-around;
-  gap: 16px;
-}
-
-.metric {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.metric .label {
-  font-size: 0.85rem;
-  opacity: 0.8;
-  margin-bottom: 4px;
-}
-
-.metric .value {
-  font-size: 1.2rem;
-  font-weight: 700;
-}
+/* Component-specific styles only */
 
 .bond-holdings {
   margin-bottom: 50px;

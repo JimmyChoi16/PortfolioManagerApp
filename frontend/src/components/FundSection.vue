@@ -1,40 +1,47 @@
 <template>
   <div class="fund-section">
+    <!-- Login Warning -->
+    <div v-if="!isLoggedIn" class="login-warning">
+      <el-alert
+        title="⚠️ You are not logged in. All data shown is for demonstration purposes only."
+        type="warning"
+        :closable="false"
+        show-icon
+      />
+    </div>
+
     <!-- Header -->
     <div class="section-header">
       <h1>Fund Management</h1>
       <p>Track and manage your investment funds with real-time data and insights</p>
-      <div class="login-notice">
-        <p>⚠️ You are not logged in. All data shown is for demonstration purposes only.</p>
-      </div>
     </div>
 
     <!-- Fund Categories Grid -->
      <!-- TODO: Need to change to mock data, will show the real after login sucessfully -->
-    <div class="fund-categories">
-      <div class="fund-category-card">
-        <div class="category-icon">📊</div>
+    <div class="card-grid-4">
+      <div class="gradient-card">
+        <div class="card-icon">📊</div>
         <h3>Index Funds</h3>
         <p>Broad market exposure with low expense ratios</p>
         <div class="fund-count">12 funds</div>
       </div>
       
-      <div class="fund-category-card">
-        <div class="category-icon">🎯</div>
+      <div class="gradient-card">
+        <div class="card-icon">🎯</div>
         <h3>Active Funds</h3>
         <p>Professional management for potential outperformance</p>
         <div class="fund-count">8 funds</div>
       </div>
       
-      <div class="fund-category-card">
-        <div class="category-icon">🌍</div>
+      <div class="gradient-card">
+        <div class="card-icon">🌍</div>
         <h3>International</h3>
         <p>Global diversification opportunities</p>
         <div class="fund-count">15 funds</div>
       </div>
       
-      <div class="fund-category-card">
-        <div class="category-icon">🏢</div>
+      <div class="gradient-card">
+        <div class="card-icon">🏢</div>
         <h3>Sector Funds</h3>
         <p>Targeted exposure to specific industries</p>
         <div class="fund-count">6 funds</div>
@@ -109,7 +116,12 @@
 </template>
 
 <script setup>
-// Fund section component logic will be added here
+const props = defineProps({
+  isLoggedIn: {
+    type: Boolean,
+    default: false
+  }
+})
 </script>
 
 <style scoped>
@@ -119,81 +131,7 @@
   padding: 40px 20px;
 }
 
-.section-header {
-  text-align: center;
-  margin-bottom: 50px;
-}
-
-.section-header h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin-bottom: 16px;
-}
-
-.section-header p {
-  font-size: 1.2rem;
-  color: #7f8c8d;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.login-notice {
-  margin-top: 20px;
-  padding: 12px 20px;
-  background: #fff3cd;
-  border: 1px solid #ffeaa7;
-  border-radius: 8px;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.login-notice p {
-  margin: 0;
-  color: #856404;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.fund-categories {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-  margin-bottom: 50px;
-}
-
-.fund-category-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 32px 24px;
-  border-radius: 16px;
-  text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.fund-category-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.3);
-}
-
-.category-icon {
-  font-size: 3rem;
-  margin-bottom: 16px;
-}
-
-.fund-category-card h3 {
-  font-size: 1.4rem;
-  font-weight: 600;
-  margin-bottom: 12px;
-}
-
-.fund-category-card p {
-  font-size: 1rem;
-  opacity: 0.9;
-  margin-bottom: 16px;
-  line-height: 1.5;
-}
+/* Component-specific styles only */
 
 .fund-count {
   background: rgba(255, 255, 255, 0.2);

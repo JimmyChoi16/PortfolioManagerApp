@@ -6,6 +6,7 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import router from './router'
 import App from './App.vue'
 import './style.css'
+import './common.css'
 import { createI18n } from 'vue-i18n'
 
 const messages = {
