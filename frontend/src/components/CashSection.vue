@@ -154,28 +154,28 @@
               <td class="positive">4.25%</td>
               <td>$0</td>
               <td>$0</td>
-              <td>✅ Yes</td>
+              <td>Yes</td>
             </tr>
             <tr>
               <td>Money Market</td>
               <td class="positive">4.85%</td>
               <td>$2,500</td>
               <td>$0</td>
-              <td>✅ Yes</td>
+              <td>Yes</td>
             </tr>
             <tr>
               <td>Traditional Savings</td>
               <td>0.01%</td>
               <td>$300</td>
               <td>$5</td>
-              <td>✅ Yes</td>
+              <td>Yes</td>
             </tr>
             <tr>
               <td>Checking Account</td>
               <td>0.05%</td>
               <td>$1,500</td>
               <td>$0</td>
-              <td>✅ Yes</td>
+              <td>Yes</td>
             </tr>
           </tbody>
         </table>
