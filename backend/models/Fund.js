@@ -174,13 +174,15 @@ class Fund {
 
       const currentPrice = parseFloat(currentPriceRow[0].price);
 
-      // 计算YTD收益率（从2024年1月1日开始）
+      // 计算YTD收益率（从当前年份1月1日开始）
+      const currentYear = new Date().getFullYear();
+      const ytdStartDate = `${currentYear}-01-01`;
       const [ytdPriceRow] = await pool.execute(`
         SELECT price FROM fund_prices 
-        WHERE symbol = ? AND record_date >= '2024-01-01'
+        WHERE symbol = ? AND record_date >= ?
         ORDER BY record_date ASC 
         LIMIT 1
-      `, [symbol]);
+      `, [symbol, ytdStartDate]);
 
       let ytd = 0;
       if (ytdPriceRow.length > 0) {
