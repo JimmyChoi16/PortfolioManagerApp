@@ -1,6 +1,8 @@
 const Holding = require('../models/Holding');
 const Fund = require('../models/Fund');
 const { YahooFinanceService } = require('../services/yahooFinanceService');
+const { MockPriceService } = require('../services/mockPriceService');
+const { pool } = require('../config/database');
 const { validationResult } = require('express-validator');
 
 const holdingController = {
@@ -246,6 +248,91 @@ const holdingController = {
     }
   },
 
+  // Update fund prices with real-time data
+  async updateFundPrices(req, res) {
+    try {
+      // 获取所有基金
+      const funds = await Fund.getAll();
+      const symbols = [...new Set(funds.map(f => f.symbol))];
+      
+      console.log(`Updating prices for ${symbols.length} funds:`, symbols);
+      
+      // 获取实时价格 - 使用模拟服务
+      const quotes = await MockPriceService.getMultipleQuotes(symbols);
+      
+      let updatedCount = 0;
+      const updateResults = [];
+      
+              for (const quote of quotes) {
+          if (quote && quote.currentPrice > 0) {
+            try {
+              const affectedRows = await Holding.updateCurrentPrice(quote.symbol, quote.currentPrice);
+              if (affectedRows > 0) {
+                updatedCount++;
+                updateResults.push({
+                  symbol: quote.symbol,
+                  oldPrice: funds.find(f => f.symbol === quote.symbol)?.current_price || 0,
+                  newPrice: quote.currentPrice,
+                  change: quote.change,
+                  changePercent: quote.changePercent
+                });
+                console.log(`Updated ${quote.symbol}: $${quote.currentPrice}`);
+              } else {
+                console.log(`No rows affected for ${quote.symbol}`);
+              }
+            } catch (error) {
+              console.error(`Error updating price for ${quote.symbol}:`, error);
+            }
+          }
+        }
+
+      // 更新投资组合历史记录
+      if (updatedCount > 0) {
+        await holdingController.updatePortfolioHistory();
+      }
+
+      res.json({
+        success: true,
+        message: `Updated prices for ${updatedCount} funds`,
+        data: {
+          updatedCount,
+          updates: updateResults,
+          timestamp: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error('Error updating fund prices:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update fund prices',
+        error: error.message
+      });
+    }
+  },
+
+  // Update portfolio history
+  async updatePortfolioHistory() {
+    try {
+      const holdings = await Holding.getAll();
+      const totalValue = holdings.reduce((sum, h) => sum + (h.current_price * h.quantity), 0);
+      
+      const [result] = await pool.execute(
+        'INSERT INTO portfolio_history (date, total_value, daily_change) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE total_value = ?, daily_change = ?',
+        [
+          new Date().toISOString().split('T')[0],
+          totalValue,
+          0, // 暂时设为0，可以后续计算
+          totalValue,
+          0
+        ]
+      );
+      
+      console.log('Portfolio history updated');
+    } catch (error) {
+      console.error('Error updating portfolio history:', error);
+    }
+  },
+
   // Get asset allocation analysis
   async getAllocationAnalysis(req, res) {
     try {
@@ -415,20 +502,45 @@ const holdingController = {
     try {
       const { symbol, action, quantity, price, notes } = req.body;
       
+      // 验证输入参数
+      if (!symbol || !action || !quantity || !price) {
+        return res.status(400).json({
+          success: false,
+          message: 'Missing required parameters: symbol, action, quantity, price'
+        });
+      }
+      
+      const parsedQuantity = parseFloat(quantity);
+      const parsedPrice = parseFloat(price);
+      
+      if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid quantity'
+        });
+      }
+      
+      if (isNaN(parsedPrice) || parsedPrice <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid price'
+        });
+      }
+      
       if (action === 'buy') {
         // Check if fund already exists
         const existingFund = await Fund.getBySymbol(symbol);
         
         if (existingFund) {
           // Update existing holding
-          const newQuantity = existingFund.quantity + parseFloat(quantity);
+          const newQuantity = existingFund.quantity + parsedQuantity;
           const avgPrice = ((existingFund.quantity * existingFund.purchase_price) + 
-                           (parseFloat(quantity) * parseFloat(price))) / newQuantity;
+                           (parsedQuantity * parsedPrice)) / newQuantity;
           
           await Holding.update(existingFund.id, {
             quantity: newQuantity,
             purchase_price: avgPrice,
-            current_price: parseFloat(price)
+            current_price: parsedPrice
           });
         } else {
           // Create new holding
@@ -436,10 +548,10 @@ const holdingController = {
             symbol: symbol.toUpperCase(),
             name: symbol, // Will be updated with real name later
             type: 'fund',
-            quantity: parseFloat(quantity),
-            purchase_price: parseFloat(price),
+            quantity: parsedQuantity,
+            purchase_price: parsedPrice,
             purchase_date: new Date().toISOString().split('T')[0],
-            current_price: parseFloat(price),
+            current_price: parsedPrice,
             sector: 'Unknown',
             notes: notes || ''
           });
@@ -454,14 +566,14 @@ const holdingController = {
           });
         }
         
-        if (existingFund.quantity < parseFloat(quantity)) {
+        if (existingFund.quantity < parsedQuantity) {
           return res.status(400).json({
             success: false,
             message: 'Insufficient quantity to sell'
           });
         }
         
-        const newQuantity = existingFund.quantity - parseFloat(quantity);
+        const newQuantity = existingFund.quantity - parsedQuantity;
         
         if (newQuantity === 0) {
           // Delete the holding if quantity becomes 0
@@ -470,9 +582,14 @@ const holdingController = {
           // Update the holding
           await Holding.update(existingFund.id, {
             quantity: newQuantity,
-            current_price: parseFloat(price)
+            current_price: parsedPrice
           });
         }
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid action. Must be "buy" or "sell"'
+        });
       }
       
       res.json({

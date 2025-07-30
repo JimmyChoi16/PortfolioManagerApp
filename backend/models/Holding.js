@@ -28,19 +28,58 @@ class Holding {
 
   static async create(holding) {
     const { symbol, name, type, quantity, purchase_price, purchase_date, current_price, sector, notes } = holding;
+    
+    // 确保所有必需字段都有值，避免 undefined
+    const insertData = {
+      symbol: symbol || '',
+      name: name || '',
+      type: type || 'fund',
+      quantity: quantity || 0,
+      purchase_price: purchase_price || 0,
+      purchase_date: purchase_date || new Date().toISOString().split('T')[0],
+      current_price: current_price || purchase_price || 0,
+      sector: sector || 'Unknown',
+      notes: notes || ''
+    };
+    
     const [result] = await pool.execute(
       'INSERT INTO holdings (symbol, name, type, quantity, purchase_price, purchase_date, current_price, sector, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [symbol, name, type, quantity, purchase_price, purchase_date, current_price || purchase_price, sector, notes]
+      [
+        insertData.symbol,
+        insertData.name,
+        insertData.type,
+        insertData.quantity,
+        insertData.purchase_price,
+        insertData.purchase_date,
+        insertData.current_price,
+        insertData.sector,
+        insertData.notes
+      ]
     );
     return result.insertId;
   }
 
   static async update(id, holding) {
-    const { symbol, name, type, quantity, purchase_price, purchase_date, current_price, sector, notes } = holding;
-    const [result] = await pool.execute(
-      'UPDATE holdings SET symbol = ?, name = ?, type = ?, quantity = ?, purchase_price = ?, purchase_date = ?, current_price = ?, sector = ?, notes = ? WHERE id = ?',
-      [symbol, name, type, quantity, purchase_price, purchase_date, current_price, sector, notes, id]
-    );
+    // 过滤掉 undefined 值，避免数据库错误
+    const updateData = {};
+    Object.keys(holding).forEach(key => {
+      if (holding[key] !== undefined) {
+        updateData[key] = holding[key];
+      }
+    });
+    
+    // 构建动态 SQL 查询
+    const fields = Object.keys(updateData);
+    const values = Object.values(updateData);
+    
+    if (fields.length === 0) {
+      return false; // 没有有效字段更新
+    }
+    
+    const setClause = fields.map(field => `${field} = ?`).join(', ');
+    const sql = `UPDATE holdings SET ${setClause} WHERE id = ?`;
+    
+    const [result] = await pool.execute(sql, [...values, id]);
     return result.affectedRows > 0;
   }
 

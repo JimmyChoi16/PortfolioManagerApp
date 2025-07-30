@@ -15,6 +15,9 @@ router.get('/historical', holdingController.getHistoricalData);
 // POST /api/holdings/update-prices - Update current prices for all holdings
 router.post('/update-prices', holdingController.updateCurrentPrices);
 
+// POST /api/holdings/update-fund-prices - Update fund prices with real-time data
+router.post('/update-fund-prices', holdingController.updateFundPrices);
+
 // Analysis endpoints
 // GET /api/holdings/analysis/allocation - Get asset allocation analysis
 router.get('/analysis/allocation', holdingController.getAllocationAnalysis);

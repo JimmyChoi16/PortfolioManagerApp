@@ -37,6 +37,11 @@ const portfolioAPI = {
     return http.post('/holdings/update-prices')
   },
 
+  // Update fund prices with real-time data
+  updateFundPrices() {
+    return http.post('/holdings/update-fund-prices')
+  },
+
   // Analysis endpoints
   getAllocationAnalysis() {
     return http.get('/holdings/analysis/allocation')
