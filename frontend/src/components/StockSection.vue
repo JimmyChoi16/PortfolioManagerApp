@@ -154,15 +154,15 @@
         <table class="market-table">
           <thead>
             <tr>
-              <th>{{ t('stock.symbol') }}</th>
-              <th>{{ t('stock.name') }}</th>
-              <th>{{ t('stock.quantity') }}</th>
-              <th>{{ t('stock.avgPurchasePrice') }}</th>
-              <th>{{ t('stock.currentPrice') }}</th>
-              <th>{{ t('stock.currentValue') }}</th>
-              <th>{{ t('stock.gainLoss') }}</th>
-              <th>{{ t('stock.gainLossPercent') }}</th>
-              <th v-if="isLoggedIn">{{ t('stock.actions') }}</th>
+              <th>{{ t('stock.tableHeaders.symbol') }}</th>
+              <th>{{ t('stock.tableHeaders.name') }}</th>
+              <th>{{ t('stock.tableHeaders.quantity') }}</th>
+              <th>{{ t('stock.tableHeaders.avgPurchasePrice') }}</th>
+              <th>{{ t('stock.tableHeaders.currentPrice') }}</th>
+              <th>{{ t('stock.tableHeaders.currentValue') }}</th>
+              <th>{{ t('stock.tableHeaders.gainLoss') }}</th>
+              <th>{{ t('stock.tableHeaders.gainLossPercent') }}</th>
+              <th v-if="isLoggedIn">{{ t('stock.tableHeaders.actions') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -510,7 +510,7 @@ const marketType = ref('us') // 'us' or 'cn'
 
 // Lifecycle
 let holdingsPriceTimer = null
-const REFRESH_INTERVAL_MS = 10000 // Global refresh interval in milliseconds
+const REFRESH_INTERVAL_MS = 50000 // Global refresh interval in milliseconds
 
 const historicalData = ref([])
 // Real-time performance metrics
