@@ -7,6 +7,7 @@ require('dotenv').config();
 const { testConnection } = require('./config/database');
 const holdingsRoutes = require('./routes/holdings');
 const marketRoutes = require('./routes/market');
+const bondsRoutes = require('./routes/bonds');
 const portfolioRoutes = require('./routes/portfolio');
 
 const app = express();
@@ -52,6 +53,7 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/api/holdings', holdingsRoutes);
 app.use('/api/market', marketRoutes);
+app.use('/api/bonds', bondsRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 
 // Root endpoint

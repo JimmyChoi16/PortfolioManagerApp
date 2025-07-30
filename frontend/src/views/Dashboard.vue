@@ -1,168 +1,168 @@
 <template>
   <div class="dashboard">
     <div class="content-area">
-      <!-- Welcome Header -->
-      <div class="welcome-header">
-        <h1>Welcome Back!</h1>
-        <p>Here's what's happening with your portfolio today</p>
-      </div>
+    <!-- Welcome Header -->
+    <div class="welcome-header">
+      <h1>Welcome Back!</h1>
+      <p>Here's what's happening with your portfolio today</p>
+    </div>
 
-      <!-- Portfolio Metrics Cards -->
-      <div class="dashboard-grid">
-        <!-- Portfolio Value -->
-        <div class="metric-card">
-          <div class="metric-content">
-            <div class="metric-icon">
-              <el-icon size="24"><Money /></el-icon>
-            </div>
-            <div class="metric-info">
-              <div class="metric-label">Portfolio Value</div>
-              <div class="metric-value">${{ formatCurrency(totalValue) }}</div>
-              <div class="metric-subtitle">Live updates</div>
-            </div>
+    <!-- Portfolio Metrics Cards -->
+    <div class="dashboard-grid">
+      <!-- Portfolio Value -->
+      <div class="metric-card">
+        <div class="metric-content">
+          <div class="metric-icon">
+            <el-icon size="24"><Money /></el-icon>
           </div>
-        </div>
-
-        <!-- Today's Change -->
-        <div class="metric-card success">
-          <div class="metric-content">
-            <div class="metric-icon">
-              <el-icon size="24"><TrendCharts /></el-icon>
-            </div>
-            <div class="metric-info">
-              <div class="metric-label">Today's Change</div>
-              <div class="metric-value">+${{ formatCurrency(Math.abs(totalGain)) }}</div>
-              <div class="metric-change">{{ gainPercent >= 0 ? '+' : '' }}{{ gainPercent.toFixed(2) }}%</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Active Holdings -->
-        <div class="metric-card warning">
-          <div class="metric-content">
-            <div class="metric-icon">
-              <el-icon size="24"><Grid /></el-icon>
-            </div>
-            <div class="metric-info">
-              <div class="metric-label">Active Holdings</div>
-              <div class="metric-value">{{ totalHoldings }}</div>
-              <div class="metric-subtitle">Across {{ totalHoldings }} sectors</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Best Performer -->
-        <div class="metric-card" v-if="topPerformer">
-          <div class="metric-content">
-            <div class="metric-icon">
-              <el-icon size="24"><Star /></el-icon>
-            </div>
-            <div class="metric-info">
-              <div class="metric-label">Best Performer</div>
-              <div class="metric-value">{{ topPerformer.symbol }}</div>
-              <div class="metric-change">+{{ topPerformer.gain_percent }}%</div>
-            </div>
+          <div class="metric-info">
+            <div class="metric-label">Portfolio Value</div>
+            <div class="metric-value">${{ formatCurrency(totalValue) }}</div>
+            <div class="metric-subtitle">Live updates</div>
           </div>
         </div>
       </div>
 
-      <!-- Charts and Performance -->
-      <div class="charts-section">
-        <!-- 5-Day Performance Chart -->
-        <el-card class="custom-card chart-card">
-          <template #header>
-            <div class="card-header">
-              <h3>5-Day Performance</h3>
-              <p>Your portfolio value over the last week</p>
-            </div>
-          </template>
-          <div class="chart-container">
-            <v-chart :option="chartOption" />
+      <!-- Today's Change -->
+      <div class="metric-card success">
+        <div class="metric-content">
+          <div class="metric-icon">
+            <el-icon size="24"><TrendCharts /></el-icon>
           </div>
-        </el-card>
-
-        <!-- Top Performers -->
-        <el-card class="custom-card performers-card">
-          <template #header>
-            <div class="card-header">
-              <h3>Top Performers</h3>
-              <p>Your best performing stocks today</p>
-            </div>
-          </template>
-          <div class="performers-list">
-            <div 
-              v-for="(performer, index) in topPerformers" 
-              :key="performer.symbol"
-              class="performer-item"
-            >
-              <div class="performer-rank">{{ index + 1 }}</div>
-              <div class="performer-info">
-                <div class="performer-symbol">{{ performer.symbol }}</div>
-                <div class="performer-name">{{ performer.name }}</div>
-              </div>
-              <div class="performer-metrics">
-                <div class="performer-price">${{ performer.current_price }}</div>
-                <div class="performer-change" :class="{ 
-                  'positive': performer.gain_percent >= 0,
-                  'negative': performer.gain_percent < 0
-                }">
-                  {{ performer.gain_percent >= 0 ? '+' : '' }}{{ performer.gain_percent }}%
-                </div>
-              </div>
-            </div>
+          <div class="metric-info">
+            <div class="metric-label">Today's Change</div>
+            <div class="metric-value">+${{ formatCurrency(Math.abs(totalGain)) }}</div>
+            <div class="metric-change">{{ gainPercent >= 0 ? '+' : '' }}{{ gainPercent.toFixed(2) }}%</div>
           </div>
-        </el-card>
+        </div>
       </div>
 
-      <!-- AI Investment Suggestions & Market News -->
-      <div class="bottom-section">
-        <el-card class="custom-card suggestions-card">
-          <template #header>
-            <div class="card-header">
-              <h3>AI Investment Suggestions</h3>
-              <p>Personalized recommendations based on your portfolio</p>
-            </div>
-          </template>
-          <div class="suggestions-content">
-            <div class="suggestion-item">
-              <el-icon color="#409eff"><InfoFilled /></el-icon>
-              <div>
-                <h4>Diversify into Tech ETFs</h4>
-                <p>Consider adding QQQ to balance your individual stock holdings</p>
-              </div>
-            </div>
-            <div class="suggestion-item">
-              <el-icon color="#67c23a"><TrendCharts /></el-icon>
-              <div>
-                <h4>Rebalance Portfolio</h4>
-                <p>Your tech allocation is 65%. Consider reducing to 55%</p>
-              </div>
-            </div>
+      <!-- Active Holdings -->
+      <div class="metric-card warning">
+        <div class="metric-content">
+          <div class="metric-icon">
+            <el-icon size="24"><Grid /></el-icon>
           </div>
-        </el-card>
+          <div class="metric-info">
+            <div class="metric-label">Active Holdings</div>
+            <div class="metric-value">{{ totalHoldings }}</div>
+            <div class="metric-subtitle">Across {{ totalHoldings }} sectors</div>
+          </div>
+        </div>
+      </div>
 
-        <el-card class="custom-card news-card">
-          <template #header>
-            <div class="card-header">
-              <h3>Market News & Activity</h3>
-              <p>Latest market updates and your recent transactions</p>
+      <!-- Best Performer -->
+      <div class="metric-card" v-if="topPerformer">
+        <div class="metric-content">
+          <div class="metric-icon">
+            <el-icon size="24"><Star /></el-icon>
+          </div>
+          <div class="metric-info">
+            <div class="metric-label">Best Performer</div>
+            <div class="metric-value">{{ topPerformer.symbol }}</div>
+            <div class="metric-change">+{{ topPerformer.gain_percent }}%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts and Performance -->
+    <div class="charts-section">
+      <!-- 5-Day Performance Chart -->
+      <el-card class="custom-card chart-card">
+        <template #header>
+          <div class="card-header">
+            <h3>5-Day Performance</h3>
+            <p>Your portfolio value over the last week</p>
+          </div>
+        </template>
+        <div class="chart-container">
+          <v-chart :option="chartOption" />
+        </div>
+      </el-card>
+
+      <!-- Top Performers -->
+      <el-card class="custom-card performers-card">
+        <template #header>
+          <div class="card-header">
+            <h3>Top Performers</h3>
+            <p>Your best performing stocks today</p>
+          </div>
+        </template>
+        <div class="performers-list">
+          <div 
+            v-for="(performer, index) in topPerformers" 
+            :key="performer.symbol"
+            class="performer-item"
+          >
+            <div class="performer-rank">{{ index + 1 }}</div>
+            <div class="performer-info">
+              <div class="performer-symbol">{{ performer.symbol }}</div>
+              <div class="performer-name">{{ performer.name }}</div>
             </div>
-          </template>
-          <div class="news-content">
-            <div class="news-item">
-              <div class="news-time">2 hours ago</div>
-              <div class="news-text">NVDA reports strong Q4 earnings, up 12% in after-hours trading</div>
-            </div>
-            <div class="news-item">
-              <div class="news-time">4 hours ago</div>
-              <div class="news-text">You added 50 shares of AAPL to your portfolio</div>
-            </div>
-            <div class="news-item">
-              <div class="news-time">1 day ago</div>
-              <div class="news-text">Federal Reserve hints at potential rate cuts in 2024</div>
+            <div class="performer-metrics">
+              <div class="performer-price">${{ performer.current_price }}</div>
+              <div class="performer-change" :class="{ 
+                'positive': performer.gain_percent >= 0,
+                'negative': performer.gain_percent < 0
+              }">
+                {{ performer.gain_percent >= 0 ? '+' : '' }}{{ performer.gain_percent }}%
+              </div>
             </div>
           </div>
-        </el-card>
+        </div>
+      </el-card>
+    </div>
+
+    <!-- AI Investment Suggestions & Market News -->
+    <div class="bottom-section">
+      <el-card class="custom-card suggestions-card">
+        <template #header>
+          <div class="card-header">
+            <h3>AI Investment Suggestions</h3>
+            <p>Personalized recommendations based on your portfolio</p>
+          </div>
+        </template>
+        <div class="suggestions-content">
+          <div class="suggestion-item">
+            <el-icon color="#409eff"><InfoFilled /></el-icon>
+            <div>
+              <h4>Diversify into Tech ETFs</h4>
+              <p>Consider adding QQQ to balance your individual stock holdings</p>
+            </div>
+          </div>
+          <div class="suggestion-item">
+            <el-icon color="#67c23a"><TrendCharts /></el-icon>
+            <div>
+              <h4>Rebalance Portfolio</h4>
+              <p>Your tech allocation is 65%. Consider reducing to 55%</p>
+            </div>
+          </div>
+        </div>
+      </el-card>
+
+      <el-card class="custom-card news-card">
+        <template #header>
+          <div class="card-header">
+            <h3>Market News & Activity</h3>
+            <p>Latest market updates and your recent transactions</p>
+          </div>
+        </template>
+        <div class="news-content">
+          <div class="news-item">
+            <div class="news-time">2 hours ago</div>
+            <div class="news-text">NVDA reports strong Q4 earnings, up 12% in after-hours trading</div>
+          </div>
+          <div class="news-item">
+            <div class="news-time">4 hours ago</div>
+            <div class="news-text">You added 50 shares of AAPL to your portfolio</div>
+          </div>
+          <div class="news-item">
+            <div class="news-time">1 day ago</div>
+            <div class="news-text">Federal Reserve hints at potential rate cuts in 2024</div>
+          </div>
+        </div>
+      </el-card>
       </div>
     </div>
   </div>
