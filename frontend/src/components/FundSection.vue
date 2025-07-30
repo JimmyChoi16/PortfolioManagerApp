@@ -6,20 +6,13 @@
       <span>Loading fund data...</span>
     </div>
 
-    <!-- Login Warning -->
-    <div v-if="!isLoggedIn" class="login-warning">
-      <el-alert
-        title="⚠️ You are not logged in. All data shown is for demonstration purposes only."
-        type="warning"
-        :closable="false"
-        show-icon
-      />
-    </div>
-
     <!-- Header -->
     <div class="section-header">
       <h1>📊 Fund Management</h1>
       <p>Track and manage your investment funds with real-time data and insights</p>
+      <div class="login-notice">
+        <p>⚠️ You are not logged in. All data shown is for demonstration purposes only.</p>
+      </div>
     </div>
 
     <!-- Fund Types Overview -->
@@ -59,6 +52,9 @@
       <div class="holdings-header">
         <h2>Current Fund Holdings</h2>
         <div class="holdings-actions">
+          <el-button type="primary" @click="showAddFundModal">
+            Add Fund Holdings
+          </el-button>
           <el-button @click="exportData">
             <el-icon><Download /></el-icon>
             Export Data
@@ -97,12 +93,6 @@
           <el-table-column prop="quantity" label="Quantity" width="120" align="right">
             <template #default="scope">
                               <span>{{ parseFloat(scope.row.quantity || 0).toFixed(2) }}</span>
-            </template>
-          </el-table-column>
-          
-          <el-table-column prop="purchase_price" label="Avg Purchase Price" width="150" align="right">
-            <template #default="scope">
-              <span>${{ parseFloat(scope.row.purchase_price || 0).toFixed(2) }}</span>
             </template>
           </el-table-column>
           
@@ -152,8 +142,8 @@
           
           <el-table-column label="3Y" width="80" align="right">
             <template #default="scope">
-              <span :class="parseFloat(scope.row.return_3y || 0) >= 0 ? 'positive' : 'negative'">
-                {{ parseFloat(scope.row.return_3y || 0) >= 0 ? '+' : '' }}{{ parseFloat(scope.row.return_3y || 0).toFixed(2) }}%
+              <span :class="parseFloat(scope.row.volatility_3y || 0) >= 0 ? 'positive' : 'negative'">
+                {{ parseFloat(scope.row.volatility_3y || 0) >= 0 ? '+' : '' }}{{ parseFloat(scope.row.volatility_3y || 0).toFixed(2) }}%
               </span>
             </template>
           </el-table-column>
@@ -412,11 +402,107 @@
         </span>
       </template>
     </el-dialog>
+
+    <!-- Add Fund Holdings Modal -->
+    <el-dialog 
+      v-model="addFundModalVisible" 
+      title="Add Fund Holdings" 
+      width="600px"
+    >
+      <div class="add-fund-form">
+        <el-form :model="addFundForm" :rules="addFundRules" ref="addFundFormRef" label-width="120px">
+          <el-form-item label="Fund Symbol" prop="symbol">
+            <el-input 
+              v-model="addFundForm.symbol" 
+              placeholder="Enter fund symbol (e.g., VTI, SPY)"
+              maxlength="10"
+            />
+          </el-form-item>
+          
+          <el-form-item label="Fund Name" prop="name">
+            <el-input 
+              v-model="addFundForm.name" 
+              placeholder="Enter fund name"
+            />
+          </el-form-item>
+          
+          <el-form-item label="Sector" prop="sector">
+            <el-select v-model="addFundForm.sector" placeholder="Select sector" style="width: 100%">
+              <el-option label="Index Funds" value="Index Funds" />
+              <el-option label="Growth Funds" value="Growth Funds" />
+              <el-option label="International Funds" value="International Funds" />
+              <el-option label="Bond Funds" value="Bond Funds" />
+              <el-option label="Sector Funds" value="Sector Funds" />
+              <el-option label="Money Market" value="Money Market" />
+              <el-option label="Real Estate" value="Real Estate" />
+              <el-option label="Commodity" value="Commodity" />
+              <el-option label="Emerging Markets" value="Emerging Markets" />
+              <el-option label="Healthcare" value="Healthcare" />
+              <el-option label="Technology" value="Technology" />
+              <el-option label="Energy" value="Energy" />
+              <el-option label="Financial" value="Financial" />
+              <el-option label="Consumer" value="Consumer" />
+            </el-select>
+          </el-form-item>
+          
+          <el-form-item label="Quantity" prop="quantity">
+            <el-input-number 
+              v-model="addFundForm.quantity" 
+              :min="0.01" 
+              :precision="2"
+              :step="0.01"
+              style="width: 100%"
+              placeholder="Enter quantity"
+            />
+          </el-form-item>
+          
+          <el-form-item label="Purchase Price" prop="purchase_price">
+            <el-input-number 
+              v-model="addFundForm.purchase_price" 
+              :min="0.01" 
+              :precision="2"
+              :step="0.01"
+              style="width: 100%"
+              placeholder="Enter purchase price per share"
+            />
+          </el-form-item>
+          
+          <el-form-item label="Purchase Date" prop="purchase_date">
+            <el-date-picker
+              v-model="addFundForm.purchase_date"
+              type="date"
+              placeholder="Select purchase date"
+              style="width: 100%"
+              format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD"
+            />
+          </el-form-item>
+          
+          <el-form-item label="Notes">
+            <el-input 
+              v-model="addFundForm.notes" 
+              type="textarea" 
+              :rows="3"
+              placeholder="Additional notes (optional)"
+            />
+          </el-form-item>
+        </el-form>
+      </div>
+      
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="addFundModalVisible = false">Cancel</el-button>
+          <el-button type="primary" @click="addFundHoldings" :loading="addingFund">
+            Add Fund Holdings
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Loading, Download, View, Plus, Minus } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
@@ -436,6 +522,44 @@ const tradeForm = ref({
   price: 0,
   notes: ''
 })
+
+// Add Fund Holdings Modal
+const addFundModalVisible = ref(false)
+const addFundFormRef = ref(null)
+const addingFund = ref(false)
+const addFundForm = ref({
+  symbol: '',
+  name: '',
+  sector: '',
+  quantity: 0,
+  purchase_price: 0,
+  purchase_date: '',
+  notes: ''
+})
+
+const addFundRules = {
+  symbol: [
+    { required: true, message: 'Please enter fund symbol', trigger: 'blur' },
+    { min: 1, max: 10, message: 'Symbol must be between 1 and 10 characters', trigger: 'blur' }
+  ],
+  name: [
+    { required: true, message: 'Please enter fund name', trigger: 'blur' }
+  ],
+  sector: [
+    { required: true, message: 'Please select sector', trigger: 'change' }
+  ],
+  quantity: [
+    { required: true, message: 'Please enter quantity', trigger: 'blur' },
+    { type: 'number', min: 0.01, message: 'Quantity must be greater than 0', trigger: 'blur' }
+  ],
+  purchase_price: [
+    { required: true, message: 'Please enter purchase price', trigger: 'blur' },
+    { type: 'number', min: 0.01, message: 'Purchase price must be greater than 0', trigger: 'blur' }
+  ],
+  purchase_date: [
+    { required: true, message: 'Please select purchase date', trigger: 'change' }
+  ]
+}
 
 // 分页相关数据
 const currentPage = ref(1)
@@ -546,18 +670,37 @@ const showTradeModal = (fund, type) => {
 
 const executeTrade = async () => {
   try {
-    const response = await portfolioAPI.executeTrade({
+    // 添加调试信息
+    console.log('Trade form data:', tradeForm.value)
+    console.log('Quantity raw:', tradeForm.value.quantity, 'Type:', typeof tradeForm.value.quantity)
+    console.log('Price raw:', tradeForm.value.price, 'Type:', typeof tradeForm.value.price)
+    
+    const tradeData = {
       symbol: selectedFund.value.symbol,
-      type: tradeType.value,
-      quantity: tradeForm.value.quantity,
-      price: tradeForm.value.price,
+      action: tradeType.value,
+      quantity: Number(tradeForm.value.quantity),
+      price: Number(tradeForm.value.price),
       notes: tradeForm.value.notes
-    })
+    }
+    
+    console.log('Sending trade data:', tradeData)
+    console.log('Quantity converted:', tradeData.quantity, 'Type:', typeof tradeData.quantity)
+    console.log('Price converted:', tradeData.price, 'Type:', typeof tradeData.price)
+    
+    const response = await portfolioAPI.executeTrade(tradeData)
     
     if (response.data.success) {
       ElMessage.success('Trade executed successfully')
       tradeModalVisible.value = false
       await loadFundData()
+      
+      // 更新弹窗中显示的基金数据
+      if (selectedFund.value) {
+        const updatedFund = holdingsData.value.find(fund => fund.symbol === selectedFund.value.symbol)
+        if (updatedFund) {
+          selectedFund.value = updatedFund
+        }
+      }
     }
   } catch (error) {
     console.error('Error executing trade:', error)
@@ -629,6 +772,13 @@ const initPieChart = () => {
   
   const chart = echarts.init(pieChart.value)
   
+  // 获取容器宽度以确定响应式设置
+  const containerWidth = pieChart.value.offsetWidth
+  const isMobile = containerWidth < 768
+  const isTablet = containerWidth >= 768 && containerWidth < 1200
+  
+  console.log('Container width:', containerWidth, 'isMobile:', isMobile, 'isTablet:', isTablet)
+  
   // 定义更美观的颜色方案
   const colors = [
     '#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de',
@@ -637,16 +787,6 @@ const initPieChart = () => {
   ]
   
   const option = {
-    title: {
-      text: 'Fund Allocation',
-      left: 'center',
-      top: 20,
-      textStyle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#2c3e50'
-      }
-    },
     tooltip: {
       trigger: 'item',
       formatter: function(params) {
@@ -662,14 +802,14 @@ const initPieChart = () => {
       }
     },
     legend: {
-      orient: 'vertical',
-      left: '5%',
-      top: 'middle',
-      itemGap: 12,
-      itemWidth: 14,
-      itemHeight: 14,
+      orient: isMobile ? 'horizontal' : 'vertical',
+      left: isMobile ? 'center' : '5%',
+      top: isMobile ? 'bottom' : 'middle',
+      itemGap: isMobile ? 8 : 12,
+      itemWidth: isMobile ? 12 : 14,
+      itemHeight: isMobile ? 12 : 14,
       textStyle: {
-        fontSize: 12,
+        fontSize: isMobile ? 10 : 12,
         color: '#2c3e50'
       },
       formatter: function(name) {
@@ -684,8 +824,8 @@ const initPieChart = () => {
       {
         name: 'Fund Allocation',
         type: 'pie',
-        radius: ['40%', '70%'],
-        center: ['60%', '55%'],
+        radius: isMobile ? ['30%', '60%'] : ['40%', '70%'],
+        center: isMobile ? ['50%', '45%'] : ['65%', '50%'],
         avoidLabelOverlap: true,
         itemStyle: {
           borderRadius: 8,
@@ -699,7 +839,7 @@ const initPieChart = () => {
         emphasis: {
           label: {
             show: true,
-            fontSize: 16,
+            fontSize: isMobile ? 14 : 16,
             fontWeight: 'bold',
             color: '#2c3e50'
           },
@@ -723,6 +863,18 @@ const initPieChart = () => {
     ]
   }
   chart.setOption(option)
+  
+  // 添加窗口大小变化监听器
+  const handleResize = () => {
+    chart.resize()
+  }
+  window.addEventListener('resize', handleResize)
+  
+  // 清理监听器
+  onUnmounted(() => {
+    window.removeEventListener('resize', handleResize)
+    chart.dispose()
+  })
 }
 
 const initPerformanceChart = () => {
@@ -735,16 +887,23 @@ const initPerformanceChart = () => {
   const performanceData = []
   const today = new Date()
   
-  // 生成过去三年的日期，每月一个数据点
-  for (let i = 36; i >= 0; i--) {
+  // 生成过去三年的日期，按日期分点（每7天一个数据点）
+  const totalDays = 3 * 365 // 三年
+  const intervalDays = 7 // 每7天一个数据点
+  
+  for (let i = 0; i <= totalDays; i += intervalDays) {
     const date = new Date(today)
-    date.setMonth(date.getMonth() - i)
-    dates.push(date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' }))
+    date.setDate(date.getDate() - (totalDays - i))
+    dates.push(date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: '2-digit', 
+      day: '2-digit' 
+    }))
     
     // 模拟性能数据（实际应该从API获取）
     const baseValue = 100
-    const growth = Math.random() * 0.02 - 0.01 // -1% to +1% monthly variation
-    const cumulativeGrowth = Math.pow(1 + growth, 36 - i)
+    const growth = Math.random() * 0.005 - 0.0025 // -0.25% to +0.25% daily variation
+    const cumulativeGrowth = Math.pow(1 + growth, i / intervalDays)
     performanceData.push((baseValue * cumulativeGrowth - baseValue).toFixed(2))
   }
   
@@ -758,14 +917,38 @@ const initPerformanceChart = () => {
                 Performance: ${data.value}%`
       }
     },
-    xAxis: {
-      type: 'category',
-      data: dates,
-      axisLabel: {
-        rotate: 45,
-        fontSize: 10
-      }
-    },
+          xAxis: {
+        type: 'category',
+        data: dates,
+        axisLabel: {
+          rotate: 0, // 字体横放
+          fontSize: 10,
+          interval: function(index, value) {
+            // 从最后一天往前算半年，每半年一个刻度
+            const totalPoints = dates.length
+            const halfYearInterval = Math.floor(totalPoints / 6) // 每半年一个刻度（6个刻度点）
+            
+            // 从最后一个点开始，每隔 halfYearInterval 个点显示一个刻度
+            const lastIndex = totalPoints - 1
+            const targetIndices = []
+            
+            for (let i = 0; i < 6; i++) {
+              targetIndices.push(lastIndex - (i * halfYearInterval))
+            }
+            
+            return targetIndices.includes(index)
+          }
+        },
+        axisTick: {
+          show: true,
+          alignWithLabel: true,
+          length: 8, // 突出的刻度线长度
+          lineStyle: {
+            color: '#666',
+            width: 2
+          }
+        }
+      },
     yAxis: {
       type: 'value',
       axisLabel: {
@@ -829,6 +1012,62 @@ const loadFundData = async () => {
     console.error('Error loading fund data:', error)
     ElMessage.error('Failed to load fund data')
   }
+}
+
+const addFundHoldings = async () => {
+  if (!addFundFormRef.value) return
+  await addFundFormRef.value.validate(async (valid) => {
+    if (valid) {
+      addingFund.value = true
+      try {
+        const response = await portfolioAPI.addFundHoldings({
+          symbol: addFundForm.value.symbol,
+          name: addFundForm.value.name,
+          type: 'fund',
+          sector: addFundForm.value.sector,
+          quantity: addFundForm.value.quantity,
+          purchase_price: addFundForm.value.purchase_price,
+          purchase_date: addFundForm.value.purchase_date,
+          notes: addFundForm.value.notes
+        })
+
+        if (response.data.success) {
+          ElMessage.success('Fund holdings added successfully')
+          addFundModalVisible.value = false
+          await loadFundData()
+          
+          // 如果当前有基金详情弹窗打开，更新其数据
+          if (selectedFund.value && fundDetailVisible.value) {
+            const updatedFund = holdingsData.value.find(fund => fund.symbol === selectedFund.value.symbol)
+            if (updatedFund) {
+              selectedFund.value = updatedFund
+            }
+          }
+        } else {
+          ElMessage.error(response.data.message || 'Failed to add fund holdings')
+        }
+      } catch (error) {
+        console.error('Error adding fund holdings:', error)
+        ElMessage.error('Failed to add fund holdings')
+      } finally {
+        addingFund.value = false
+      }
+    }
+  })
+}
+
+const showAddFundModal = () => {
+  addFundModalVisible.value = true
+  addFundForm.value = {
+    symbol: '',
+    name: '',
+    sector: '',
+    quantity: 0,
+    purchase_price: 0,
+    purchase_date: '',
+    notes: ''
+  }
+  addFundFormRef.value?.resetFields()
 }
 
 // 生命周期
@@ -1055,12 +1294,48 @@ onMounted(async () => {
   overflow: hidden;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border: 1px solid #e1e8ed;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* 自定义滚动条样式 */
+.holdings-table::-webkit-scrollbar {
+  height: 8px;
+}
+
+.holdings-table::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.holdings-table::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.holdings-table::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
 /* Table Styles */
 :deep(.el-table) {
   border-radius: 8px;
   overflow: hidden;
+  min-width: 1200px;
+}
+
+:deep(.el-table .cell) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:deep(.el-table th .cell) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+  padding: 8px 4px;
 }
 
 :deep(.el-table th) {
@@ -1146,21 +1421,24 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 30px;
-  align-items: center;
+  align-items: stretch;
+  min-height: 500px;
 }
 
 .allocation-chart {
   background: white;
   border-radius: 16px;
   padding: 30px;
-  min-height: 400px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
 }
 
 .chart-container {
   width: 100%;
-  height: 400px;
+  flex: 1;
+  min-height: 400px;
 }
 
 .allocation-summary {
@@ -1169,11 +1447,11 @@ onMounted(async () => {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   padding: 30px;
   min-width: 320px;
-  min-height: 400px;
+  height: 500px;
   border: 1px solid #f0f0f0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  overflow-y: auto;
 }
 
 .allocation-summary h3 {
@@ -1182,6 +1460,25 @@ onMounted(async () => {
   font-size: 1.3rem;
   font-weight: 600;
   text-align: center;
+}
+
+/* Custom scrollbar for allocation summary */
+.allocation-summary::-webkit-scrollbar {
+  width: 6px;
+}
+
+.allocation-summary::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.allocation-summary::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.allocation-summary::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
 .summary-stats {
@@ -1481,6 +1778,27 @@ onMounted(async () => {
   color: #409eff;
 }
 
+/* Add Fund Holdings Modal */
+.add-fund-form {
+  padding: 20px 0;
+}
+
+.add-fund-form .el-form-item {
+  margin-bottom: 20px;
+}
+
+.add-fund-form .el-input,
+.add-fund-form .el-select,
+.add-fund-form .el-input-number,
+.add-fund-form .el-date-picker {
+  width: 100%;
+}
+
+.add-fund-form .el-textarea__inner {
+  resize: vertical;
+  min-height: 80px;
+}
+
 /* 分页容器样式 */
 .pagination-container {
   display: flex;
@@ -1516,6 +1834,21 @@ onMounted(async () => {
   
   .allocation-container {
     grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .allocation-chart {
+    padding: 20px;
+    min-height: 350px;
+  }
+  
+  .chart-container {
+    height: 350px;
+  }
+  
+  .allocation-summary {
+    padding: 20px;
+    height: 400px;
   }
   
   .filter-section {

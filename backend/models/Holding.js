@@ -79,6 +79,11 @@ class Holding {
     const setClause = fields.map(field => `${field} = ?`).join(', ');
     const sql = `UPDATE holdings SET ${setClause} WHERE id = ?`;
     
+    console.log('Holding.update - SQL:', sql);
+    console.log('Holding.update - Values:', values);
+    console.log('Holding.update - ID:', id);
+    console.log('Holding.update - Value types:', values.map(v => typeof v));
+    
     const [result] = await pool.execute(sql, [...values, id]);
     return result.affectedRows > 0;
   }

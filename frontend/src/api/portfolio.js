@@ -72,6 +72,10 @@ const portfolioAPI = {
     return http.get('/holdings/funds/performance')
   },
 
+  addFundHoldings(data) {
+    return http.post('/holdings/funds', data)
+  },
+
   getFundVolatility(symbol) {
     return http.get(`/holdings/funds/${symbol}/volatility`)
   },

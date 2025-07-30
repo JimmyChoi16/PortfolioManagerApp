@@ -41,6 +41,9 @@ router.get('/funds/categories', holdingController.getFundCategories);
 // GET /api/holdings/funds/performance - Get fund performance
 router.get('/funds/performance', holdingController.getFundPerformance);
 
+// POST /api/holdings/funds - Add fund holdings
+router.post('/funds', validationRules.createHolding, holdingController.addFundHoldings);
+
 // GET /api/holdings/funds/search - Search funds
 router.get('/funds/search', holdingController.searchFunds);
 

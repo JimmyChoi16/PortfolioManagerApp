@@ -491,6 +491,61 @@ const holdingController = {
     }
   },
 
+  // Add fund holdings
+  async addFundHoldings(req, res) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: 'Validation failed',
+          errors: errors.array()
+        });
+      }
+
+      const { symbol, name, sector, quantity, purchase_price, purchase_date, notes } = req.body;
+      
+      // Get current price from mock service for funds
+      let current_price = purchase_price;
+      try {
+        const quotes = await MockPriceService.getMultipleQuotes([symbol.toUpperCase()]);
+        if (quotes && quotes.length > 0 && quotes[0].currentPrice > 0) {
+          current_price = quotes[0].currentPrice;
+        }
+      } catch (error) {
+        console.warn('Could not fetch current price, using purchase price');
+      }
+
+      const holdingData = {
+        symbol: symbol.toUpperCase(),
+        name,
+        type: 'fund',
+        quantity: parseFloat(quantity),
+        purchase_price: parseFloat(purchase_price),
+        purchase_date,
+        current_price,
+        sector,
+        notes: notes || ''
+      };
+
+      const holdingId = await Holding.create(holdingData);
+      const newHolding = await Holding.getById(holdingId);
+
+      res.status(201).json({
+        success: true,
+        message: 'Fund holdings added successfully',
+        data: newHolding
+      });
+    } catch (error) {
+      console.error('Error adding fund holdings:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to add fund holdings',
+        error: error.message
+      });
+    }
+  },
+
   // Get fund volatility data
   async getFundVolatility(req, res) {
     try {
@@ -531,21 +586,29 @@ const holdingController = {
 
   // Execute trade
   async executeTrade(req, res) {
-    try {
-      const { symbol, action, quantity, price, notes } = req.body;
-      
-      // 验证输入参数
-      if (!symbol || !action || !quantity || !price) {
+  try {
+    const { symbol, action, quantity, price, notes } = req.body;
+    
+    // 添加调试信息
+    console.log('Received trade request:', req.body)
+    console.log('Quantity raw:', quantity, 'Type:', typeof quantity)
+    console.log('Price raw:', price, 'Type:', typeof price)
+    
+    // 验证输入参数
+    if (!symbol || !action || !quantity || !price) {
         return res.status(400).json({
           success: false,
           message: 'Missing required parameters: symbol, action, quantity, price'
         });
       }
       
-      const parsedQuantity = parseFloat(quantity);
-      const parsedPrice = parseFloat(price);
-      
-      if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
+          const parsedQuantity = parseFloat(quantity);
+    const parsedPrice = parseFloat(price);
+    
+    console.log('Parsed quantity:', parsedQuantity, 'Type:', typeof parsedQuantity)
+    console.log('Parsed price:', parsedPrice, 'Type:', typeof parsedPrice)
+    
+    if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
         return res.status(400).json({
           success: false,
           message: 'Invalid quantity'
@@ -565,9 +628,35 @@ const holdingController = {
         
         if (existingFund) {
           // Update existing holding
-          const newQuantity = existingFund.quantity + parsedQuantity;
-          const avgPrice = ((existingFund.quantity * existingFund.purchase_price) + 
+          // 确保从数据库返回的字符串值被转换为数字
+          const existingQuantity = parseFloat(existingFund.quantity);
+          const existingPurchasePrice = parseFloat(existingFund.purchase_price);
+          
+          const newQuantity = existingQuantity + parsedQuantity;
+          const avgPrice = ((existingQuantity * existingPurchasePrice) + 
                            (parsedQuantity * parsedPrice)) / newQuantity;
+          
+          console.log('Existing fund data:', {
+            id: existingFund.id,
+            quantity: existingFund.quantity,
+            quantityType: typeof existingFund.quantity,
+            purchase_price: existingFund.purchase_price,
+            purchase_priceType: typeof existingFund.purchase_price
+          });
+          console.log('Converted values:', {
+            existingQuantity: existingQuantity,
+            existingPurchasePrice: existingPurchasePrice
+          });
+          console.log('Calculated values:', {
+            newQuantity: newQuantity,
+            avgPrice: avgPrice,
+            current_price: parsedPrice
+          });
+          console.log('Types:', {
+            newQuantityType: typeof newQuantity,
+            avgPriceType: typeof avgPrice,
+            currentPriceType: typeof parsedPrice
+          });
           
           await Holding.update(existingFund.id, {
             quantity: newQuantity,
@@ -598,14 +687,17 @@ const holdingController = {
           });
         }
         
-        if (existingFund.quantity < parsedQuantity) {
+        // 确保从数据库返回的字符串值被转换为数字
+        const existingQuantity = parseFloat(existingFund.quantity);
+        
+        if (existingQuantity < parsedQuantity) {
           return res.status(400).json({
             success: false,
             message: 'Insufficient quantity to sell'
           });
         }
         
-        const newQuantity = existingFund.quantity - parsedQuantity;
+        const newQuantity = existingQuantity - parsedQuantity;
         
         if (newQuantity === 0) {
           // Delete the holding if quantity becomes 0
