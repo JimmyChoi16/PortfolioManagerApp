@@ -37,6 +37,11 @@ const portfolioAPI = {
     return http.post('/holdings/update-prices')
   },
 
+  // Update fund prices with real-time data
+  updateFundPrices() {
+    return http.post('/holdings/update-fund-prices')
+  },
+
   // Analysis endpoints
   getAllocationAnalysis() {
     return http.get('/holdings/analysis/allocation')
@@ -52,6 +57,32 @@ const portfolioAPI = {
 
   getDetailedHistoryAnalysis() {
     return http.get('/holdings/analysis/history')
+  },
+
+  // Fund-specific endpoints
+  getFunds() {
+    return http.get('/holdings/funds')
+  },
+
+  getFundCategories() {
+    return http.get('/holdings/funds/categories')
+  },
+
+  getFundPerformance() {
+    return http.get('/holdings/funds/performance')
+  },
+
+  getFundVolatility(symbol) {
+    return http.get(`/holdings/funds/${symbol}/volatility`)
+  },
+
+  searchFunds(query) {
+    return http.get(`/holdings/funds/search?q=${encodeURIComponent(query)}`)
+  },
+
+  // Trade endpoints
+  executeTrade(data) {
+    return http.post('/holdings/trade', data)
   },
 
   // Real-time performance metrics

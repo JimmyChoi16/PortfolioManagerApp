@@ -15,6 +15,9 @@ router.get('/historical', holdingController.getHistoricalData);
 // POST /api/holdings/update-prices - Update current prices for all holdings
 router.post('/update-prices', holdingController.updateCurrentPrices);
 
+// POST /api/holdings/update-fund-prices - Update fund prices with real-time data
+router.post('/update-fund-prices', holdingController.updateFundPrices);
+
 // Analysis endpoints
 // GET /api/holdings/analysis/allocation - Get asset allocation analysis
 router.get('/analysis/allocation', holdingController.getAllocationAnalysis);
@@ -27,6 +30,25 @@ router.get('/analysis/sector', holdingController.getSectorAnalysis);
 
 // GET /api/holdings/analysis/history - Get detailed historical analysis
 router.get('/analysis/history', holdingController.getDetailedHistoryAnalysis);
+
+// Fund-specific endpoints
+// GET /api/holdings/funds - Get all funds
+router.get('/funds', holdingController.getFunds);
+
+// GET /api/holdings/funds/categories - Get fund categories
+router.get('/funds/categories', holdingController.getFundCategories);
+
+// GET /api/holdings/funds/performance - Get fund performance
+router.get('/funds/performance', holdingController.getFundPerformance);
+
+// GET /api/holdings/funds/search - Search funds
+router.get('/funds/search', holdingController.searchFunds);
+
+// GET /api/holdings/funds/:symbol/volatility - Get fund volatility
+router.get('/funds/:symbol/volatility', holdingController.getFundVolatility);
+
+// POST /api/holdings/trade - Execute trade
+router.post('/trade', holdingController.executeTrade);
 
 // GET /api/holdings/analysis/realtime-metrics - Get real-time performance metrics
 router.get('/analysis/realtime-metrics', holdingController.getRealTimePerformanceMetrics);
