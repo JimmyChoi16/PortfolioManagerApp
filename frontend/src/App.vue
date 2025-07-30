@@ -92,7 +92,7 @@
                 <h1 class="banner-title">Welcome to Portfolio Manager!</h1>
                 <div class="banner-desc">
                   <p>The smart, simple way to track and manage your investments.</p>
-                  <p>Monitor stocks, bonds, cash and more—all in one place.</p>
+                  <p>Monitor stocks, funds, bonds, cash and more—all in one place.</p>
                   <p>Gain insights into your portfolio's performance, make data-driven decisions, and achieve your financial goals with ease.</p>
                 </div>
               </div>
@@ -116,7 +116,7 @@
                     <li><strong>Browse & Edit Your Portfolio</strong> </li>
                     <li><strong>Real-Time Performance Tracking</strong> </li>
                     <li><strong>Actionable Insights</strong> </li>
-                    <li><strong>No Hassle, No Accounts</strong> </li>
+                    <li><strong>Simple and Intuitive</strong> </li>
                   </ul>
                 </div>
               </div>
@@ -225,8 +225,8 @@ const features = ref([
   {
     key: 'privacy',
     title: 'Simple, Secure & Private',
-    brief: 'No sign-ups, passwords, or unnecessary complexity.',
-    content: 'No sign-ups, passwords, or unnecessary complexity. Portfolio Manager is designed for single-user, local management, ensuring your financial data remains private and easy to control.'
+    brief: 'Quick sign-up, no complexity.',
+    content: 'Quick sign-up, no complexity. Portfolio Manager is designed for seamless, single-user access—making it easy to get started while keeping your financial data private, secure, and fully under your control.'
   }
 ])
 
