@@ -7,6 +7,7 @@ require('dotenv').config();
 const { testConnection } = require('./config/database');
 const holdingsRoutes = require('./routes/holdings');
 const marketRoutes = require('./routes/market');
+const bondsRoutes = require('./routes/bonds');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -51,6 +52,7 @@ app.get('/health', (req, res) => {
 // API routes
 app.use('/api/holdings', holdingsRoutes);
 app.use('/api/market', marketRoutes);
+app.use('/api/bonds', bondsRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
