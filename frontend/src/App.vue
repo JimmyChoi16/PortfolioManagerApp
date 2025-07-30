@@ -345,7 +345,7 @@ onMounted(() => {
 }
 
 .asset-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #f8b500 0%, #f8b500 100%);
   border: none;
   color: white;
   font-weight: 500;
@@ -365,7 +365,7 @@ onMounted(() => {
 .asset-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  background: linear-gradient(135deg, #fceabb 0%, #f8b500 100%);
 }
 
 .asset-menu {
@@ -388,7 +388,7 @@ onMounted(() => {
 
 .asset-menu .el-dropdown-menu__item:hover {
   background: linear-gradient(135deg, #f0f4ff 0%, #e8f4fd 100%);
-  color: #0071e3;
+  color: #000000;
   transform: translateX(4px);
 }
 
