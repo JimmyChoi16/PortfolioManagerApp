@@ -200,7 +200,7 @@ class TencentFinanceService {
         if (fields.length < 35) continue;
         result.push({
           symbol,
-          name: fields[1],
+          name: usCnCompanyNames[symbol] || fields[1],
           currentPrice: parseFloat(fields[3]),
           change: parseFloat(fields[31]),
           changePercent: parseFloat(fields[32]),
