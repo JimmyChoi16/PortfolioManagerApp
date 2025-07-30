@@ -1,5 +1,6 @@
--- Create database
-CREATE DATABASE IF NOT EXISTS portfolio_db;
+-- Drop and recreate database
+DROP DATABASE IF EXISTS portfolio_db;
+CREATE DATABASE portfolio_db;
 USE portfolio_db;
 
 -- Holdings table to store portfolio assets
@@ -93,16 +94,14 @@ CREATE TABLE IF NOT EXISTS simple_recommendations (
 
 -- Insert initial portfolio summary record
 INSERT INTO portfolio_summary (total_value, daily_change, daily_change_percent, total_holdings) 
-VALUES (125430.00, 7675.00, 7.72, 10) 
-ON DUPLICATE KEY UPDATE id=id;
+VALUES (125430.00, 7675.00, 7.72, 10);
 
 -- Insert sample holdings data (stocks)
 INSERT INTO holdings (symbol, name, type, quantity, purchase_price, purchase_date, current_price, sector, notes) VALUES
 ('AAPL', 'Apple Inc.', 'stock', 100, 150.00, '2023-01-15', 175.50, 'Technology', 'Core technology holding'),
 ('NVDA', 'NVIDIA Corp.', 'stock', 50, 400.00, '2023-02-10', 520.00, 'Technology', 'AI and gaming focus'),
 ('MSFT', 'Microsoft Corp.', 'stock', 75, 280.00, '2023-03-05', 420.00, 'Technology', 'Cloud and software leader'),
-('TSLA', 'Tesla Inc.', 'stock', 25, 200.00, '2023-04-12', 250.00, 'Automotive', 'Electric vehicle pioneer')
-ON DUPLICATE KEY UPDATE current_price=VALUES(current_price), sector=VALUES(sector), notes=VALUES(notes);
+('TSLA', 'Tesla Inc.', 'stock', 25, 200.00, '2023-04-12', 250.00, 'Automotive', 'Electric vehicle pioneer');
 
 -- Insert fund holdings data (10 different types of funds)
 -- 1. Index Fund - VTSAX
@@ -171,12 +170,11 @@ INSERT INTO portfolio_history (date, total_value, daily_change, total_cost, tota
 ('2024-01-16', 99200.00, 750.00, 95000.00, 4200.00, 4.42),
 ('2024-01-17', 101300.00, 2100.00, 95000.00, 6300.00, 6.63),
 ('2024-01-18', 103800.00, 2500.00, 95000.00, 8800.00, 9.26),
-('2024-01-19', 107125.00, 3325.00, 95000.00, 12125.00, 12.76)
-ON DUPLICATE KEY UPDATE total_value=VALUES(total_value), total_cost=VALUES(total_cost), total_gain_loss=VALUES(total_gain_loss), gain_loss_percent=VALUES(gain_loss_percent);
+('2024-01-19', 107125.00, 3325.00, 95000.00, 12125.00, 12.76);
 
 -- Insert sample recommendations
 INSERT INTO simple_recommendations (symbol, recommendation, reason, expires_at) VALUES
 ('AAPL', 'hold', 'Strong fundamentals, wait for better entry point', DATE_ADD(NOW(), INTERVAL 30 DAY)),
 ('NVDA', 'buy', 'AI growth momentum continues', DATE_ADD(NOW(), INTERVAL 14 DAY)),
 ('MSFT', 'hold', 'Stable performer, good for long term', DATE_ADD(NOW(), INTERVAL 60 DAY)),
-('TSLA', 'sell', 'Consider taking profits, high volatility', DATE_ADD(NOW(), INTERVAL 7 DAY));
+('TSLA', 'sell', 'Consider taking profits, high volatility', DATE_ADD(NOW(), INTERVAL 7 DAY)); 

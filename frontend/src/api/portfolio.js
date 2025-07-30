@@ -52,6 +52,32 @@ const portfolioAPI = {
 
   getDetailedHistoryAnalysis() {
     return http.get('/holdings/analysis/history')
+  },
+
+  // Fund-specific endpoints
+  getFunds() {
+    return http.get('/holdings/funds')
+  },
+
+  getFundCategories() {
+    return http.get('/holdings/funds/categories')
+  },
+
+  getFundPerformance() {
+    return http.get('/holdings/funds/performance')
+  },
+
+  getFundVolatility(symbol) {
+    return http.get(`/holdings/funds/${symbol}/volatility`)
+  },
+
+  searchFunds(query) {
+    return http.get(`/holdings/funds/search?q=${encodeURIComponent(query)}`)
+  },
+
+  // Trade endpoints
+  executeTrade(data) {
+    return http.post('/holdings/trade', data)
   }
 }
 

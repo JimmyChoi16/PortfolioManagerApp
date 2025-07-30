@@ -1,4 +1,5 @@
 const Holding = require('../models/Holding');
+const Fund = require('../models/Fund');
 const { YahooFinanceService } = require('../services/yahooFinanceService');
 const { validationResult } = require('express-validator');
 
@@ -312,6 +313,177 @@ const holdingController = {
       res.status(500).json({
         success: false,
         message: 'Failed to fetch detailed history analysis',
+        error: error.message
+      });
+    }
+  },
+
+  // Get all funds (holdings with type 'fund')
+  async getFunds(req, res) {
+    try {
+      const funds = await Fund.getAll();
+      res.json({
+        success: true,
+        data: funds
+      });
+    } catch (error) {
+      console.error('Error fetching funds:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch funds',
+        error: error.message
+      });
+    }
+  },
+
+  // Get fund categories analysis
+  async getFundCategories(req, res) {
+    try {
+      const categories = await Fund.getCategories();
+      res.json({
+        success: true,
+        data: categories
+      });
+    } catch (error) {
+      console.error('Error fetching fund categories:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch fund categories',
+        error: error.message
+      });
+    }
+  },
+
+  // Get fund performance data
+  async getFundPerformance(req, res) {
+    try {
+      const performance = await Fund.getPerformance();
+      res.json({
+        success: true,
+        data: performance
+      });
+    } catch (error) {
+      console.error('Error fetching fund performance:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch fund performance',
+        error: error.message
+      });
+    }
+  },
+
+  // Get fund volatility data
+  async getFundVolatility(req, res) {
+    try {
+      const { symbol } = req.params;
+      const volatility = await Fund.getVolatility(symbol);
+      res.json({
+        success: true,
+        data: volatility
+      });
+    } catch (error) {
+      console.error('Error fetching fund volatility:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch fund volatility',
+        error: error.message
+      });
+    }
+  },
+
+  // Search funds
+  async searchFunds(req, res) {
+    try {
+      const { q } = req.query;
+      const funds = await Fund.search(q);
+      res.json({
+        success: true,
+        data: funds
+      });
+    } catch (error) {
+      console.error('Error searching funds:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to search funds',
+        error: error.message
+      });
+    }
+  },
+
+  // Execute trade
+  async executeTrade(req, res) {
+    try {
+      const { symbol, action, quantity, price, notes } = req.body;
+      
+      if (action === 'buy') {
+        // Check if fund already exists
+        const existingFund = await Fund.getBySymbol(symbol);
+        
+        if (existingFund) {
+          // Update existing holding
+          const newQuantity = existingFund.quantity + parseFloat(quantity);
+          const avgPrice = ((existingFund.quantity * existingFund.purchase_price) + 
+                           (parseFloat(quantity) * parseFloat(price))) / newQuantity;
+          
+          await Holding.update(existingFund.id, {
+            quantity: newQuantity,
+            purchase_price: avgPrice,
+            current_price: parseFloat(price)
+          });
+        } else {
+          // Create new holding
+          await Holding.create({
+            symbol: symbol.toUpperCase(),
+            name: symbol, // Will be updated with real name later
+            type: 'fund',
+            quantity: parseFloat(quantity),
+            purchase_price: parseFloat(price),
+            purchase_date: new Date().toISOString().split('T')[0],
+            current_price: parseFloat(price),
+            sector: 'Unknown',
+            notes: notes || ''
+          });
+        }
+      } else if (action === 'sell') {
+        const existingFund = await Fund.getBySymbol(symbol);
+        
+        if (!existingFund) {
+          return res.status(404).json({
+            success: false,
+            message: 'Fund not found in holdings'
+          });
+        }
+        
+        if (existingFund.quantity < parseFloat(quantity)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Insufficient quantity to sell'
+          });
+        }
+        
+        const newQuantity = existingFund.quantity - parseFloat(quantity);
+        
+        if (newQuantity === 0) {
+          // Delete the holding if quantity becomes 0
+          await Holding.delete(existingFund.id);
+        } else {
+          // Update the holding
+          await Holding.update(existingFund.id, {
+            quantity: newQuantity,
+            current_price: parseFloat(price)
+          });
+        }
+      }
+      
+      res.json({
+        success: true,
+        message: `${action} order executed successfully`
+      });
+    } catch (error) {
+      console.error('Error executing trade:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to execute trade',
         error: error.message
       });
     }

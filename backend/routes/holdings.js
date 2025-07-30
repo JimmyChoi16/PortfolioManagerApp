@@ -28,6 +28,25 @@ router.get('/analysis/sector', holdingController.getSectorAnalysis);
 // GET /api/holdings/analysis/history - Get detailed historical analysis
 router.get('/analysis/history', holdingController.getDetailedHistoryAnalysis);
 
+// Fund-specific endpoints
+// GET /api/holdings/funds - Get all funds
+router.get('/funds', holdingController.getFunds);
+
+// GET /api/holdings/funds/categories - Get fund categories
+router.get('/funds/categories', holdingController.getFundCategories);
+
+// GET /api/holdings/funds/performance - Get fund performance
+router.get('/funds/performance', holdingController.getFundPerformance);
+
+// GET /api/holdings/funds/search - Search funds
+router.get('/funds/search', holdingController.searchFunds);
+
+// GET /api/holdings/funds/:symbol/volatility - Get fund volatility
+router.get('/funds/:symbol/volatility', holdingController.getFundVolatility);
+
+// POST /api/holdings/trade - Execute trade
+router.post('/trade', holdingController.executeTrade);
+
 // GET /api/holdings/:id - Get holding by ID
 router.get('/:id', holdingController.getHoldingById);
 

@@ -159,6 +159,104 @@ class Holding {
     `);
     return rows.reverse();
   }
+
+  // Get all funds (holdings with type 'fund')
+  static async getFunds() {
+    const [rows] = await pool.execute(`
+      SELECT h.*, 
+             ROUND((h.current_price - h.purchase_price) * h.quantity, 2) as unrealized_gain,
+             ROUND(((h.current_price - h.purchase_price) / h.purchase_price) * 100, 2) as gain_percent,
+             ROUND(h.current_price * h.quantity, 2) as current_value,
+             ROUND(((h.current_price - h.purchase_price) / h.purchase_price) * 100, 2) as ytd,
+             ROUND(((h.current_price - h.purchase_price) / h.purchase_price) * 100, 2) as return_1y
+      FROM holdings h 
+      WHERE h.type = 'fund' AND h.is_active = TRUE
+      ORDER BY h.created_at DESC
+    `);
+    return rows;
+  }
+
+  // Get fund categories analysis
+  static async getFundCategories() {
+    const [rows] = await pool.execute(`
+      SELECT 
+        sector as type,
+        COUNT(*) as count,
+        ROUND(SUM(quantity * current_price), 2) as value,
+        ROUND(AVG(((current_price - purchase_price) / purchase_price) * 100), 2) as ytd,
+        ROUND(SUM(quantity * current_price) / (SELECT SUM(quantity * current_price) FROM holdings WHERE type = 'fund' AND is_active = TRUE) * 100, 2) as percentage
+      FROM holdings 
+      WHERE type = 'fund' AND is_active = TRUE
+      GROUP BY sector
+      ORDER BY value DESC
+    `);
+    return rows;
+  }
+
+  // Get fund performance data
+  static async getFundPerformance() {
+    const [rows] = await pool.execute(`
+      SELECT 
+        symbol,
+        name,
+        type,
+        sector,
+        quantity,
+        current_price,
+        purchase_price,
+        ROUND(quantity * current_price, 2) as current_value,
+        ROUND(((current_price - purchase_price) / purchase_price) * 100, 2) as ytd,
+        ROUND(((current_price - purchase_price) / purchase_price) * 100, 2) as return_1y,
+        ROUND(0.5, 2) as expense_ratio
+      FROM holdings 
+      WHERE type = 'fund' AND is_active = TRUE
+      ORDER BY current_value DESC
+    `);
+    return rows;
+  }
+
+  // Get fund volatility data (simulated)
+  static async getFundVolatility(symbol) {
+    // This would typically come from external API data
+    // For now, returning simulated data
+    return {
+      symbol,
+      volatility_3y: Math.random() * 20 + 5,
+      volatility_1y: Math.random() * 15 + 5,
+      volatility_6m: Math.random() * 10 + 3,
+      volatility_3m: Math.random() * 8 + 2
+    };
+  }
+
+  // Search funds
+  static async searchFunds(query) {
+    const [rows] = await pool.execute(`
+      SELECT h.*, 
+             ROUND((h.current_price - h.purchase_price) * h.quantity, 2) as unrealized_gain,
+             ROUND(((h.current_price - h.purchase_price) / h.purchase_price) * 100, 2) as gain_percent,
+             ROUND(h.current_price * h.quantity, 2) as current_value,
+             ROUND(((h.current_price - h.purchase_price) / h.purchase_price) * 100, 2) as ytd,
+             ROUND(((h.current_price - h.purchase_price) / h.purchase_price) * 100, 2) as return_1y
+      FROM holdings h 
+      WHERE h.type = 'fund' AND h.is_active = TRUE 
+        AND (h.name LIKE ? OR h.symbol LIKE ?)
+      ORDER BY h.name
+    `, [`%${query}%`, `%${query}%`]);
+    return rows;
+  }
+
+  // Get holding by symbol
+  static async getBySymbol(symbol) {
+    const [rows] = await pool.execute(`
+      SELECT h.*, 
+             ROUND((h.current_price - h.purchase_price) * h.quantity, 2) as unrealized_gain,
+             ROUND(((h.current_price - h.purchase_price) / h.purchase_price) * 100, 2) as gain_percent,
+             ROUND(h.current_price * h.quantity, 2) as current_value
+      FROM holdings h 
+      WHERE h.symbol = ? AND h.is_active = TRUE
+    `, [symbol]);
+    return rows[0];
+  }
 }
 
 module.exports = Holding;
