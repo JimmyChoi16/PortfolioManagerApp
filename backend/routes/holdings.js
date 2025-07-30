@@ -28,6 +28,12 @@ router.get('/analysis/sector', holdingController.getSectorAnalysis);
 // GET /api/holdings/analysis/history - Get detailed historical analysis
 router.get('/analysis/history', holdingController.getDetailedHistoryAnalysis);
 
+// GET /api/holdings/analysis/realtime-metrics - Get real-time performance metrics
+router.get('/analysis/realtime-metrics', holdingController.getRealTimePerformanceMetrics);
+
+// POST /api/holdings/update-history - Update portfolio history
+router.post('/update-history', holdingController.updatePortfolioHistory);
+
 // GET /api/holdings/:id - Get holding by ID
 router.get('/:id', holdingController.getHoldingById);
 

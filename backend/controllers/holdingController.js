@@ -331,19 +331,55 @@ const holdingController = {
     }
   },
 
-  // Get detailed historical analysis
+  // Get detailed history analysis
   async getDetailedHistoryAnalysis(req, res) {
     try {
-      const historyData = await Holding.getDetailedHistoryAnalysis();
+      const analysisData = await Holding.getDetailedHistoryAnalysis();
       res.json({
         success: true,
-        data: historyData
+        data: analysisData
       });
     } catch (error) {
       console.error('Error fetching detailed history analysis:', error);
       res.status(500).json({
         success: false,
         message: 'Failed to fetch detailed history analysis',
+        error: error.message
+      });
+    }
+  },
+
+  // Get real-time performance metrics
+  async getRealTimePerformanceMetrics(req, res) {
+    try {
+      const metrics = await Holding.getRealTimePerformanceMetrics();
+      res.json({
+        success: true,
+        data: metrics
+      });
+    } catch (error) {
+      console.error('Error fetching real-time performance metrics:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch real-time performance metrics',
+        error: error.message
+      });
+    }
+  },
+
+  // Update portfolio history
+  async updatePortfolioHistory(req, res) {
+    try {
+      await Holding.updatePortfolioHistory();
+      res.json({
+        success: true,
+        message: 'Portfolio history updated successfully'
+      });
+    } catch (error) {
+      console.error('Error updating portfolio history:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update portfolio history',
         error: error.message
       });
     }

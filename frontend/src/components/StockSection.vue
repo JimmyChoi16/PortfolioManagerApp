@@ -1,4 +1,3 @@
-// TODO: Haven't implemented CRUD for stock holdings yet.
 <template>
   <div class="stock-section">
     <!-- Login Warning -->
@@ -511,6 +510,17 @@ let holdingsPriceTimer = null
 const REFRESH_INTERVAL_MS = 10000 // Global refresh interval in milliseconds
 
 const historicalData = ref([])
+// Real-time performance metrics
+const realTimeMetrics = ref({
+  cagr: 0,
+  sharpeRatio: 0,
+  maxDrawdown: 0,
+  totalValue: 0,
+  totalCost: 0,
+  totalGainLoss: 0,
+  gainLossPercent: 0
+})
+
 // Static mock data for unauthenticated users
 const staticMockHistoricalData = [
   { date: '2025-01-01', total_value: 100000 },
@@ -526,40 +536,67 @@ const staticMockCagr = 0.13 // 13% annualized return
 
 const effectiveHistoricalData = computed(() => props.isLoggedIn ? historicalData.value : staticMockHistoricalData)
 
+// Fetch real-time performance metrics
+const fetchRealTimeMetrics = async () => {
+  if (!props.isLoggedIn) return
+  
+  try {
+    const response = await portfolioAPI.getRealTimePerformanceMetrics()
+    if (response.data.success) {
+      realTimeMetrics.value = response.data.data
+    }
+  } catch (error) {
+    console.error('Error fetching real-time metrics:', error)
+  }
+}
+
+// Update portfolio history
+const updatePortfolioHistory = async () => {
+  if (!props.isLoggedIn) return
+  
+  try {
+    await portfolioAPI.updatePortfolioHistory()
+  } catch (error) {
+    console.error('Error updating portfolio history:', error)
+  }
+}
+
 const cagr = computed(() => {
   if (!props.isLoggedIn) {
     return staticMockCagr
   }
-  const data = effectiveHistoricalData.value
-  if (!data || data.length < 2) return 0
-  const startValue = data[0].total_value
-  const endValue = data[data.length - 1].total_value
-  const years = (new Date(data[data.length - 1].date) - new Date(data[0].date)) / (365 * 24 * 3600 * 1000)
-  if (startValue <= 0 || years <= 0) return 0
-  return Math.pow(endValue / startValue, 1 / years) - 1
+  return realTimeMetrics.value.cagr || 0
 })
+
 const sharpe = computed(() => {
-  const data = effectiveHistoricalData.value
-  if (!data || data.length < 2) return 0
-  const returns = []
-  for (let i = 1; i < data.length; i++) {
-    returns.push((data[i].total_value / data[i - 1].total_value) - 1)
+  if (!props.isLoggedIn) {
+    const data = effectiveHistoricalData.value
+    if (!data || data.length < 2) return 0
+    const returns = []
+    for (let i = 1; i < data.length; i++) {
+      returns.push((data[i].total_value / data[i - 1].total_value) - 1)
+    }
+    const avgReturn = returns.reduce((a, b) => a + b, 0) / returns.length
+    const stdDev = Math.sqrt(returns.reduce((a, b) => a + Math.pow(b - avgReturn, 2), 0) / returns.length)
+    const riskFreeRate = 0.02
+    return stdDev > 0 ? (cagr.value - riskFreeRate) / (stdDev * Math.sqrt(252)) : 0
   }
-  const avgReturn = returns.reduce((a, b) => a + b, 0) / returns.length
-  const stdDev = Math.sqrt(returns.reduce((a, b) => a + Math.pow(b - avgReturn, 2), 0) / returns.length)
-  const riskFreeRate = 0.02
-  return stdDev > 0 ? (cagr.value - riskFreeRate) / (stdDev * Math.sqrt(252)) : 0
+  return realTimeMetrics.value.sharpeRatio || 0
 })
+
 const maxDrawdown = computed(() => {
-  const data = effectiveHistoricalData.value
-  if (!data || data.length < 2) return 0
-  let maxDd = 0, peak = data[0].total_value
-  for (let i = 1; i < data.length; i++) {
-    if (data[i].total_value > peak) peak = data[i].total_value
-    const drawdown = (peak - data[i].total_value) / peak
-    if (drawdown > maxDd) maxDd = drawdown
+  if (!props.isLoggedIn) {
+    const data = effectiveHistoricalData.value
+    if (!data || data.length < 2) return 0
+    let maxDd = 0, peak = data[0].total_value
+    for (let i = 1; i < data.length; i++) {
+      if (data[i].total_value > peak) peak = data[i].total_value
+      const drawdown = (peak - data[i].total_value) / peak
+      if (drawdown > maxDd) maxDd = drawdown
+    }
+    return maxDd
   }
-  return maxDd
+  return realTimeMetrics.value.maxDrawdown || 0
 })
 const dailyReturns = computed(() => {
   const data = effectiveHistoricalData.value
@@ -647,42 +684,42 @@ const stockPerformance = computed(() => {
   if (!props.isLoggedIn) {
     // mock performance for not logged in
     return {
-      total_value: 150000,
-      total_gain: 50000,
-      avg_gain_percent: 50,
-      total_holdings: 5
+      total_value: 114392.71,
+      total_gain: 21535.79,
+      avg_gain_percent: 12.67,
+      total_holdings: 10
     }
   }
-  if (stockHoldings.value.length === 0) return null
+  if (computedStockHoldings.value.length === 0) return null
 
-  const totalValue = stockHoldings.value.reduce((sum, item) => {
+  const totalValue = computedStockHoldings.value.reduce((sum, item) => {
     const currentValue = parseFloat(item.current_value) || 0
     return sum + currentValue
   }, 0)
 
-  const totalGain = stockHoldings.value.reduce((sum, item) => {
+  const totalGain = computedStockHoldings.value.reduce((sum, item) => {
     const unrealizedGain = parseFloat(item.unrealized_gain) || 0
     return sum + unrealizedGain
   }, 0)
 
-  const avgGainPercent = stockHoldings.value.length > 0 ?
-    stockHoldings.value.reduce((sum, item) => {
+  const avgGainPercent = computedStockHoldings.value.length > 0 ?
+    computedStockHoldings.value.reduce((sum, item) => {
       const gainPercent = parseFloat(item.gain_percent) || 0
       return sum + gainPercent
-    }, 0) / stockHoldings.value.length : 0
+    }, 0) / computedStockHoldings.value.length : 0
 
   return {
     total_value: totalValue,
     total_gain: totalGain,
     avg_gain_percent: avgGainPercent,
-    total_holdings: stockHoldings.value.length
+    total_holdings: computedStockHoldings.value.length
   }
 })
 
 const stockAllocation = computed(() => {
   const allocation = {}
 
-  stockHoldings.value.forEach(holding => {
+  computedStockHoldings.value.forEach(holding => {
     const sector = holding.sector || 'Other'
     if (!allocation[sector]) {
       allocation[sector] = {
@@ -696,7 +733,7 @@ const stockAllocation = computed(() => {
     allocation[sector].total_value += currentValue
   })
 
-  const totalValue = stockHoldings.value.reduce((sum, item) => {
+  const totalValue = computedStockHoldings.value.reduce((sum, item) => {
     const currentValue = parseFloat(item.current_value) || 0
     return sum + currentValue
   }, 0)
@@ -710,8 +747,15 @@ const stockAllocation = computed(() => {
 })
 
 const bestPerformer = computed(() => {
-  if (stockHoldings.value.length === 0) return null
-  return stockHoldings.value.reduce((best, current) => {
+  if (!props.isLoggedIn) {
+    // mock best performer for not logged in
+    return {
+      symbol: 'MSFT',
+      gain_percent: 50.00
+    }
+  }
+  if (computedStockHoldings.value.length === 0) return null
+  return computedStockHoldings.value.reduce((best, current) => {
     const bestGain = parseFloat(best.gain_percent) || 0
     const currentGain = parseFloat(current.gain_percent) || 0
     return currentGain > bestGain ? current : best
@@ -719,8 +763,15 @@ const bestPerformer = computed(() => {
 })
 
 const worstPerformer = computed(() => {
-  if (stockHoldings.value.length === 0) return null
-  return stockHoldings.value.reduce((worst, current) => {
+  if (!props.isLoggedIn) {
+    // mock worst performer for not logged in
+    return {
+      symbol: 'SH601318',
+      gain_percent: -15.01
+    }
+  }
+  if (computedStockHoldings.value.length === 0) return null
+  return computedStockHoldings.value.reduce((worst, current) => {
     const worstGain = parseFloat(worst.gain_percent) || 0
     const currentGain = parseFloat(current.gain_percent) || 0
     return currentGain < worstGain ? current : worst
@@ -1054,6 +1105,8 @@ const loadStockData = async () => {
       holdingsCurrentPage.value = 1
       // Reset holdings data map for proper flash highlighting
       prevHoldingsDataMap.value = {}
+      // Fetch real-time metrics after loading holdings
+      await fetchRealTimeMetrics()
     }
   } catch (error) {
     console.error('Error loading stock data:', error)
@@ -1226,10 +1279,13 @@ onMounted(() => {
   fetchMarketData()
   fetchHistoricalData()
   fetchHoldingsRealtimePrices()
+  fetchRealTimeMetrics()
+  updatePortfolioHistory()
   // Update market data every REFRESH_INTERVAL_MS for real-time feel
   timer.value = setInterval(() => {
     fetchMarketData()
     fetchHoldingsRealtimePrices()
+    fetchRealTimeMetrics()
   }, REFRESH_INTERVAL_MS)
 })
 
