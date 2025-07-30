@@ -50,6 +50,12 @@ router.get('/funds/search', holdingController.searchFunds);
 // GET /api/holdings/funds/:symbol/volatility - Get fund volatility
 router.get('/funds/:symbol/volatility', holdingController.getFundVolatility);
 
+// GET /api/holdings/funds/:symbol/returns - Get fund returns for different periods
+router.get('/funds/:symbol/returns', holdingController.getFundReturns);
+
+// GET /api/holdings/funds/:symbol/performance-history - Get fund performance history for chart
+router.get('/funds/:symbol/performance-history', holdingController.getFundPerformanceHistory);
+
 // POST /api/holdings/trade - Execute trade
 router.post('/trade', holdingController.executeTrade);
 

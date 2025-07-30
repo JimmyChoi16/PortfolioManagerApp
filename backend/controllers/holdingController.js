@@ -565,6 +565,44 @@ const holdingController = {
     }
   },
 
+  // Get fund returns for different periods
+  async getFundReturns(req, res) {
+    try {
+      const { symbol } = req.params;
+      const returns = await Fund.calculateFundReturns(symbol);
+      res.json({
+        success: true,
+        data: returns
+      });
+    } catch (error) {
+      console.error('Error fetching fund returns:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch fund returns',
+        error: error.message
+      });
+    }
+  },
+
+  // Get fund performance history for chart
+  async getFundPerformanceHistory(req, res) {
+    try {
+      const { symbol } = req.params;
+      const performanceHistory = await Fund.calculatePerformanceHistory(symbol);
+      res.json({
+        success: true,
+        data: performanceHistory
+      });
+    } catch (error) {
+      console.error('Error fetching fund performance history:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch fund performance history',
+        error: error.message
+      });
+    }
+  },
+
   // Search funds
   async searchFunds(req, res) {
     try {

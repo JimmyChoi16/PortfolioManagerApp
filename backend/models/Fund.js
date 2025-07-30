@@ -156,15 +156,15 @@ class Fund {
   // Calculate historical returns for a fund
   static async calculateHistoricalReturns(symbol) {
     try {
-      // 获取当前价格（最新价格）
-      const [currentPriceRow] = await pool.execute(`
-        SELECT price FROM fund_prices 
+      // 获取最新价格和最新记录日期
+      const [latestPriceRow] = await pool.execute(`
+        SELECT price, record_date FROM fund_prices 
         WHERE symbol = ? 
         ORDER BY record_date DESC 
         LIMIT 1
       `, [symbol]);
 
-      if (!currentPriceRow.length) {
+      if (!latestPriceRow.length) {
         return {
           ytd: 0,
           return_1y: 0,
@@ -172,7 +172,8 @@ class Fund {
         };
       }
 
-      const currentPrice = parseFloat(currentPriceRow[0].price);
+      const currentPrice = parseFloat(latestPriceRow[0].price);
+      const latestRecordDate = new Date(latestPriceRow[0].record_date);
 
       // 计算YTD收益率（从当前年份1月1日开始）
       const currentYear = new Date().getFullYear();
@@ -190,13 +191,31 @@ class Fund {
         ytd = ((currentPrice - ytdPrice) / ytdPrice) * 100;
       }
 
-      // 计算1年收益率（使用最早的价格作为1年前的参考）
+      // 计算1年前的日期（相对于数据库中的最新日期）
+      const oneYearAgo = new Date(latestRecordDate);
+      oneYearAgo.setFullYear(latestRecordDate.getFullYear() - 1);
+      const oneYearAgoStr = oneYearAgo.toISOString().split('T')[0];
+
+      // 计算3年前的日期
+      const threeYearsAgo = new Date(latestRecordDate);
+      threeYearsAgo.setFullYear(latestRecordDate.getFullYear() - 3);
+      const threeYearsAgoStr = threeYearsAgo.toISOString().split('T')[0];
+
+      // 获取1年前的价格（小于等于目标日期的最近价格）
       const [oneYearPriceRow] = await pool.execute(`
         SELECT price FROM fund_prices 
-        WHERE symbol = ? 
+        WHERE symbol = ? AND record_date >= ?
         ORDER BY record_date ASC 
         LIMIT 1
-      `, [symbol]);
+      `, [symbol, oneYearAgoStr]);
+
+      // 获取3年前的价格（小于等于目标日期的最近价格）
+      const [threeYearsPriceRow] = await pool.execute(`
+        SELECT price FROM fund_prices 
+        WHERE symbol = ? AND record_date >= ?
+        ORDER BY record_date ASC 
+        LIMIT 1
+      `, [symbol, threeYearsAgoStr]);
 
       let return_1y = 0;
       if (oneYearPriceRow.length > 0) {
@@ -204,8 +223,11 @@ class Fund {
         return_1y = ((currentPrice - oneYearPrice) / oneYearPrice) * 100;
       }
 
-      // 计算3年收益率（使用模拟数据）
-      const return_3y = this.generate3YearReturn(symbol);
+      let return_3y = 0;
+      if (threeYearsPriceRow.length > 0) {
+        const threeYearsPrice = parseFloat(threeYearsPriceRow[0].price);
+        return_3y = ((currentPrice - threeYearsPrice) / threeYearsPrice) * 100;
+      }
 
       return {
         ytd: Math.round(ytd * 100) / 100,
@@ -397,6 +419,191 @@ class Fund {
     // 为未知基金生成合理的3年回报率（8%-50%之间）
     return Math.round((Math.random() * 42 + 8) * 10) / 10;
   }
+
+  // Calculate fund returns for different periods based on fund_prices table
+  static async calculateFundReturns(symbol) {
+    try {
+      // 获取最新价格和最新记录日期
+      const [latestPriceRow] = await pool.execute(`
+        SELECT price, record_date FROM fund_prices 
+        WHERE symbol = ? 
+        ORDER BY record_date DESC 
+        LIMIT 1
+      `, [symbol]);
+
+      if (!latestPriceRow.length) {
+        return {
+          return_3m: 0,
+          return_6m: 0,
+          return_1y: 0,
+          return_3y: 0
+        };
+      }
+
+      const currentPrice = parseFloat(latestPriceRow[0].price);
+      const latestRecordDate = new Date(latestPriceRow[0].record_date); // 使用数据库中的最新日期作为参考
+
+      // 计算3个月前的日期（相对于数据库中的最新日期）
+      const threeMonthsAgo = new Date(latestRecordDate);
+      threeMonthsAgo.setMonth(latestRecordDate.getMonth() - 3);
+      const threeMonthsAgoStr = threeMonthsAgo.toISOString().split('T')[0];
+
+      // 计算6个月前的日期
+      const sixMonthsAgo = new Date(latestRecordDate);
+      sixMonthsAgo.setMonth(latestRecordDate.getMonth() - 6);
+      const sixMonthsAgoStr = sixMonthsAgo.toISOString().split('T')[0];
+
+      // 计算1年前的日期
+      const oneYearAgo = new Date(latestRecordDate);
+      oneYearAgo.setFullYear(latestRecordDate.getFullYear() - 1);
+      const oneYearAgoStr = oneYearAgo.toISOString().split('T')[0];
+
+      // 计算3年前的日期
+      const threeYearsAgo = new Date(latestRecordDate);
+      threeYearsAgo.setFullYear(latestRecordDate.getFullYear() - 3);
+      const threeYearsAgoStr = threeYearsAgo.toISOString().split('T')[0];
+
+        // 获取3个月前的价格（小于等于目标日期的最近价格）
+       const [threeMonthsPriceRow] = await pool.execute(`
+         SELECT price FROM fund_prices 
+         WHERE symbol = ? AND record_date >= ?
+         ORDER BY record_date ASC 
+         limit 1
+       `, [symbol, threeMonthsAgoStr]);
+
+       // 获取6个月前的价格（小于等于目标日期的最近价格）
+       const [sixMonthsPriceRow] = await pool.execute(`
+         SELECT price FROM fund_prices 
+         WHERE symbol = ? AND record_date >= ?
+         ORDER BY record_date ASC 
+         limit 1
+       `, [symbol, sixMonthsAgoStr]);
+
+       // 获取1年前的价格（小于等于目标日期的最近价格）
+       const [oneYearPriceRow] = await pool.execute(`
+         SELECT price FROM fund_prices 
+         WHERE symbol = ? AND record_date >= ?
+         ORDER BY record_date ASC 
+         limit 1
+       `, [symbol, oneYearAgoStr]);
+
+       // 获取3年前的价格（小于等于目标日期的最近价格）
+       const [threeYearsPriceRow] = await pool.execute(`
+         SELECT price FROM fund_prices 
+         WHERE symbol = ? AND record_date >= ?
+         ORDER BY record_date ASC 
+         limit 1
+       `, [symbol, threeYearsAgoStr]);
+        // console.log(currentPrice);
+        // console.log(threeYearsPriceRow[0].price);
+      // 计算各期收益率
+      let return_3m = 0;
+      let return_6m = 0;
+      let return_1y = 0;
+      let return_3y = 0;
+
+      if (threeMonthsPriceRow.length > 0) {
+        const threeMonthsPrice = parseFloat(threeMonthsPriceRow[0].price);
+        return_3m = ((currentPrice - threeMonthsPrice) / threeMonthsPrice) * 100;
+      }
+
+      if (sixMonthsPriceRow.length > 0) {
+        const sixMonthsPrice = parseFloat(sixMonthsPriceRow[0].price);
+        return_6m = ((currentPrice - sixMonthsPrice) / sixMonthsPrice) * 100;
+      }
+
+      if (oneYearPriceRow.length > 0) {
+        const oneYearPrice = parseFloat(oneYearPriceRow[0].price);
+        return_1y = ((currentPrice - oneYearPrice) / oneYearPrice) * 100;
+      }
+
+      if (threeYearsPriceRow.length > 0) {
+        const threeYearsPrice = parseFloat(threeYearsPriceRow[0].price);
+        return_3y = ((currentPrice - threeYearsPrice) / threeYearsPrice) * 100;
+      }
+
+      return {
+        return_3m: Math.round(return_3m * 100) / 100,
+        return_6m: Math.round(return_6m * 100) / 100,
+        return_1y: Math.round(return_1y * 100) / 100,
+        return_3y: Math.round(return_3y * 100) / 100
+             };
+     } catch (error) {
+       console.error(`Error calculating fund returns for ${symbol}:`, error);
+       return {
+         return_3m: 0,
+         return_6m: 0,
+         return_1y: 0,
+         return_3y: 0
+       };
+     }
+   }
+
+   // Calculate fund performance history for chart
+   static async calculatePerformanceHistory(symbol) {
+     try {
+       // 获取基金的基本信息（买入价格和日期）
+       const [fundInfo] = await pool.execute(`
+         SELECT purchase_price, purchase_date FROM holdings 
+         WHERE symbol = ? AND type = 'fund' AND is_active = TRUE
+         LIMIT 1
+       `, [symbol]);
+
+       if (!fundInfo.length) {
+         return {
+           dates: [],
+           performanceData: []
+         };
+       }
+
+       const purchasePrice = parseFloat(fundInfo[0].purchase_price);
+       const purchaseDate = new Date(fundInfo[0].purchase_date);
+
+       // 获取该基金的所有价格数据，按日期排序
+       const [priceData] = await pool.execute(`
+         SELECT record_date, price FROM fund_prices 
+         WHERE symbol = ? AND record_date >= ?
+         ORDER BY record_date ASC
+       `, [symbol, purchaseDate.toISOString().split('T')[0]]);
+
+       if (!priceData.length) {
+         return {
+           dates: [],
+           performanceData: []
+         };
+       }
+
+       const dates = [];
+       const performanceData = [];
+
+       // 计算每天的收益率
+       for (const record of priceData) {
+         const currentPrice = parseFloat(record.price);
+         const currentDate = new Date(record.record_date);
+         
+         // 计算从买入日期到当前日期的收益率
+         const returnRate = ((currentPrice - purchasePrice) / purchasePrice) * 100;
+         
+         dates.push(currentDate.toLocaleDateString('en-US', { 
+           year: 'numeric', 
+           month: '2-digit', 
+           day: '2-digit' 
+         }));
+         performanceData.push(returnRate.toFixed(2));
+       }
+
+       return {
+         dates,
+         performanceData
+       };
+     } catch (error) {
+       console.error(`Error calculating performance history for ${symbol}:`, error);
+       return {
+         dates: [],
+         performanceData: []
+       };
+     }
+   }
 }
 
 module.exports = Fund; 

@@ -80,6 +80,14 @@ const portfolioAPI = {
     return http.get(`/holdings/funds/${symbol}/volatility`)
   },
 
+  getFundReturns(symbol) {
+    return http.get(`/holdings/funds/${symbol}/returns`)
+  },
+
+  getFundPerformanceHistory(symbol) {
+    return http.get(`/holdings/funds/${symbol}/performance-history`)
+  },
+
   searchFunds(query) {
     return http.get(`/holdings/funds/search?q=${encodeURIComponent(query)}`)
   },

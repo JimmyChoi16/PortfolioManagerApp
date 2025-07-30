@@ -142,8 +142,8 @@
           
           <el-table-column label="3Y" width="80" align="right">
             <template #default="scope">
-              <span :class="parseFloat(scope.row.volatility_3y || 0) >= 0 ? 'positive' : 'negative'">
-                {{ parseFloat(scope.row.volatility_3y || 0) >= 0 ? '+' : '' }}{{ parseFloat(scope.row.volatility_3y || 0).toFixed(2) }}%
+              <span :class="parseFloat(scope.row.return_3y || 0) >= 0 ? 'positive' : 'negative'">
+                {{ parseFloat(scope.row.return_3y || 0) >= 0 ? '+' : '' }}{{ parseFloat(scope.row.return_3y || 0).toFixed(2) }}%
               </span>
             </template>
           </el-table-column>
@@ -304,30 +304,30 @@
           </div>
           
           <div class="fund-volatility">
-            <h4>Volatility Analysis</h4>
+            <h4>Return Analysis</h4>
             <div class="volatility-grid">
               <div class="volatility-item">
                 <span class="period">3 Years</span>
-                <span class="value" :class="getVolatilityClass(selectedFund.volatility_3y)">
-                  {{ parseFloat(selectedFund.volatility_3y || 0).toFixed(2) }}%
+                <span class="value" :class="getReturnClass(selectedFund.return_3y)">
+                  {{ parseFloat(selectedFund.return_3y || 0) >= 0 ? '+' : '' }}{{ parseFloat(selectedFund.return_3y || 0).toFixed(2) }}%
                 </span>
               </div>
               <div class="volatility-item">
                 <span class="period">1 Year</span>
-                <span class="value" :class="getVolatilityClass(selectedFund.volatility_1y)">
-                  {{ parseFloat(selectedFund.volatility_1y || 0).toFixed(2) }}%
+                <span class="value" :class="getReturnClass(selectedFund.return_1y)">
+                  {{ parseFloat(selectedFund.return_1y || 0) >= 0 ? '+' : '' }}{{ parseFloat(selectedFund.return_1y || 0).toFixed(2) }}%
                 </span>
               </div>
               <div class="volatility-item">
                 <span class="period">6 Months</span>
-                <span class="value" :class="getVolatilityClass(selectedFund.volatility_6m)">
-                  {{ parseFloat(selectedFund.volatility_6m || 0).toFixed(2) }}%
+                <span class="value" :class="getReturnClass(selectedFund.return_6m)">
+                  {{ parseFloat(selectedFund.return_6m || 0) >= 0 ? '+' : '' }}{{ parseFloat(selectedFund.return_6m || 0).toFixed(2) }}%
                 </span>
               </div>
               <div class="volatility-item">
                 <span class="period">3 Months</span>
-                <span class="value" :class="getVolatilityClass(selectedFund.volatility_3m)">
-                  {{ parseFloat(selectedFund.volatility_3m || 0).toFixed(2) }}%
+                <span class="value" :class="getReturnClass(selectedFund.return_3m)">
+                  {{ parseFloat(selectedFund.return_3m || 0) >= 0 ? '+' : '' }}{{ parseFloat(selectedFund.return_3m || 0).toFixed(2) }}%
                 </span>
               </div>
             </div>
@@ -649,9 +649,24 @@ const exportData = () => {
   ElMessage.success('Data exported successfully')
 }
 
-const showFundDetail = (fund) => {
+const showFundDetail = async (fund) => {
   selectedFund.value = fund
   fundDetailVisible.value = true
+  
+  // 获取基金的收益率数据
+  try {
+    const response = await portfolioAPI.getFundReturns(fund.symbol)
+    if (response.data.success) {
+      // 将收益率数据添加到选中的基金对象中
+      selectedFund.value = {
+        ...selectedFund.value,
+        ...response.data.data
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching fund returns:', error)
+  }
+  
   nextTick(() => {
     initPerformanceChart()
   })
@@ -767,6 +782,12 @@ const getVolatilityClass = (volatility) => {
   return 'high'
 }
 
+const getReturnClass = (returnValue) => {
+  const value = parseFloat(returnValue || 0)
+  if (value >= 0) return 'positive'
+  return 'negative'
+}
+
 const initPieChart = () => {
   if (!pieChart.value) return
   
@@ -877,37 +898,44 @@ const initPieChart = () => {
   })
 }
 
-const initPerformanceChart = () => {
+const initPerformanceChart = async () => {
   if (!performanceChart.value || !selectedFund.value) return
   
   const chart = echarts.init(performanceChart.value)
   
-  // 生成三年的日期数据
-  const dates = []
-  const performanceData = []
-  const today = new Date()
-  
-  // 生成过去三年的日期，按日期分点（每7天一个数据点）
-  const totalDays = 3 * 365 // 三年
-  const intervalDays = 7 // 每7天一个数据点
-  
-  for (let i = 0; i <= totalDays; i += intervalDays) {
-    const date = new Date(today)
-    date.setDate(date.getDate() - (totalDays - i))
-    dates.push(date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: '2-digit', 
-      day: '2-digit' 
-    }))
+  try {
+    // 获取真实的性能历史数据
+    const response = await portfolioAPI.getFundPerformanceHistory(selectedFund.value.symbol)
+    let dates = []
+    let performanceData = []
     
-    // 模拟性能数据（实际应该从API获取）
-    const baseValue = 100
-    const growth = Math.random() * 0.005 - 0.0025 // -0.25% to +0.25% daily variation
-    const cumulativeGrowth = Math.pow(1 + growth, i / intervalDays)
-    performanceData.push((baseValue * cumulativeGrowth - baseValue).toFixed(2))
-  }
-  
-  const option = {
+    if (response.data.success && response.data.data.dates.length > 0) {
+      dates = response.data.data.dates
+      performanceData = response.data.data.performanceData
+    } else {
+      // 如果没有数据，生成模拟数据
+      const today = new Date()
+      const totalDays = 3 * 365 // 三年
+      const intervalDays = 7 // 每7天一个数据点
+      
+      for (let i = 0; i <= totalDays; i += intervalDays) {
+        const date = new Date(today)
+        date.setDate(date.getDate() - (totalDays - i))
+        dates.push(date.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: '2-digit', 
+          day: '2-digit' 
+        }))
+        
+        // 模拟性能数据
+        const baseValue = 100
+        const growth = Math.random() * 0.005 - 0.0025 // -0.25% to +0.25% daily variation
+        const cumulativeGrowth = Math.pow(1 + growth, i / intervalDays)
+        performanceData.push((baseValue * cumulativeGrowth - baseValue).toFixed(2))
+      }
+    }
+    
+    const option = {
     tooltip: {
       trigger: 'axis',
       formatter: function(params) {
@@ -982,6 +1010,103 @@ const initPerformanceChart = () => {
     ]
   }
   chart.setOption(option)
+  } catch (error) {
+    console.error('Error loading performance history:', error)
+    // 如果出错，使用模拟数据
+    const today = new Date()
+    const totalDays = 3 * 365
+    const intervalDays = 7
+    const dates = []
+    const performanceData = []
+    
+    for (let i = 0; i <= totalDays; i += intervalDays) {
+      const date = new Date(today)
+      date.setDate(date.getDate() - (totalDays - i))
+      dates.push(date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit' 
+      }))
+      
+      const baseValue = 100
+      const growth = Math.random() * 0.005 - 0.0025
+      const cumulativeGrowth = Math.pow(1 + growth, i / intervalDays)
+      performanceData.push((baseValue * cumulativeGrowth - baseValue).toFixed(2))
+    }
+    
+    const option = {
+      tooltip: {
+        trigger: 'axis',
+        formatter: function(params) {
+          const data = params[0]
+          return `${data.name}<br/>
+                  <span style="display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:${data.color};"></span>
+                  Performance: ${data.value}%`
+        }
+      },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        axisLabel: {
+          rotate: 0,
+          fontSize: 10,
+          interval: function(index, value) {
+            const totalPoints = dates.length
+            const halfYearInterval = Math.floor(totalPoints / 6)
+            const lastIndex = totalPoints - 1
+            const targetIndices = []
+            
+            for (let i = 0; i < 6; i++) {
+              targetIndices.push(lastIndex - (i * halfYearInterval))
+            }
+            
+            return targetIndices.includes(index)
+          }
+        },
+        axisTick: {
+          show: true,
+          alignWithLabel: true,
+          length: 8,
+          lineStyle: {
+            color: '#666',
+            width: 2
+          }
+        }
+      },
+      yAxis: {
+        type: 'value',
+        axisLabel: {
+          formatter: '{value}%'
+        }
+      },
+      series: [
+        {
+          name: 'Performance',
+          type: 'line',
+          data: performanceData,
+          smooth: true,
+          lineStyle: {
+            color: '#409eff',
+            width: 2
+          },
+          areaStyle: {
+            color: {
+              type: 'linear',
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [
+                { offset: 0, color: 'rgba(64, 158, 255, 0.3)' },
+                { offset: 1, color: 'rgba(64, 158, 255, 0.1)' }
+              ]
+            }
+          }
+        }
+      ]
+    }
+    chart.setOption(option)
+  }
 }
 
 const loadFundData = async () => {
@@ -1744,6 +1869,14 @@ onMounted(async () => {
 }
 
 .volatility-item .value.high {
+  color: #e74c3c;
+}
+
+.volatility-item .value.positive {
+  color: #27ae60;
+}
+
+.volatility-item .value.negative {
   color: #e74c3c;
 }
 
