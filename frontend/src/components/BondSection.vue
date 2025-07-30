@@ -14,9 +14,6 @@
     <div class="section-header">
       <h1>{{ t('bond.title') }}</h1>
       <p>{{ t('bond.subtitle') }}</p>
-      <div v-if="!currentLoginState" class="login-notice">
-        <p>{{ t('bond.loginNotice') }}</p>
-      </div>
     </div>
 
     <!-- Bond Types Overview -->
@@ -52,7 +49,8 @@
           <h2>{{ t('bond.currentBondHoldings') }}</h2>
           <span class="bond-count">({{ bonds.length }} {{ t('bond.bonds') }})</span>
         </div>
-        <el-button type="primary" @click="showAddBondDialog = true" :icon="Plus">
+        <!-- Only show buy bond button if logged in -->
+        <el-button v-if="isLoggedIn" type="primary" @click="showAddBondDialog = true" :icon="Plus">
           {{ t('bond.buyBond') }}
         </el-button>
       </div>
@@ -73,7 +71,7 @@
               <th>{{ t('bond.tableHeaders.couponRate') }}</th>
               <th>{{ t('bond.tableHeaders.maturity') }}</th>
               <th>{{ t('bond.tableHeaders.currentYield') }}</th>
-              <th>{{ t('bond.tableHeaders.action') }}</th>
+              <th v-if="currentLoginState">{{ t('bond.tableHeaders.action') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -83,14 +81,14 @@
                 <td>{{ getBondTypeDisplayName(bond) }}</td>
                 <td>${{ formatNumber(bond.face_value) }}</td>
                 <td>{{ bond.coupon_rate }}%</td>
-                <td>{{ bond.maturity_date }}</td>
+                <td>{{ formatDate(bond.maturity_date) }}</td>
                 <td class="positive">{{ bond.current_yield }}%</td>
-                              <td>
-                <el-button size="small" type="danger" @click="sellBond(bond.id)" :icon="Delete">{{ t('bond.sell') }}</el-button>
-              </td>
+                <td v-if="currentLoginState">
+                  <el-button v-size="small" type="danger" @click="sellBond(bond.id)" :icon="Delete">{{ t('bond.sell') }}</el-button>
+                </td>
             </tr>
               <tr v-if="bonds.length === 0">
-                <td colspan="8" class="no-data">{{ t('bond.noBondsFound') }}</td>
+                <td :colspan="currentLoginState ? 8 : 7" class="no-data">{{ t('bond.noBondsFound') }}</td>
             </tr>
           </tbody>
         </table>
@@ -552,7 +550,6 @@ const initializeLoginState = () => {
 const handleStorageChange = (event) => {
   if (event.key === 'isLoggedIn') {
     // Reload bonds data when login state changes
-    console.log('Login state changed, reloading bonds data...')
     loadBonds()
   }
 }
@@ -594,21 +591,12 @@ const bondRules = {
 // Test API function for debugging
 const testAPIDirectly = async () => {
   try {
-    console.log('=== DIRECT API TEST ===')
-    console.log('Testing API call directly...')
-    
     // Test with fetch API directly
     const fetchResponse = await fetch('/api/bonds')
-    console.log('Fetch response status:', fetchResponse.status)
-    console.log('Fetch response ok:', fetchResponse.ok)
-    
     const fetchData = await fetchResponse.json()
-    console.log('Fetch raw data:', fetchData)
     
     // Test with bondsAPI
-    console.log('Testing with bondsAPI...')
     const apiResponse = await bondsAPI.getBonds()
-    console.log('BondsAPI response:', apiResponse)
     
     return { fetchData, apiResponse }
   } catch (error) {
@@ -620,55 +608,30 @@ const testAPIDirectly = async () => {
 const loadBonds = async () => {
   try {
     loading.value = true
-    console.log('Starting to load bonds...')
-    console.log('Current login state:', currentLoginState.value)
     
     if (!currentLoginState.value) {
       // Use mock data for unlogged users
-      console.log('User not logged in, using mock data')
       bonds.value = mockBonds
       return
     }
     
     // Load real data from API for logged in users
-    console.log('User logged in, loading from API...')
-    console.log('API URL:', '/api/bonds')
     
     // First test API directly
     await testAPIDirectly()
     
     const response = await bondsAPI.getBonds()
-    console.log('=== COMPLETE API RESPONSE DEBUG ===')
-    console.log('Raw API response:', response)
-    console.log('Response type:', typeof response)
-    console.log('Response keys:', Object.keys(response || {}))
-    console.log('Response data:', response.data)
-    console.log('Response data type:', typeof response.data)
-    console.log('Is response.data an array?', Array.isArray(response.data))
-    
-    if (response.data) {
-      console.log('Response.data length:', response.data.length)
-      console.log('First item in response.data:', response.data[0])
-    }
     
     // Check if response has the expected structure
     if (response && response.data && response.data.success && Array.isArray(response.data.data)) {
-      console.log('Using response.data.data (successful API response)')
       bonds.value = response.data.data
     } else if (response && response.data && Array.isArray(response.data)) {
-      console.log('Using response.data (direct array)')
       bonds.value = response.data
     } else {
       console.warn('Unexpected API response structure:', response)
       bonds.value = []
     }
     
-    console.log('=== FINAL BONDS DATA DEBUG ===')
-    console.log('Final bonds data:', bonds.value)
-    console.log('Bonds count:', bonds.value.length)
-    console.log('First bond (if exists):', bonds.value[0])
-    console.log('All bond yields:', bonds.value.map(bond => ({ symbol: bond.symbol, yield: bond.current_yield })))
-    console.log('Yield curve data computed:', yieldCurveData.value)
   } catch (error) {
     console.error('Failed to load bonds:', error)
     console.error('Error details:', error.response?.data || error.message)
@@ -706,12 +669,6 @@ const resetForm = () => {
 }
 
 const buyBond = async () => {
-  console.log('buyBond function called')
-  console.log('bondFormRef.value:', bondFormRef.value)
-  console.log('showAddBondDialog.value:', showAddBondDialog.value)
-  console.log('currentLoginState.value:', currentLoginState.value)
-  console.log('bondForm.value:', bondForm.value)
-  
   if (!bondFormRef.value) {
     console.error('bondFormRef.value is null or undefined')
     ElMessage.error('Form reference not found. Please try again.')
@@ -719,9 +676,7 @@ const buyBond = async () => {
   }
   
   try {
-    console.log('Starting form validation...')
     await bondFormRef.value.validate()
-    console.log('Form validation passed')
     saving.value = true
     
     if (!currentLoginState.value) {
@@ -760,7 +715,6 @@ const buyBond = async () => {
       notes: bondForm.value.notes || ''
     }
     
-    console.log('Sending bond data to API:', bondData)
     const response = await bondsAPI.createBond(bondData)
     ElMessage.success('Bond purchased successfully')
     showAddBondDialog.value = false
@@ -768,11 +722,6 @@ const buyBond = async () => {
     await loadBonds()
   } catch (error) {
     console.error('Failed to buy bond:', error)
-    console.error('Error details:', {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status
-    })
     ElMessage.error('Failed to buy bond: ' + (error.response?.data?.message || error.message))
   } finally {
     saving.value = false
@@ -811,6 +760,12 @@ const sellBond = async (bondId) => {
 
 const formatNumber = (value) => {
   return new Intl.NumberFormat().format(value)
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return 'N/A'
+  const date = new Date(dateString)
+  return date.toISOString().split('T')[0] // YYYY-MM-DD format
 }
 
 // Helper functions for date handling
@@ -864,8 +819,6 @@ const calculateMaturityDate = (force = false) => {
 
 // Bond type statistics computed property
 const bondTypeStats = computed(() => {
-  console.log('Calculating bond stats for bonds:', bonds.value)
-  
   const stats = {
     government: { yield: 0, duration: 0, count: 0, totalValue: 0 },
     corporate: { yield: 0, duration: 0, count: 0, totalValue: 0 },
@@ -874,16 +827,6 @@ const bondTypeStats = computed(() => {
   }
   
   bonds.value.forEach(bond => {
-    console.log('Processing bond:', bond.name, 'Type:', bond.bond_type, 'Sector:', bond.sector)
-    console.log('Bond data:', {
-      name: bond.name,
-      bond_type: bond.bond_type,
-      current_yield: bond.current_yield,
-      maturity_date: bond.maturity_date,
-      quantity: bond.quantity,
-      current_price: bond.current_price
-    })
-    
     // Use bond_type from the new bond table
     const bondType = bond.bond_type || 'government'
     
@@ -900,17 +843,10 @@ const bondTypeStats = computed(() => {
       const duration = calculateDuration(bond.maturity_date) || 0
       const value = (bond.quantity || 0) * (bond.current_price || 0)
       
-      console.log(`Adding to ${bondType}: yield=${currentYield}, duration=${duration}, count=1`)
-      console.log(`Current stats for ${bondType}:`, stats[bondType])
-      
       stats[bondType].yield += currentYield
       stats[bondType].duration += duration
       stats[bondType].count += 1
       stats[bondType].totalValue += value
-      
-      console.log(`Updated stats for ${bondType}:`, stats[bondType])
-    } else {
-      console.log('Bond type not found in stats:', bondType)
     }
   })
   
@@ -919,8 +855,6 @@ const bondTypeStats = computed(() => {
     if (stats[type].count > 0) {
       const avgYield = stats[type].yield / stats[type].count
       const avgDuration = stats[type].duration / stats[type].count
-      
-      console.log(`${type} calculation: yield=${stats[type].yield}, count=${stats[type].count}, avg=${avgYield}`)
       
       // 确保结果不是NaN
       if (!isNaN(avgYield)) {
@@ -937,7 +871,6 @@ const bondTypeStats = computed(() => {
     }
   })
   
-  console.log('Final stats:', stats)
   return stats
 })
 
@@ -948,23 +881,17 @@ const totalBondCount = computed(() => {
 
 // Yield curve data computed property - updated to use real database data
 const yieldCurveData = computed(() => {
-  console.log('Computing yield curve data from bonds:', bonds.value)
-  
   return bonds.value
     .filter(bond => {
       // Filter out bonds without required data for yield curve
       const hasYield = bond.current_yield !== null && bond.current_yield !== undefined && bond.current_yield !== ''
       const hasMaturity = bond.maturity_date !== null && bond.maturity_date !== undefined && bond.maturity_date !== ''
       
-      console.log(`Bond ${bond.symbol}: hasYield=${hasYield}, hasMaturity=${hasMaturity}, yield=${bond.current_yield}, maturity=${bond.maturity_date}`)
-      
       return hasYield && hasMaturity
     })
     .map(bond => {
       const duration = calculateDuration(bond.maturity_date)
       const yield_value = parseFloat(bond.current_yield)
-      
-      console.log(`Mapping bond ${bond.symbol}: duration=${duration}, yield=${yield_value}`)
       
       return {
         symbol: bond.symbol,
@@ -978,7 +905,6 @@ const yieldCurveData = computed(() => {
     .filter(point => {
       // Filter out invalid points
       const isValid = !isNaN(point.yield) && !isNaN(point.duration) && point.duration > 0
-      console.log(`Point ${point.symbol}: isValid=${isValid}, yield=${point.yield}, duration=${point.duration}`)
       return isValid
     })
     .sort((a, b) => a.duration - b.duration)
@@ -1299,7 +1225,6 @@ onMounted(() => {
   resetForm()
   
   // Always load bonds data (mock for unlogged, real for logged)
-  console.log('Loading bonds data...')
   loadBonds()
 })
 
