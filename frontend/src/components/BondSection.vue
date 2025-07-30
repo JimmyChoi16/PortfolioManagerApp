@@ -3,7 +3,7 @@
     <!-- Login Warning -->
     <div v-if="!currentLoginState" class="login-warning">
       <el-alert
-        title="⚠️ You are not logged in. All data shown is for demonstration purposes only."
+        :title="t('bond.loginWarning')"
         type="warning"
         :closable="false"
         show-icon
@@ -12,10 +12,10 @@
 
     <!-- Header -->
     <div class="section-header">
-      <h1>Bond Portfolio</h1>
-      <p>Manage your fixed income investments with comprehensive bond analysis</p>
+      <h1>{{ t('bond.title') }}</h1>
+      <p>{{ t('bond.subtitle') }}</p>
       <div v-if="!currentLoginState" class="login-notice">
-        <p>⚠️ You are not logged in. All data shown is for demonstration purposes only.</p>
+        <p>{{ t('bond.loginNotice') }}</p>
       </div>
     </div>
 
@@ -27,12 +27,12 @@
         <p>{{ getBondTypeDescription(type) }}</p>
         <div class="bond-metrics">
           <div class="metric">
-            <span class="label">Yield</span>
+            <span class="label">{{ t('bond.yield') }}</span>
             <span class="value">{{ stats.count > 0 && !isNaN(stats.yield) ? stats.yield + '%' : 'N/A' }}</span>
           </div>
           <div class="metric">
-            <span class="label">Duration</span>
-            <span class="value">{{ stats.count > 0 && !isNaN(stats.duration) ? stats.duration + ' years' : 'N/A' }}</span>
+            <span class="label">{{ t('bond.duration') }}</span>
+            <span class="value">{{ stats.count > 0 && !isNaN(stats.duration) ? stats.duration + ' ' + t('bond.years') : 'N/A' }}</span>
           </div>
         </div>
       </div>
@@ -40,8 +40,8 @@
       <!-- Show message if no bonds -->
       <div v-if="totalBondCount === 0" class="no-bonds-message">
         <div class="type-icon">📊</div>
-        <h3>No Bonds Yet</h3>
-        <p>Add your first bond to see statistics here</p>
+        <h3>{{ t('bond.noBondsYet') }}</h3>
+        <p>{{ t('bond.noBondsYetDesc') }}</p>
       </div>
     </div>
 
@@ -49,16 +49,16 @@
     <div class="bond-holdings">
       <div class="holdings-header">
         <div class="header-left">
-          <h2>Current Bond Holdings</h2>
-          <span class="bond-count">({{ bonds.length }} bonds)</span>
+          <h2>{{ t('bond.currentBondHoldings') }}</h2>
+          <span class="bond-count">({{ bonds.length }} {{ t('bond.bonds') }})</span>
         </div>
         <el-button type="primary" @click="showAddBondDialog = true" :icon="Plus">
-          Buy Bond
+          {{ t('bond.buyBond') }}
         </el-button>
       </div>
       <!-- Demo Notice -->
       <div v-if="!currentLoginState && bonds.length === 0" class="demo-notice">
-        <p>⚠️ Demo Mode: Data shown is for demonstration purposes only.</p>
+        <p>{{ t('bond.demoMode') }}</p>
       </div>
 
       <div class="holdings-table">
@@ -66,14 +66,14 @@
         <table>
           <thead>
             <tr>
-              <th>Bond Name</th>
-              <th>Ticker</th>
-              <th>Type</th>
-              <th>Face Value</th>
-              <th>Coupon Rate</th>
-              <th>Maturity</th>
-              <th>Current Yield</th>
-                <th>Action</th>
+              <th>{{ t('bond.tableHeaders.bondName') }}</th>
+              <th>{{ t('bond.tableHeaders.ticker') }}</th>
+              <th>{{ t('bond.tableHeaders.type') }}</th>
+              <th>{{ t('bond.tableHeaders.faceValue') }}</th>
+              <th>{{ t('bond.tableHeaders.couponRate') }}</th>
+              <th>{{ t('bond.tableHeaders.maturity') }}</th>
+              <th>{{ t('bond.tableHeaders.currentYield') }}</th>
+              <th>{{ t('bond.tableHeaders.action') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -86,11 +86,11 @@
                 <td>{{ bond.maturity_date }}</td>
                 <td class="positive">{{ bond.current_yield }}%</td>
                               <td>
-                <el-button size="small" type="danger" @click="sellBond(bond.id)" :icon="Delete">Sell</el-button>
+                <el-button size="small" type="danger" @click="sellBond(bond.id)" :icon="Delete">{{ t('bond.sell') }}</el-button>
               </td>
             </tr>
               <tr v-if="bonds.length === 0">
-                <td colspan="8" class="no-data">No bonds found. Add your first bond!</td>
+                <td colspan="8" class="no-data">{{ t('bond.noBondsFound') }}</td>
             </tr>
           </tbody>
         </table>
@@ -412,9 +412,12 @@ const props = defineProps({
   }
 })
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Edit, Delete, Loading } from '@element-plus/icons-vue'
 import bondsAPI from '@/api/bonds'
+
+const { t } = useI18n()
 
 // Reactive data
 const bonds = ref([])
@@ -796,12 +799,12 @@ const sellBond = async (bondId) => {
     }
     
     await bondsAPI.deleteBond(bondId)
-    ElMessage.success('Bond sold successfully')
+    ElMessage.success(t('bond.bondSoldSuccessfully'))
     await loadBonds()
   } catch (error) {
     if (error !== 'cancel') {
       console.error('Failed to sell bond:', error)
-      ElMessage.error('Failed to sell bond')
+      ElMessage.error(t('bond.failedToSellBond'))
     }
   }
 }
@@ -1125,20 +1128,20 @@ const getBondTypeIcon = (type) => {
 
 const getBondTypeName = (type) => {
   const names = {
-    government: 'Government Bonds',
-    corporate: 'Corporate Bonds',
-    municipal: 'Municipal Bonds',
-    international: 'International Bonds'
+    government: t('bond.types.government'),
+    corporate: t('bond.types.corporate'),
+    municipal: t('bond.types.municipal'),
+    international: t('bond.types.international')
   }
   return names[type] || 'Other Bonds'
 }
 
 const getBondTypeDescription = (type) => {
   const descriptions = {
-    government: 'U.S. Treasury securities with guaranteed returns',
-    corporate: 'Investment-grade corporate debt securities',
-    municipal: 'Tax-advantaged state and local government debt',
-    international: 'Global fixed income diversification'
+    government: t('bond.typeDescriptions.government'),
+    corporate: t('bond.typeDescriptions.corporate'),
+    municipal: t('bond.typeDescriptions.municipal'),
+    international: t('bond.typeDescriptions.international')
   }
   return descriptions[type] || 'Fixed income securities'
 }
@@ -1152,10 +1155,10 @@ const getBondTypeDisplayName = (bond) => {
   
   // Return display name
   const displayNames = {
-    'government': 'Government',
-    'corporate': 'Corporate',
-    'municipal': 'Municipal',
-    'international': 'International'
+    'government': t('bond.types.government'),
+    'corporate': t('bond.types.corporate'),
+    'municipal': t('bond.types.municipal'),
+    'international': t('bond.types.international')
   }
   
   return displayNames[bondType] || 'Bond'
