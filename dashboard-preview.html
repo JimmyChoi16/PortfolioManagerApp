@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #2c3e50;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .dashboard-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Main Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        /* Left Column - Account Details */
+        .accounts-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+
+        .net-worth-header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .net-worth-header h2 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+        }
+
+        .net-worth-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .account-section {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #7f8c8d;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .account-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .account-item:last-child {
+            border-bottom: none;
+        }
+
+        .account-info {
+            flex: 1;
+        }
+
+        .account-name {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .account-time {
+            font-size: 0.75rem;
+            color: #7f8c8d;
+        }
+
+        .account-balance {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .section-total {
+            font-weight: 700;
+            color: #2c3e50;
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+
+        /* Center Column - Charts */
+        .charts-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-section {
+            margin-bottom: 32px;
+        }
+
+        .chart-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .chart-stats {
+            display: flex;
+            gap: 24px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .stat-value.positive {
+            color: #27ae60;
+        }
+
+        .stat-value.negative {
+            color: #e74c3c;
+        }
+
+        .chart-placeholder {
+            height: 200px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            border: 2px dashed #dee2e6;
+        }
+
+        .cash-flow-charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .donut-chart {
+            height: 150px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            border: 2px dashed #dee2e6;
+            position: relative;
+        }
+
+        .donut-center {
+            text-align: center;
+        }
+
+        .donut-center .label {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-bottom: 4px;
+        }
+
+        .donut-center .value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        /* Right Column - Market & Insights */
+        .market-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+
+        .market-movers {
+            margin-bottom: 32px;
+        }
+
+        .market-movers h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 16px;
+        }
+
+        .market-indices {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .market-index {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .index-name {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-bottom: 4px;
+        }
+
+        .index-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .index-value.positive {
+            color: #27ae60;
+        }
+
+        .index-value.negative {
+            color: #e74c3c;
+        }
+
+        .holdings-performance {
+            margin-bottom: 32px;
+        }
+
+        .performance-section {
+            margin-bottom: 24px;
+        }
+
+        .performance-section h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 12px;
+        }
+
+        .performance-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        .performance-item:last-child {
+            border-bottom: none;
+        }
+
+        .company-name {
+            font-size: 0.85rem;
+            color: #2c3e50;
+        }
+
+        .performance-change {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .performance-change.positive {
+            color: #27ae60;
+        }
+
+        .performance-change.negative {
+            color: #e74c3c;
+        }
+
+        .insights-section h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 16px;
+        }
+
+        .insight-item {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #2c3e50;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .cash-flow-charts {
+                grid-template-columns: 1fr;
+            }
+            
+            .market-indices {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 10px;
+            }
+            
+            .dashboard-header {
+                padding: 20px;
+            }
+            
+            .dashboard-header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1>Portfolio Dashboard</h1>
+            <p>Your financial overview at a glance</p>
+        </div>
+
+        <!-- Main Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Left Column - Account Details -->
+            <div class="accounts-panel">
+                <div class="net-worth-header">
+                    <h2>NET WORTH</h2>
+                    <div class="net-worth-value">$2,317,371.20</div>
+                </div>
+
+                <div class="account-section">
+                    <div class="section-title">CASH</div>
+                    <div class="account-item">
+                        <div class="account-info">
+                            <div class="account-name">Fidelity Cash Management</div>
+                            <div class="account-time">13 mins ago</div>
+                        </div>
+                        <div class="account-balance">$2,291.90</div>
+                    </div>
+                    <div class="account-item">
+                        <div class="account-info">
+                            <div class="account-name">Wells Fargo Checking</div>
+                            <div class="account-time">13 mins ago</div>
+                        </div>
+                        <div class="account-balance">$309.13</div>
+                    </div>
+                    <div class="account-item">
+                        <div class="account-info">
+                            <div class="account-name">Wells Fargo Savings</div>
+                            <div class="account-time">13 mins ago</div>
+                        </div>
+                        <div class="account-balance">$2,000.67</div>
+                    </div>
+                    <div class="section-total">Total: $4,601.70</div>
+                </div>
+
+                <div class="account-section">
+                    <div class="section-title">INVESTMENT</div>
+                    <div class="account-item">
+                        <div class="account-info">
+                            <div class="account-name">Fidelity Brokerage</div>
+                            <div class="account-time">13 mins ago</div>
+                        </div>
+                        <div class="account-balance">$53,185.79</div>
+                    </div>
+                    <div class="account-item">
+                        <div class="account-info">
+                            <div class="account-name">Pershing IRA 1</div>
+                            <div class="account-time">9 mins ago</div>
+                        </div>
+                        <div class="account-balance">$455,191.03</div>
+                    </div>
+                    <div class="account-item">
+                        <div class="account-info">
+                            <div class="account-name">Pershing IRA 2</div>
+                            <div class="account-time">9 mins ago</div>
+                        </div>
+                        <div class="account-balance">$90,472.35</div>
+                    </div>
+                    <div class="account-item">
+                        <div class="account-info">
+                            <div class="account-name">Pershing Taxable</div>
+                            <div class="account-time">9 mins ago</div>
+                        </div>
+                        <div class="account-balance">$103,144.46</div>
+                    </div>
+                    <div class="section-total">Total: $701,993.63</div>
+                </div>
+            </div>
+
+            <!-- Center Column - Charts -->
+            <div class="charts-panel">
+                <!-- Net Worth Chart -->
+                <div class="chart-section">
+                    <div class="chart-header">
+                        <div class="chart-title">Net Worth</div>
+                        <div class="chart-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">LAST 30 DAYS</div>
+                                <div class="stat-value positive">+$138,884</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">TODAY'S CHANGE</div>
+                                <div class="stat-value positive">+$3,402</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-placeholder">
+                        Net Worth Trend Chart (30 days)
+                    </div>
+                </div>
+
+                <!-- Cash Flow Charts -->
+                <div class="chart-section">
+                    <div class="chart-header">
+                        <div class="chart-title">Cash Flow</div>
+                        <div class="chart-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">LAST 30 DAYS</div>
+                                <div class="stat-value negative">-$23,834</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cash-flow-charts">
+                        <div class="donut-chart">
+                            <div class="donut-center">
+                                <div class="label">INCOME</div>
+                                <div class="value">$18,665</div>
+                            </div>
+                        </div>
+                        <div class="donut-chart">
+                            <div class="donut-center">
+                                <div class="label">SPENDING</div>
+                                <div class="value">$42,500</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Market & Insights -->
+            <div class="market-panel">
+                <!-- Market Movers -->
+                <div class="market-movers">
+                    <h3>Market Movers</h3>
+                    <div class="market-indices">
+                        <div class="market-index">
+                            <div class="index-name">S&P 500</div>
+                            <div class="index-value positive">+0.65%</div>
+                        </div>
+                        <div class="market-index">
+                            <div class="index-name">DOW JONES</div>
+                            <div class="index-value negative">-0.72%</div>
+                        </div>
+                        <div class="market-index">
+                            <div class="index-name">NASDAQ</div>
+                            <div class="index-value positive">+0.14%</div>
+                        </div>
+                        <div class="market-index">
+                            <div class="index-name">10-YR BOND</div>
+                            <div class="index-value negative">-2.96%</div>
+                        </div>
+                    </div>
+                    <div class="performance-item">
+                        <div class="company-name">Your Holdings</div>
+                        <div class="performance-change positive">+0.14%</div>
+                    </div>
+                </div>
+
+                <!-- Holdings Performance -->
+                <div class="holdings-performance">
+                    <div class="performance-section">
+                        <h4>YOUR GAINERS</h4>
+                        <div class="performance-item">
+                            <div class="company-name">Apple Inc</div>
+                            <div class="performance-change positive">+2.53%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="company-name">Firstenergy Corp</div>
+                            <div class="performance-change positive">+1.66%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="company-name">Duke Energy Corp</div>
+                            <div class="performance-change positive">+1.42%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="company-name">Northeast Utilities</div>
+                            <div class="performance-change positive">+0.95%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="company-name">ITT Educational Services</div>
+                            <div class="performance-change positive">+0.88%</div>
+                        </div>
+                    </div>
+
+                    <div class="performance-section">
+                        <h4>YOUR LOSERS</h4>
+                        <div class="performance-item">
+                            <div class="company-name">Harris Teeter Supermarkets</div>
+                            <div class="performance-change negative">-2.61%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="company-name">Gulfport Energy Corp</div>
+                            <div class="performance-change negative">-2.01%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="company-name">Microsoft Corp</div>
+                            <div class="performance-change negative">-1.66%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="company-name">Wells Fargo & Co</div>
+                            <div class="performance-change negative">-1.57%</div>
+                        </div>
+                        <div class="performance-item">
+                            <div class="company-name">Eastman Chemical Co</div>
+                            <div class="performance-change negative">-1.50%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insights -->
+                <div class="insights-section">
+                    <h3>Insights</h3>
+                    <div class="insight-item">
+                        Compared to our baseline portfolio, you are underweight in: International Stocks by (8.64)%.
+                    </div>
+                    <div class="insight-item">
+                        You are currently paying over $3,408.14 per year in fees for mutual funds and ETF's.
+                    </div>
+                    <div class="insight-item">
+                        You are projected to pay over $119,017.22 in 20 years in management fees for mutual funds and ETF's.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

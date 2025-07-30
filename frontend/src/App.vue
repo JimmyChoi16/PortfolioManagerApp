@@ -64,7 +64,7 @@
     <el-main class="app-main">
       <!-- Dashboard (logged in only) -->
       <template v-if="isLoggedIn && activePage === 'dashboard'">
-        <Dashboard @logout="handleLogout" />
+        <NewDashboard @logout="handleLogout" />
       </template>
       
       <!-- Asset Pages (both logged in and not logged in) -->
@@ -183,6 +183,7 @@ import BondSection from './components/BondSection.vue'
 import CashSection from './components/CashSection.vue'
 import LoginPage from './components/LoginPage.vue'
 import Dashboard from './components/Dashboard.vue'
+import NewDashboard from './components/NewDashboard.vue'
 import LanguageSwitcher from './components/LanguageSwitcher.vue'
 
 const router = useRouter()
