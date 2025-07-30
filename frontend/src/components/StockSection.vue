@@ -188,12 +188,13 @@
               <td v-if="isLoggedIn" class="actions-cell">
                 <div class="action-buttons">
                   <el-button 
-                    type="primary" 
+                    v-if="item.holdings_count === 1" 
+                    type="danger" 
                     size="small" 
-                    @click="editHolding(item)"
-                    :icon="Edit"
+                    @click="sellHolding(item)"
+                    :icon="Delete"
                     circle
-                    title="Edit"
+                    title="Sell"
                   />
                   <el-button 
                     v-if="item.holdings_count > 1" 
@@ -373,12 +374,12 @@
                 </td>
                 <td>
                   <el-button 
-                    type="primary" 
+                    type="danger" 
                     size="small" 
-                    @click="editHolding(holding)"
-                    :icon="Edit"
+                    @click="sellIndividualHolding(holding)"
+                    :icon="Delete"
                     circle
-                    title="Edit"
+                    title="Sell"
                   />
                 </td>
               </tr>
@@ -470,8 +471,8 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
-import { Plus, Refresh, Loading, Edit, View } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+import { Plus, Refresh, Loading, Edit, View, Delete } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import portfolioAPI from '../api/portfolio.js'
 import marketAPI from '../api/market.js'
 import http from '../api/http.js'
@@ -601,23 +602,12 @@ const drawdownChartData = computed(() => {
 const showCagrDialog = ref(false)
 const showSharpeDialog = ref(false)
 const showDrawdownDialog = ref(false)
-const showEditDialog = ref(false)
 const showCreateDialog = ref(false)
 const showDetailsDialog = ref(false)
 const saving = ref(false)
 const creating = ref(false)
 const selectedHolding = ref(null)
 const createFormRef = ref(null)
-
-// Edit form data
-const editForm = ref({
-  id: null,
-  symbol: '',
-  name: '',
-  quantity: 0,
-  purchase_price: 0,
-  notes: ''
-})
 
 // Create form data
 const createForm = ref({
@@ -1497,20 +1487,81 @@ const showHoldingDetails = (holding) => {
   showDetailsDialog.value = true
 }
 
-const editHolding = (holding) => {
-  // If this is a grouped holding, we need to find the first individual holding
-  // or we could show a selection dialog. For now, let's use the first one.
-  const individualHolding = holding.individual_holdings ? holding.individual_holdings[0] : holding
-  
-  editForm.value = {
-    id: individualHolding.id,
-    symbol: individualHolding.symbol,
-    name: individualHolding.name,
-    quantity: parseFloat(individualHolding.quantity),
-    purchase_price: parseFloat(individualHolding.purchase_price),
-    notes: individualHolding.notes || ''
+const sellHolding = async (holding) => {
+  const symbol = holding.symbol
+  const quantityToSell = holding.quantity
+  const currentPrice = holdingsRealtimePrices.value[symbol] || holding.current_price
+
+  if (quantityToSell <= 0) {
+    ElMessage.warning('Please select a positive quantity to sell.')
+    return
   }
-  showEditDialog.value = true
+
+  if (currentPrice <= 0) {
+    ElMessage.error('Cannot sell at a price of 0 or less.')
+    return
+  }
+
+  const confirm = await ElMessageBox.confirm(
+    `Are you sure you want to sell ${quantityToSell} shares of ${symbol} at $${currentPrice.toFixed(2)}?`,
+    'Confirm Sale',
+    {
+      confirmButtonText: 'Sell',
+      cancelButtonText: 'Cancel',
+      type: 'warning',
+    }
+  ).catch(() => false)
+
+  if (confirm) {
+    try {
+      // For single holdings, we need to find the actual holding ID
+      const actualHolding = holding.individual_holdings ? holding.individual_holdings[0] : holding
+      await portfolioAPI.deleteHolding(actualHolding.id)
+      
+      await loadStockData()
+      ElMessage.success(`Sold ${quantityToSell} shares of ${symbol} for $${(quantityToSell * currentPrice).toFixed(2)}`)
+    } catch (error) {
+      console.error('Error selling holding:', error)
+      ElMessage.error('Failed to sell holding.')
+    }
+  }
+}
+
+const sellIndividualHolding = async (holding) => {
+  const symbol = holding.symbol
+  const quantityToSell = holding.quantity
+  const currentPrice = holdingsRealtimePrices.value[symbol] || holding.current_price
+
+  if (quantityToSell <= 0) {
+    ElMessage.warning('Please select a positive quantity to sell.')
+    return
+  }
+
+  if (currentPrice <= 0) {
+    ElMessage.error('Cannot sell at a price of 0 or less.')
+    return
+  }
+
+  const confirm = await ElMessageBox.confirm(
+    `Are you sure you want to sell ${quantityToSell} shares of ${symbol} at $${currentPrice.toFixed(2)}?`,
+    'Confirm Sale',
+    {
+      confirmButtonText: 'Sell',
+      cancelButtonText: 'Cancel',
+      type: 'warning',
+    }
+  ).catch(() => false)
+
+  if (confirm) {
+    try {
+      await portfolioAPI.deleteHolding(holding.id)
+      await loadStockData()
+      ElMessage.success(`Sold ${quantityToSell} shares of ${symbol} for $${(quantityToSell * currentPrice).toFixed(2)}`)
+    } catch (error) {
+      console.error('Error selling individual holding:', error)
+      ElMessage.error('Failed to sell individual holding.')
+    }
+  }
 }
 </script>
 
