@@ -83,7 +83,7 @@
                 <td>{{ getBondTypeDisplayName(bond) }}</td>
                 <td>${{ formatNumber(bond.face_value) }}</td>
                 <td>{{ bond.coupon_rate }}%</td>
-                <td>{{ bond.maturity_date }}</td>
+                <td>{{ formatMaturityDate(bond.maturity_date) }}</td>
                 <td class="positive">{{ bond.current_yield }}%</td>
                               <td>
                 <el-button size="small" type="danger" @click="sellBond(bond.id)" :icon="Delete">Sell</el-button>
@@ -281,11 +281,7 @@
                 <div class="tooltip-row">
                   <span class="tooltip-label">Maturity:</span>
                   <span class="tooltip-value">
-                    {{ tooltipData.maturityDate ? new Date(tooltipData.maturityDate).toLocaleDateString('en-US', { 
-                      year: 'numeric', 
-                      month: 'short', 
-                      day: 'numeric' 
-                    }) : 'N/A' }}
+                    {{ formatMaturityDate(tooltipData.maturityDate) }}
                   </span>
                 </div>
               </div>
@@ -391,11 +387,7 @@
                   {{ bond.symbol }}
                 </div>
               </div>
-              <div v-if="step.hasGaps" class="step-recommendations">
-                <div class="recommendation">
-                  💡 Consider adding {{ step.recommendedAmount }} in {{ step.recommendedPeriod }} bonds
-                </div>
-              </div>
+
             </div>
           </div>
         </div>
@@ -808,6 +800,23 @@ const sellBond = async (bondId) => {
 
 const formatNumber = (value) => {
   return new Intl.NumberFormat().format(value)
+}
+
+// Format maturity date to YY-MM-DD HH:MM:SS format
+const formatMaturityDate = (dateString) => {
+  if (!dateString) return 'N/A'
+  
+  const date = new Date(dateString)
+  if (isNaN(date.getTime())) return 'Invalid Date'
+  
+  const year = date.getFullYear().toString().slice(-2) // 取年份后两位
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 
 // Helper functions for date handling
@@ -1277,8 +1286,6 @@ const ladderSteps = computed(() => {
     
     // Check for gaps
     step.hasGaps = step.bonds.length === 0 || step.totalValue < 50000
-    step.recommendedAmount = step.hasGaps ? '$50,000-$100,000' : ''
-    step.recommendedPeriod = step.period.split(' ')[0].toLowerCase()
   })
   
   return steps
@@ -1951,16 +1958,16 @@ const getBondColor = (bondType) => {
 }
 
 .ladder-step-new {
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, #fffbeb 0%, #fbbf24 100%);
   border-radius: 12px;
   padding: 24px;
-  border: 2px solid #e2e8f0;
+  border: none;
   transition: all 0.3s ease;
 }
 
 .ladder-step-new.has-gaps {
-  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-  border-color: #fca5a5;
+  background: linear-gradient(135deg, #fef3c7 0%, #f59e0b 100%);
+  border: none;
 }
 
 .ladder-step-new:hover {
@@ -2019,19 +2026,6 @@ const getBondColor = (bondType) => {
   font-size: 0.8rem;
   color: white;
   font-weight: 600;
-}
-
-.step-recommendations {
-  background: #fef3c7;
-  border: 1px solid #f59e0b;
-  border-radius: 8px;
-  padding: 12px;
-}
-
-.recommendation {
-  font-size: 0.9rem;
-  color: #92400e;
-  margin: 0;
 }
 
 /* Tooltip Styles */
