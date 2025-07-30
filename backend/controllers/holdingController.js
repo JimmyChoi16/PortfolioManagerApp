@@ -1,5 +1,5 @@
 const Holding = require('../models/Holding');
-const { YahooFinanceService } = require('../services/yahooFinanceService');
+const { SinaFinanceService, TencentFinanceService } = require('../services/yahooFinanceService');
 const { validationResult } = require('express-validator');
 
 const holdingController = {
@@ -62,10 +62,26 @@ const holdingController = {
 
       const { symbol, name, type, quantity, purchase_price, purchase_date, sector, notes } = req.body;
       
-      // Get current price from Yahoo Finance
+      // Get current price from appropriate market service
       let current_price = purchase_price;
       try {
-        const quote = await YahooFinanceService.getQuote(symbol);
+        const isAStock = /^S[HZ]/.test(symbol.toUpperCase());
+        let quote = null;
+        
+        if (isAStock) {
+          // Get A股 current price
+          const quotes = await TencentFinanceService.getTencentQuotes([symbol.toUpperCase()]);
+          if (quotes && quotes.length > 0) {
+            quote = quotes[0];
+          }
+        } else {
+          // Get US stock current price
+          const quotes = await SinaFinanceService.getSinaQuotes([symbol.toUpperCase()]);
+          if (quotes && quotes.length > 0) {
+            quote = quotes[0];
+          }
+        }
+        
         if (quote && quote.currentPrice) {
           current_price = quote.currentPrice;
         }
@@ -224,16 +240,32 @@ const holdingController = {
       const holdings = await Holding.getAll();
       const symbols = [...new Set(holdings.map(h => h.symbol))];
       
-      const quotes = await YahooFinanceService.getMultipleQuotes(symbols);
+      // Separate A股 and US stocks
+      const aStockSymbols = symbols.filter(s => /^S[HZ]/.test(s));
+      const usStockSymbols = symbols.filter(s => !/^S[HZ]/.test(s));
       
-      for (const quote of quotes) {
+      let allQuotes = [];
+      
+      // Get A股 quotes
+      if (aStockSymbols.length > 0) {
+        const aStockQuotes = await TencentFinanceService.getTencentQuotes(aStockSymbols);
+        allQuotes = allQuotes.concat(aStockQuotes);
+      }
+      
+      // Get US stock quotes
+      if (usStockSymbols.length > 0) {
+        const usStockQuotes = await SinaFinanceService.getSinaQuotes(usStockSymbols);
+        allQuotes = allQuotes.concat(usStockQuotes);
+      }
+      
+      for (const quote of allQuotes) {
         await Holding.updateCurrentPrice(quote.symbol, quote.currentPrice);
       }
 
       res.json({
         success: true,
-        message: `Updated prices for ${quotes.length} symbols`,
-        data: quotes
+        message: `Updated prices for ${allQuotes.length} symbols`,
+        data: allQuotes
       });
     } catch (error) {
       console.error('Error updating current prices:', error);
@@ -299,19 +331,55 @@ const holdingController = {
     }
   },
 
-  // Get detailed historical analysis
+  // Get detailed history analysis
   async getDetailedHistoryAnalysis(req, res) {
     try {
-      const historyData = await Holding.getDetailedHistoryAnalysis();
+      const analysisData = await Holding.getDetailedHistoryAnalysis();
       res.json({
         success: true,
-        data: historyData
+        data: analysisData
       });
     } catch (error) {
       console.error('Error fetching detailed history analysis:', error);
       res.status(500).json({
         success: false,
         message: 'Failed to fetch detailed history analysis',
+        error: error.message
+      });
+    }
+  },
+
+  // Get real-time performance metrics
+  async getRealTimePerformanceMetrics(req, res) {
+    try {
+      const metrics = await Holding.getRealTimePerformanceMetrics();
+      res.json({
+        success: true,
+        data: metrics
+      });
+    } catch (error) {
+      console.error('Error fetching real-time performance metrics:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch real-time performance metrics',
+        error: error.message
+      });
+    }
+  },
+
+  // Update portfolio history
+  async updatePortfolioHistory(req, res) {
+    try {
+      await Holding.updatePortfolioHistory();
+      res.json({
+        success: true,
+        message: 'Portfolio history updated successfully'
+      });
+    } catch (error) {
+      console.error('Error updating portfolio history:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update portfolio history',
         error: error.message
       });
     }

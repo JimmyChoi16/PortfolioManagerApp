@@ -124,6 +124,129 @@
   font-weight: 600;
 }
 
+/* ===== ACTION BUTTONS ===== */
+.actions-cell {
+  width: 120px;
+  text-align: center;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.action-buttons .el-button {
+  margin: 0;
+  transition: all 0.2s ease;
+}
+
+.action-buttons .el-button:hover {
+  transform: scale(1.1);
+}
+
+/* ===== HOLDING DETAILS ===== */
+.holding-summary {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.holding-summary h4 {
+  margin: 0 0 15px 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.summary-item .label {
+  font-weight: 600;
+  color: #6c757d;
+}
+
+.summary-item .value {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.individual-holdings {
+  margin-top: 20px;
+}
+
+.individual-holdings h4 {
+  margin: 0 0 15px 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+}
+
+.details-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.details-table th,
+.details-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.details-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.details-table tr:hover {
+  background: #f8f9fa;
+}
+
+.details-table td.up {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.details-table td.down {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+/* ===== HOLDINGS HEADER ===== */
+.holdings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.holdings-header h2 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
 /* ===== FLASH ANIMATIONS ===== */
 .flash-up {
   animation: flashUp 1s;

@@ -188,8 +188,8 @@ const marketController = {
   async getCnStockQuotes(req, res) {
     try {
       const symbols = [
-        'sh600519', 'sh601318', 'sh600036', 'sh601166', 'sz000858',
-        'sh601888', 'sz000333', 'sh600276', 'sh601398', 'sh601988'
+        'SH600519', 'SH601318', 'SH600036', 'SH601166', 'SZ000858',
+        'SH601888', 'SZ000333', 'SH600276', 'SH601398', 'SH601988'
       ];
       const quotes = await TencentFinanceService.getTencentQuotes(symbols);
       res.json({
