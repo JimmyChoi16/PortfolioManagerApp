@@ -19,7 +19,9 @@
     <!-- Bond Types Overview -->
     <div class="card-grid-4">
       <div class="gradient-card green">
-        <div class="card-icon">🏛️</div>
+        <div class="card-icon">
+          <img class="bond-icon-img" src="@/assets/govern.png" alt="Government Bonds" />
+        </div>
         <h3>Government Bonds</h3>
         <p>U.S. Treasury securities with guaranteed returns</p>
         <div class="metrics">
@@ -35,7 +37,9 @@
       </div>
       
       <div class="gradient-card green">
-        <div class="card-icon">🏢</div>
+        <div class="card-icon">
+          <img class="bond-icon-img" src="@/assets/house.png" alt="Corporate Bonds" />
+        </div>
         <h3>Corporate Bonds</h3>
         <p>Investment-grade corporate debt securities</p>
         <div class="metrics">
@@ -51,7 +55,9 @@
       </div>
       
       <div class="gradient-card green">
-        <div class="card-icon">🏘️</div>
+        <div class="card-icon">
+          <img class="bond-icon-img" src="@/assets/buildings.png" alt="Municipal Bonds" />
+        </div>
         <h3>Municipal Bonds</h3>
         <p>Tax-advantaged state and local government debt</p>
         <div class="metrics">
@@ -67,7 +73,9 @@
       </div>
       
       <div class="gradient-card green">
-        <div class="card-icon">🌍</div>
+        <div class="card-icon">
+          <img class="bond-icon-img" src="@/assets/earth.png" alt="International Bonds" />
+        </div>
         <h3>International Bonds</h3>
         <p>Global fixed income diversification</p>
         <div class="metrics">
@@ -344,6 +352,15 @@ const props = defineProps({
   font-size: 0.9rem;
   color: #7f8c8d;
   margin: 0;
+}
+
+.bond-icon-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 8px auto;
+  filter: brightness(0) invert(1);
 }
 
 @media (max-width: 768px) {

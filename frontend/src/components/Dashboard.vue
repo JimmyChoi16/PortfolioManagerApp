@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="dashboard-header">
       <div class="header-content">
-        <h1>Welcome back! 👋</h1>
+        <h1>Welcome back!</h1>
         <p>Here's your portfolio overview</p>
         <div class="header-actions">
           <el-button type="primary" @click="refreshData" :loading="loading">
@@ -21,7 +21,8 @@
     <!-- Portfolio Summary Cards -->
     <div class="summary-cards" v-if="portfolioSummary">
       <div class="summary-card total-value">
-        <div class="card-icon">💰</div>
+        <img class="card-icon-img" src="@/assets/money.png" alt="Total Value" />
+        <div class="card-divider"></div>
         <div class="card-content">
           <h3>Total Value</h3>
           <p class="card-value">${{ formatNumber(portfolioSummary.total_value) }}</p>
@@ -33,7 +34,8 @@
       </div>
 
       <div class="summary-card holdings-count">
-        <div class="card-icon">📊</div>
+        <img class="card-icon-img" src="@/assets/bar_chart.png" alt="Total Holdings" />
+        <div class="card-divider"></div>
         <div class="card-content">
           <h3>Total Holdings</h3>
           <p class="card-value">{{ portfolioSummary.total_holdings }}</p>
@@ -42,7 +44,8 @@
       </div>
 
       <div class="summary-card avg-return">
-        <div class="card-icon">📈</div>
+        <img class="card-icon-img" src="@/assets/line_chart.png" alt="Avg Return" />
+        <div class="card-divider"></div>
         <div class="card-content">
           <h3>Avg Return</h3>
           <p class="card-value" :class="portfolioSummary.avg_gain_percent >= 0 ? 'positive' : 'negative'">
@@ -410,17 +413,12 @@ const loadData = async () => {
       portfolioAPI.getPortfolioSummary()
     ])
     
-    console.log('Holdings response:', holdingsRes)
-    console.log('Summary response:', summaryRes)
-    
     if (holdingsRes.data && holdingsRes.data.success) {
       holdings.value = holdingsRes.data.data
-      console.log('Holdings loaded:', holdings.value)
     }
     
     if (summaryRes.data && summaryRes.data.success) {
       portfolioSummary.value = summaryRes.data.data.summary
-      console.log('Summary loaded:', portfolioSummary.value)
     }
   } catch (error) {
     ElMessage.error('Failed to load portfolio data')
@@ -537,13 +535,6 @@ const deleteHolding = async (id) => {
   }
 }
 
-// const logout = () => {
-//   // Clear localStorage and emit logout event
-//   localStorage.removeItem('isLoggedIn')
-//   localStorage.removeItem('activePage')
-//   emit('logout')
-// }
-
 const getTypeTagType = (type) => {
   const types = {
     stock: 'primary',
@@ -576,7 +567,7 @@ onMounted(() => {
 }
 
 .dashboard-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #6A95CC 0%, #53A7D8 100%);
   color: white;
   border-radius: 16px;
   padding: 40px;
@@ -627,6 +618,25 @@ onMounted(() => {
 .card-icon {
   font-size: 2.5rem;
   flex-shrink: 0;
+}
+
+.card-icon-img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  display: block;
+}
+.card-divider {
+  width: 1px;
+  height: 44px;
+  background: #e0e0e0;
+  margin: 0 18px;
+  align-self: center;
+}
+.summary-card {
+  display: flex;
+  align-items: center;
+  gap: 0;
 }
 
 .card-content h3 {

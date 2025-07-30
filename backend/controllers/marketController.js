@@ -188,7 +188,6 @@ const marketController = {
         WHERE (expires_at IS NULL OR expires_at > NOW()) 
         ORDER BY created_at DESC
       `);
-      
       res.json({
         success: true,
         data: rows

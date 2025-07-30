@@ -23,7 +23,6 @@
         :key="category.sector"
         class="category-card"
       >
-        <div class="category-icon">📈</div>
         <h3>{{ category.sector || 'Other' }}</h3>
         <p>{{ getSectorDescription(category.sector) }}</p>
         <div class="category-metrics">
@@ -77,6 +76,12 @@
                 <span style="margin-left: 8px;">Loading market data...</span>
               </td>
             </tr>
+            <tr v-else-if="!marketDataLoading && pagedMarketData.length === 0">
+              <td colspan="5" style="text-align: center; padding: 40px; color: #7f8c8d;">
+                <div>No market data available</div>
+                <div style="font-size: 0.9rem; margin-top: 8px;">Try refreshing the data</div>
+              </td>
+            </tr>
             <tr
               v-for="item in pagedMarketData"
               :key="item.symbol"
@@ -90,12 +95,12 @@
             >
               <td>{{ item.symbol }}</td>
               <td>{{ item.name }}</td>
-              <td>${{ item.currentPrice }}</td>
+              <td>${{ formatNumber(item.currentPrice) }}</td>
               <td :class="{ up: item.change > 0, down: item.change < 0 }">
-                {{ item.change > 0 ? '+' : '' }}{{ item.change }}
+                {{ item.change > 0 ? '+' : '' }}{{ formatNumber(item.change) }}
               </td>
               <td :class="{ up: item.change > 0, down: item.change < 0 }">
-                {{ item.change > 0 ? '+' : '' }}{{ item.changePercent }}%
+                {{ item.change > 0 ? '+' : '' }}{{ formatNumber(item.changePercent) }}%
               </td>
             </tr>
           </tbody>
@@ -128,7 +133,7 @@
           </thead>
           <tbody>
             <tr
-              v-for="item in stockHoldings"
+              v-for="item in pagedStockHoldings"
               :key="item.symbol"
               @mouseover="hoveredRow = item.symbol"
               @mouseleave="hoveredRow = null"
@@ -153,6 +158,25 @@
           </tbody>
         </table>
       </div>
+      
+      <!-- Holdings Pagination -->
+      <div class="pagination" v-if="holdingsTotalPages > 1">
+        <el-button 
+          @click="holdingsPrevPage" 
+          :disabled="holdingsCurrentPage === 1"
+          size="small"
+        >
+          Previous
+        </el-button>
+        <span>Page {{ holdingsCurrentPage }} of {{ holdingsTotalPages }}</span>
+        <el-button 
+          @click="holdingsNextPage" 
+          :disabled="holdingsCurrentPage === holdingsTotalPages"
+          size="small"
+        >
+          Next
+        </el-button>
+      </div>
     </div>
 
     <!-- Portfolio Performance -->
@@ -160,7 +184,9 @@
       <h2>Stock Portfolio Performance</h2>
       <div class="performance-cards">
         <div class="performance-card">
-          <div class="card-icon">📊</div>
+          <div class="card-icon">
+            <img class="performance-icon-img" src="@/assets/bar_chart.png" alt="Bar Chart" />
+          </div>
           <div class="card-content">
             <h4>Total Value</h4>
             <p class="card-value">${{ formatNumber(stockPerformance.total_value) }}</p>
@@ -172,7 +198,9 @@
         </div>
         
         <div class="performance-card">
-          <div class="card-icon">📈</div>
+          <div class="card-icon">
+            <img class="performance-icon-img" src="@/assets/line_chart.png" alt="Line Chart" />
+          </div>
           <div class="card-content">
             <h4>Total Holdings</h4>
             <p class="card-value">{{ stockPerformance.total_holdings }}</p>
@@ -180,8 +208,11 @@
           </div>
         </div>
         
-        <div class="performance-card">
-          <div class="card-icon">🎯</div>
+        <div class="performance-card"> 
+          <div class="card-icon">
+            <img class="performance-icon-img" src="@/assets/trophy-line.png" alt="Trophy line" />
+          </div>
+          
           <div class="card-content">
             <h4>Best Performer</h4>
             <p class="card-value">{{ bestPerformer?.symbol || 'N/A' }}</p>
@@ -192,7 +223,9 @@
         </div>
         
         <div class="performance-card">
-          <div class="card-icon">📉</div>
+          <div class="card-icon">
+            <img class="performance-icon-img" src="@/assets/loss.png" alt="Loss" />
+          </div>
           <div class="card-content">
             <h4>Worst Performer</h4>
             <p class="card-value">{{ worstPerformer?.symbol || 'N/A' }}</p>
@@ -256,14 +289,28 @@ const timer = ref(null)
 const currentPage = ref(1)
 const pageSize = 10
 const marketDataLoading = ref(false)
+const holdingsCurrentPage = ref(1)
+const holdingsPageSize = 10
 
 // Computed properties
 const stockPerformance = computed(() => {
   if (stockHoldings.value.length === 0) return null
   
-  const totalValue = stockHoldings.value.reduce((sum, item) => sum + item.current_value, 0)
-  const totalGain = stockHoldings.value.reduce((sum, item) => sum + item.unrealized_gain, 0)
-  const avgGainPercent = stockHoldings.value.reduce((sum, item) => sum + item.gain_percent, 0) / stockHoldings.value.length
+  const totalValue = stockHoldings.value.reduce((sum, item) => {
+    const currentValue = parseFloat(item.current_value) || 0
+    return sum + currentValue
+  }, 0)
+  
+  const totalGain = stockHoldings.value.reduce((sum, item) => {
+    const unrealizedGain = parseFloat(item.unrealized_gain) || 0
+    return sum + unrealizedGain
+  }, 0)
+  
+  const avgGainPercent = stockHoldings.value.length > 0 ? 
+    stockHoldings.value.reduce((sum, item) => {
+      const gainPercent = parseFloat(item.gain_percent) || 0
+      return sum + gainPercent
+    }, 0) / stockHoldings.value.length : 0
   
   return {
     total_value: totalValue,
@@ -286,10 +333,14 @@ const stockAllocation = computed(() => {
       }
     }
     allocation[sector].count++
-    allocation[sector].total_value += holding.current_value
+    const currentValue = parseFloat(holding.current_value) || 0
+    allocation[sector].total_value += currentValue
   })
   
-  const totalValue = stockHoldings.value.reduce((sum, item) => sum + item.current_value, 0)
+  const totalValue = stockHoldings.value.reduce((sum, item) => {
+    const currentValue = parseFloat(item.current_value) || 0
+    return sum + currentValue
+  }, 0)
   
   return Object.values(allocation)
     .map(item => ({
@@ -301,16 +352,20 @@ const stockAllocation = computed(() => {
 
 const bestPerformer = computed(() => {
   if (stockHoldings.value.length === 0) return null
-  return stockHoldings.value.reduce((best, current) => 
-    current.gain_percent > best.gain_percent ? current : best
-  )
+  return stockHoldings.value.reduce((best, current) => {
+    const bestGain = parseFloat(best.gain_percent) || 0
+    const currentGain = parseFloat(current.gain_percent) || 0
+    return currentGain > bestGain ? current : best
+  })
 })
 
 const worstPerformer = computed(() => {
   if (stockHoldings.value.length === 0) return null
-  return stockHoldings.value.reduce((worst, current) => 
-    current.gain_percent < worst.gain_percent ? current : worst
-  )
+  return stockHoldings.value.reduce((worst, current) => {
+    const worstGain = parseFloat(worst.gain_percent) || 0
+    const currentGain = parseFloat(current.gain_percent) || 0
+    return currentGain < worstGain ? current : worst
+  })
 })
 
 const totalPages = computed(() => Math.ceil(marketData.value.length / pageSize))
@@ -328,10 +383,16 @@ const pagedMarketData = computed(() => {
   return result
 })
 
+const holdingsTotalPages = computed(() => Math.ceil(stockHoldings.value.length / holdingsPageSize))
+const pagedStockHoldings = computed(() => {
+  const start = (holdingsCurrentPage.value - 1) * holdingsPageSize
+  return stockHoldings.value.slice(start, start + holdingsPageSize)
+})
+
 // Methods
 const loadStockData = async () => {
   if (!props.isLoggedIn) {
-    // Mock data for non-logged in users
+    // Mock data for non-logged in users (more than 10 items to test pagination)
     stockHoldings.value = [
       {
         id: 1,
@@ -374,8 +435,136 @@ const loadStockData = async () => {
         gain_percent: 6.99,
         sector: 'Technology',
         type: 'stock'
+      },
+      {
+        id: 4,
+        symbol: 'NVDA',
+        name: 'NVIDIA Corporation',
+        quantity: 3,
+        purchase_price: 300.00,
+        current_price: 520.00,
+        current_value: 1560.00,
+        purchase_value: 900.00,
+        unrealized_gain: 660.00,
+        gain_percent: 73.33,
+        sector: 'Technology',
+        type: 'stock'
+      },
+      {
+        id: 5,
+        symbol: 'TSLA',
+        name: 'Tesla Inc.',
+        quantity: 15,
+        purchase_price: 180.00,
+        current_price: 325.59,
+        current_value: 4883.85,
+        purchase_value: 2700.00,
+        unrealized_gain: 2183.85,
+        gain_percent: 80.88,
+        sector: 'Automotive',
+        type: 'stock'
+      },
+      {
+        id: 6,
+        symbol: 'AMZN',
+        name: 'Amazon.com Inc.',
+        quantity: 12,
+        purchase_price: 120.00,
+        current_price: 185.50,
+        current_value: 2226.00,
+        purchase_value: 1440.00,
+        unrealized_gain: 786.00,
+        gain_percent: 54.58,
+        sector: 'Consumer',
+        type: 'stock'
+      },
+      {
+        id: 7,
+        symbol: 'META',
+        name: 'Meta Platforms Inc.',
+        quantity: 20,
+        purchase_price: 200.00,
+        current_price: 485.00,
+        current_value: 9700.00,
+        purchase_value: 4000.00,
+        unrealized_gain: 5700.00,
+        gain_percent: 142.50,
+        sector: 'Technology',
+        type: 'stock'
+      },
+      {
+        id: 8,
+        symbol: 'NFLX',
+        name: 'Netflix Inc.',
+        quantity: 8,
+        purchase_price: 350.00,
+        current_price: 680.00,
+        current_value: 5440.00,
+        purchase_value: 2800.00,
+        unrealized_gain: 2640.00,
+        gain_percent: 94.29,
+        sector: 'Consumer',
+        type: 'stock'
+      },
+      {
+        id: 9,
+        symbol: 'JPM',
+        name: 'JPMorgan Chase & Co.',
+        quantity: 25,
+        purchase_price: 140.00,
+        current_price: 195.00,
+        current_value: 4875.00,
+        purchase_value: 3500.00,
+        unrealized_gain: 1375.00,
+        gain_percent: 39.29,
+        sector: 'Financial',
+        type: 'stock'
+      },
+      {
+        id: 10,
+        symbol: 'JNJ',
+        name: 'Johnson & Johnson',
+        quantity: 30,
+        purchase_price: 160.00,
+        current_price: 175.00,
+        current_value: 5250.00,
+        purchase_value: 4800.00,
+        unrealized_gain: 450.00,
+        gain_percent: 9.38,
+        sector: 'Healthcare',
+        type: 'stock'
+      },
+      {
+        id: 11,
+        symbol: 'PG',
+        name: 'Procter & Gamble Co.',
+        quantity: 18,
+        purchase_price: 150.00,
+        current_price: 165.00,
+        current_value: 2970.00,
+        purchase_value: 2700.00,
+        unrealized_gain: 270.00,
+        gain_percent: 10.00,
+        sector: 'Consumer',
+        type: 'stock'
+      },
+      {
+        id: 12,
+        symbol: 'V',
+        name: 'Visa Inc.',
+        quantity: 22,
+        purchase_price: 220.00,
+        current_price: 280.00,
+        current_value: 6160.00,
+        purchase_value: 4840.00,
+        unrealized_gain: 1320.00,
+        gain_percent: 27.27,
+        sector: 'Financial',
+        type: 'stock'
       }
     ]
+    // Reset pagination for mock data
+    holdingsCurrentPage.value = 1
     return
   }
 
@@ -384,10 +573,13 @@ const loadStockData = async () => {
     if (response.data.success) {
       const allHoldings = response.data.data
       stockHoldings.value = allHoldings.filter(holding => holding.type === 'stock')
+      // Reset pagination when new data is loaded
+      holdingsCurrentPage.value = 1
     }
   } catch (error) {
     console.error('Error loading stock data:', error)
     stockHoldings.value = []
+    holdingsCurrentPage.value = 1
   }
 }
 
@@ -396,28 +588,27 @@ const fetchMarketData = async () => {
   try {
     const res = await marketAPI.getPublicQuotes()
     console.log('marketAPI.getPublicQuotes() response:', res)
-    console.log('res.success:', res.success)
-    console.log('res.data:', res.data)
     
-    if (res.success && res.data) {
-      const newData = res.data
+    if (res.data && res.data.success && res.data.data) {
+      const newData = res.data.data
       console.log('newData length:', newData.length)
       console.log('newData[0]:', newData[0])
       
-      // 检查数据格式
-      newData.forEach((item, index) => {
-        console.log(`Item ${index}:`, {
-          symbol: item.symbol,
-          name: item.name,
-          currentPrice: item.currentPrice,
-          change: item.change,
-          changePercent: item.changePercent
-        })
+      // 检查数据格式并确保所有必要字段都存在
+      const validData = newData.filter(item => {
+        return item && 
+               item.symbol && 
+               item.name && 
+               typeof item.currentPrice === 'number' &&
+               typeof item.change === 'number' &&
+               typeof item.changePercent === 'number'
       })
+      
+      console.log('validData length:', validData.length)
       
       // 高亮逻辑
       const newFlash = {}
-      newData.forEach(item => {
+      validData.forEach(item => {
         const prev = prevDataMap.value[item.symbol]
         if (prev !== undefined && prev !== item.currentPrice) {
           if (item.currentPrice > prev) newFlash[item.symbol] = 'up'
@@ -428,13 +619,14 @@ const fetchMarketData = async () => {
       if (Object.keys(newFlash).length > 0) {
         setTimeout(() => { rowFlash.value = {} }, 1000)
       }
-      prevDataMap.value = Object.fromEntries(newData.map(i => [i.symbol, i.currentPrice]))
+      prevDataMap.value = Object.fromEntries(validData.map(i => [i.symbol, i.currentPrice]))
       // Force Vue reactivity by creating a new array
-      marketData.value = [...newData]
+      marketData.value = [...validData]
       console.log('marketData.value set to:', marketData.value)
       console.log('marketData.value length:', marketData.value.length)
     } else {
       console.log('API response not successful:', res)
+      marketData.value = []
     }
   } catch (e) {
     console.error('Error fetching market data:', e)
@@ -485,6 +677,14 @@ const nextPage = () => {
   if (currentPage.value < totalPages.value) currentPage.value++
 }
 
+const holdingsPrevPage = () => {
+  if (holdingsCurrentPage.value > 1) holdingsCurrentPage.value--
+}
+
+const holdingsNextPage = () => {
+  if (holdingsCurrentPage.value < holdingsTotalPages.value) holdingsCurrentPage.value++
+}
+
 // Lifecycle
 onMounted(() => {
   loadStockData()
@@ -515,7 +715,7 @@ onUnmounted(() => {
 }
 
 .category-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #6A95CC 0%, #53A7D8 100%);
   color: white;
   padding: 32px 24px;
   border-radius: 16px;
@@ -531,6 +731,14 @@ onUnmounted(() => {
 .category-icon {
   font-size: 3rem;
   margin-bottom: 16px;
+}
+
+.category-icon-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 8px auto;
 }
 
 .category-card h3 {
@@ -621,7 +829,7 @@ onUnmounted(() => {
 
 .allocation-fill {
   height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #6A95CC 0%, #53A7D8 100%);
   transition: width 0.3s ease;
 }
 
@@ -630,6 +838,14 @@ onUnmounted(() => {
   text-align: right;
   font-weight: 600;
   color: #2c3e50;
+}
+
+.performance-icon-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 8px auto;
 }
 
 @media (max-width: 768px) {

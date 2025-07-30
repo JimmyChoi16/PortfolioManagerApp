@@ -13,35 +13,32 @@
           <template #dropdown>
             <el-dropdown-menu class="asset-menu">
               <el-dropdown-item @click="setActivePage('dashboard')" v-if="isLoggedIn">
-                📊
+    
                 <span>Dashboard</span>
               </el-dropdown-item>
               <el-dropdown-item @click="setActivePage('home')" v-if="!isLoggedIn">
-                🏠
+                
                 <span>Home</span>
               </el-dropdown-item>
               <el-dropdown-item @click="setActivePage('stock')">
-                📈
+                
                 <span>Stock</span>
               </el-dropdown-item>
               <el-dropdown-item @click="setActivePage('fund')">
-                💰
+                
                 <span>Fund</span>
               </el-dropdown-item>
               <el-dropdown-item @click="setActivePage('bond')">
-                💳
+                
                 <span>Bond</span>
               </el-dropdown-item>
               <el-dropdown-item @click="setActivePage('cash')">
-                💵
+                
                 <span>Cash</span>
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        
-        <el-button text @click="switchLang('en')" :class="{ active: lang === 'en' }">EN</el-button>
-        <el-button text @click="switchLang('zh')" :class="{ active: lang === 'zh' }">中文</el-button>
         
         <!-- Show login/logout button based on auth status -->
         <el-button 
@@ -95,7 +92,7 @@
                 <h1 class="banner-title">Welcome to Portfolio Manager!</h1>
                 <div class="banner-desc">
                   <p>The smart, simple way to track and manage your investments.</p>
-                  <p>Monitor stocks, bonds, cash and more—all in one place.</p>
+                  <p>Monitor stocks, funds, bonds, cash and more—all in one place.</p>
                   <p>Gain insights into your portfolio's performance, make data-driven decisions, and achieve your financial goals with ease.</p>
                 </div>
               </div>
@@ -107,15 +104,21 @@
         <section class="section-about">
           <div class="section-content">
             <transition name="fade-slide" appear>
-              <div class="about-card">
-                <h2>What is Portfolio Manager?</h2>
-                <p>Portfolio Manager is an intuitive platform designed to help investors like you manage, track, and analyze your financial portfolio in real time. Whether you hold stocks, bonds, funds, or cash, Portfolio Manager centralizes your assets, so you always have a clear view of your investment performance.</p>
-                <ul>
-                  <li><b>Browse & Edit Your Portfolio:</b> Easily view all your holdings in one dashboard. Add, edit, or remove investments as your strategy evolves.</li>
-                  <li><b>Real-Time Performance Tracking:</b> Instantly see how your portfolio is performing with up-to-date data, charts, and clear summaries.</li>
-                  <li><b>Actionable Insights:</b> Get visual analytics and performance breakdowns to help you make smarter, more informed decisions.</li>
-                  <li><b>No Hassle, No Accounts:</b> Enjoy streamlined management with no user authentication needed—just focus on your investments.</li>
-                </ul>
+              <div class="about-split">
+                <div class="about-left">
+                  <h2 class="about-title">What is Portfolio Manager?</h2>
+                  <p class="about-description">Portfolio Manager is an intuitive platform designed to help investors like you manage, track, and analyze your financial portfolio in real time. Whether you hold stocks, bonds, funds, or cash, Portfolio Manager centralizes your assets, so you always have a clear view of your investment performance.</p>
+                </div>
+                <div class="about-divider"></div>
+                <div class="about-right">
+                  <h3 class="features-title">Key Features</h3>
+                  <ul class="features-list">
+                    <li><strong>Browse & Edit Your Portfolio</strong> </li>
+                    <li><strong>Real-Time Performance Tracking</strong> </li>
+                    <li><strong>Actionable Insights</strong> </li>
+                    <li><strong>Simple and Intuitive</strong> </li>
+                  </ul>
+                </div>
               </div>
             </transition>
           </div>
@@ -171,7 +174,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
 import StockSection from './components/StockSection.vue'
 import FundSection from './components/FundSection.vue'
 import BondSection from './components/BondSection.vue'
@@ -180,8 +182,6 @@ import LoginPage from './components/LoginPage.vue'
 import Dashboard from './components/Dashboard.vue'
 
 const router = useRouter()
-const { locale } = useI18n()
-const lang = ref(locale.value)
 const activePage = ref('home')
 const showBanner = ref(false)
 const hoveredFeature = ref(null)
@@ -225,17 +225,12 @@ const features = ref([
   {
     key: 'privacy',
     title: 'Simple, Secure & Private',
-    brief: 'No sign-ups, passwords, or unnecessary complexity.',
-    content: 'No sign-ups, passwords, or unnecessary complexity. Portfolio Manager is designed for single-user, local management, ensuring your financial data remains private and easy to control.'
+    brief: 'Quick sign-up, no complexity.',
+    content: 'Quick sign-up, no complexity. Portfolio Manager is designed for seamless, single-user access—making it easy to get started while keeping your financial data private, secure, and fully under your control.'
   }
 ])
 
 // Methods
-const switchLang = (l) => {
-  locale.value = l
-  lang.value = l
-}
-
 const goLogin = () => {
   activePage.value = 'login'
   localStorage.setItem('activePage', 'login')
@@ -350,7 +345,7 @@ onMounted(() => {
 }
 
 .asset-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #f8b500 0%, #f8b500 100%);
   border: none;
   color: white;
   font-weight: 500;
@@ -370,7 +365,7 @@ onMounted(() => {
 .asset-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  background: linear-gradient(135deg, #fceabb 0%, #f8b500 100%);
 }
 
 .asset-menu {
@@ -393,7 +388,7 @@ onMounted(() => {
 
 .asset-menu .el-dropdown-menu__item:hover {
   background: linear-gradient(135deg, #f0f4ff 0%, #e8f4fd 100%);
-  color: #0071e3;
+  color: #000000;
   transform: translateX(4px);
 }
 
@@ -467,14 +462,43 @@ onMounted(() => {
 /* Home Page Sections */
 .section-banner {
   width: 100vw;
-  background: linear-gradient(120deg, #e9f7ef 0%, #e3eafc 100%);
+  background: url('../public/images/Home_pic1.png') no-repeat center center;
+  background-size: cover;
   padding: 90px 0 60px 0;
+  position: relative;
+  margin-bottom: 0;
+}
+
+.section-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1;
+}
+
+.section-banner .section-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* White spacing between sections */
+.section-banner + .section-about {
+  margin-top: 10px;
 }
 
 .section-about {
   width: 100vw;
-  background: #f7f8fa;
+  background:rgba(235, 237, 241, 0.78);
   padding: 80px 0 60px 0;
+  margin-bottom: 0;
+}
+
+.section-about + .section-features {
+  margin-top: 10px;
 }
 
 .section-features {
@@ -497,53 +521,118 @@ onMounted(() => {
 }
 
 .banner-title {
-  font-size: 2.7rem;
+  font-size: 3rem;
   font-weight: 700;
   margin-bottom: 18px;
   letter-spacing: 1px;
   text-align: center;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
 }
 
 .banner-desc {
   font-size: 1.25rem;
-  color: #444;
+  color: #fff;
   line-height: 1.7;
   text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .banner-desc p {
   margin: 0 0 10px 0;
 }
 
-/* About Card */
-.about-card {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
-  max-width: 700px;
+/* About Split Layout */
+.about-split {
+  max-width: 1000px;
   margin: 0 auto;
   padding: 40px 48px;
-  text-align: center;
+  display: flex;
+  align-items: flex-start;
+  gap: 40px;
   animation: fadeIn 1.2s;
 }
 
-.about-card h2 {
+.about-left {
+  flex: 1;
+  text-align: left;
+  padding-right: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.about-title {
   font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 40px;
+  color: #1a1a1a;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.about-description {
+  font-size: 1.1rem;
+  line-height: 2.2;
+  color: #333;
+  margin-bottom: 0;
+  width: 80%;
+}
+
+.about-divider {
+  width: 2px;
+  background: linear-gradient(to bottom, #e0e0e0, #c0c0c0, #e0e0e0);
+  margin: 0 20px;
+  align-self: stretch;
+  border-radius: 1px;
+}
+
+.about-right {
+  flex: 1;
+  text-align: left;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.features-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-top:10px;
+  margin-bottom: 40px;
+  color: #1a1a1a;
+}
+
+.features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.features-list li {
+  margin-bottom: 24px;
+  line-height: 2.3;
+  color: #333;
+  position: relative;
+  padding-left: 20px;
+  font-size: 1.2rem;
+}
+
+.features-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #0071e3;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.features-list strong {
+  color: #1a1a1a;
   font-weight: 600;
-  margin-bottom: 18px;
-}
-
-.about-card ul {
-  margin-top: 18px;
-  padding-left: 0;
-  display: inline-block;
-  text-align: left;
-}
-
-.about-card li {
-  margin-bottom: 10px;
-  line-height: 1.7;
-  text-align: left;
 }
 
 /* Features Grid */
@@ -728,11 +817,28 @@ onMounted(() => {
   }
   
   .banner-title {
-    font-size: 2rem;
+    font-size: 4rem;
   }
   
-  .about-card {
-    padding: 24px 20px;
+  .about-split {
+    flex-direction: column;
+    padding: 30px 20px;
+    gap: 30px;
+  }
+  
+  .about-divider {
+    width: 100%;
+    height: 2px;
+    margin: 0;
+    background: linear-gradient(to right, #e0e0e0, #c0c0c0, #e0e0e0);
+  }
+  
+  .about-title {
+    font-size: 1.8rem;
+  }
+  
+  .features-title {
+    font-size: 1.3rem;
   }
   
   .market-table {
