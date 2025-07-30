@@ -101,7 +101,7 @@
             <p class="card-value">${{ formatNumber(stockPerformance.total_value) }}</p>
             <span class="card-change" :class="stockPerformance.total_gain >= 0 ? 'positive' : 'negative'">
               {{ stockPerformance.total_gain >= 0 ? '+' : '' }}${{ formatNumber(stockPerformance.total_gain) }}
-              ({{ stockPerformance.avg_gain_percent >= 0 ? '+' : '' }}{{ stockPerformance.avg_gain_percent }}%)
+              ({{ stockPerformance.avg_gain_percent >= 0 ? '+' : '' }}{{ Number(stockPerformance.avg_gain_percent).toFixed(2) }}%)
             </span>
           </div>
         </div>
@@ -121,7 +121,7 @@
             <h4>{{ t('stock.bestPerformer') }}</h4>
             <p class="card-value">{{ bestPerformer?.symbol || 'N/A' }}</p>
             <span class="card-change positive" v-if="bestPerformer">
-              +{{ bestPerformer.gain_percent }}%
+              +{{ Number(bestPerformer.gain_percent).toFixed(2) }}%
             </span>
           </div>
         </div>
@@ -132,7 +132,7 @@
             <h4>{{ t('stock.worstPerformer') }}</h4>
             <p class="card-value">{{ worstPerformer?.symbol || 'N/A' }}</p>
             <span class="card-change negative" v-if="worstPerformer">
-              {{ worstPerformer.gain_percent }}%
+              {{ Number(worstPerformer.gain_percent).toFixed(2) }}%
             </span>
           </div>
         </div>
@@ -182,7 +182,7 @@
                 {{ item.unrealized_gain > 0 ? '+' : '' }}${{ formatNumber(item.unrealized_gain) }}
               </td>
               <td :class="{ up: item.gain_percent > 0, down: item.gain_percent < 0 }">
-                {{ item.gain_percent > 0 ? '+' : '' }}{{ item.gain_percent }}%
+                {{ item.gain_percent > 0 ? '+' : '' }}{{ Number(item.gain_percent).toFixed(2) }}%
               </td>
               <td v-if="isLoggedIn" class="actions-cell">
                 <div class="action-buttons">
