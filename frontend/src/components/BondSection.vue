@@ -1,7 +1,7 @@
 <template>
   <div class="bond-section">
     <!-- Login Warning -->
-    <div v-if="!isLoggedIn" class="login-warning">
+    <div v-if="!currentLoginState" class="login-warning">
       <el-alert
         title="⚠️ You are not logged in. All data shown is for demonstration purposes only."
         type="warning"
@@ -14,18 +14,12 @@
     <div class="section-header">
       <h1>Bond Portfolio</h1>
       <p>Manage your fixed income investments with comprehensive bond analysis</p>
-      <div v-if="!isLoggedIn" class="login-notice">
+      <div v-if="!currentLoginState" class="login-notice">
         <p>⚠️ You are not logged in. All data shown is for demonstration purposes only.</p>
       </div>
     </div>
 
     <!-- Bond Types Overview -->
-    <div class="card-grid-4">
-      <div class="gradient-card green">
-        <div class="card-icon">🏛️</div>
-        <h3>Government Bonds</h3>
-        <p>U.S. Treasury securities with guaranteed returns</p>
-        <div class="metrics">
     <div class="bond-types">
       <div class="bond-type-card" v-for="(stats, type) in bondTypeStats" :key="type">
         <div class="type-icon">{{ getBondTypeIcon(type) }}</div>
@@ -42,32 +36,7 @@
           </div>
         </div>
       </div>
-      
-      <div class="gradient-card green">
-        <div class="card-icon">🏢</div>
-        <h3>Corporate Bonds</h3>
-        <p>Investment-grade corporate debt securities</p>
-        <div class="metrics">
-          <div class="metric">
-            <span class="label">Count</span>
-            <span class="value">{{ stats.count }}</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="gradient-card green">
-        <div class="card-icon">🏘️</div>
-        <h3>Municipal Bonds</h3>
-        <p>Tax-advantaged state and local government debt</p>
-        <div class="metrics">
-          <div class="metric">
-            <span class="label">Yield</span>
-            <span class="value">3.9%</span>
-          </div>
-          <div class="metric">
-            <span class="label">Duration</span>
-            <span class="value">8.5 years</span>
-          </div>
+
       <!-- Show message if no bonds -->
       <div v-if="totalBondCount === 0" class="no-bonds-message">
         <div class="type-icon">📊</div>
@@ -87,25 +56,8 @@
           Buy Bond
         </el-button>
       </div>
-      
-      <div class="gradient-card green">
-        <div class="card-icon">🌍</div>
-        <h3>International Bonds</h3>
-        <p>Global fixed income diversification</p>
-        <div class="metrics">
-          <div class="metric">
-            <span class="label">Yield</span>
-            <span class="value">3.2%</span>
-          </div>
-          <div class="metric">
-            <span class="label">Duration</span>
-            <span class="value">6.8 years</span>
-          </div>
-        </div>
-      </div>
-    </div>
       <!-- Demo Notice -->
-      <div v-if="!isLoggedIn && bonds.length === 0" class="demo-notice">
+      <div v-if="!currentLoginState && bonds.length === 0" class="demo-notice">
         <p>⚠️ Demo Mode: Data shown is for demonstration purposes only.</p>
       </div>
 
@@ -210,7 +162,7 @@
       
       <template #footer>
         <el-button @click="showAddBondDialog = false">Cancel</el-button>
-        <el-button type="primary" @click="saveBond" :loading="saving">
+        <el-button type="primary" @click="buyBond" :loading="saving">
           Buy Bond
         </el-button>
       </template>
@@ -468,19 +420,137 @@ import bondsAPI from '@/api/bonds'
 const bonds = ref([])
 const showAddBondDialog = ref(false)
 const saving = ref(false)
-const isLoggedIn = ref(false)
 const loading = ref(false) // Added loading state
+const bondFormRef = ref(null) // Add missing form reference
 
-// Initialize login state from localStorage
+// Mock data for unlogged users
+const mockBonds = [
+  {
+    id: 1,
+    symbol: 'UST10Y',
+    name: 'U.S. Treasury 10-Year',
+    bond_type: 'government',
+    coupon_rate: '4.25',
+    maturity_date: '2034-05-14',
+    face_value: '50000.00',
+    current_yield: '4.28',
+    credit_rating: 'AAA',
+    issuer: 'U.S. Treasury',
+    quantity: '100.000000',
+    purchase_price: '150.00',
+    purchase_date: '2023-01-14',
+    current_price: '175.50',
+    sector: 'Government',
+    notes: 'Core government holding'
+  },
+  {
+    id: 2,
+    symbol: 'AAPL5Y',
+    name: 'Apple Inc. 5-Year',
+    bond_type: 'corporate',
+    coupon_rate: '3.85',
+    maturity_date: '2029-03-14',
+    face_value: '25000.00',
+    current_yield: '4.12',
+    credit_rating: 'AA+',
+    issuer: 'Apple Inc.',
+    quantity: '50.000000',
+    purchase_price: '400.00',
+    purchase_date: '2023-02-09',
+    current_price: '520.00',
+    sector: 'Technology',
+    notes: 'Tech sector exposure'
+  },
+  {
+    id: 3,
+    symbol: 'CAMUNI7',
+    name: 'California Muni 7-Year',
+    bond_type: 'municipal',
+    coupon_rate: '3.45',
+    maturity_date: '2031-08-19',
+    face_value: '30000.00',
+    current_yield: '3.52',
+    credit_rating: 'AA',
+    issuer: 'State of California',
+    quantity: '75.000000',
+    purchase_price: '280.00',
+    purchase_date: '2023-03-04',
+    current_price: '420.00',
+    sector: 'Municipal',
+    notes: 'Tax-advantaged income'
+  },
+  {
+    id: 4,
+    symbol: 'DEBUND5',
+    name: 'German Bund 5-Year',
+    bond_type: 'international',
+    coupon_rate: '2.15',
+    maturity_date: '2029-12-09',
+    face_value: '20000.00',
+    current_yield: '2.18',
+    credit_rating: 'AAA',
+    issuer: 'German Government',
+    quantity: '25.000000',
+    purchase_price: '200.00',
+    purchase_date: '2023-04-11',
+    current_price: '250.00',
+    sector: 'International',
+    notes: 'International diversification'
+  },
+  {
+    id: 5,
+    symbol: 'UST30Y',
+    name: 'U.S. Treasury 30-Year',
+    bond_type: 'government',
+    coupon_rate: '3.75',
+    maturity_date: '2053-01-14',
+    face_value: '100000.00',
+    current_yield: '3.95',
+    credit_rating: 'AAA',
+    issuer: 'U.S. Treasury',
+    quantity: '40.000000',
+    purchase_price: '130.00',
+    purchase_date: '2023-05-31',
+    current_price: '145.00',
+    sector: 'Government',
+    notes: 'Long-term government bond'
+  },
+  {
+    id: 6,
+    symbol: 'MSFT7Y',
+    name: 'Microsoft Corp. 7-Year',
+    bond_type: 'corporate',
+    coupon_rate: '4.15',
+    maturity_date: '2030-02-19',
+    face_value: '75000.00',
+    current_yield: '4.05',
+    credit_rating: 'AA+',
+    issuer: 'Microsoft Corp.',
+    quantity: '200.000000',
+    purchase_price: '200.00',
+    purchase_date: '2023-01-24',
+    current_price: '245.00',
+    sector: 'Technology',
+    notes: 'Tech corporate bond'
+  }
+]
+
+// Use the prop for login state, with fallback to localStorage
+const currentLoginState = computed(() => {
+  return props.isLoggedIn || localStorage.getItem('isLoggedIn') === 'true'
+})
+
+// Initialize login state from localStorage (for backward compatibility)
 const initializeLoginState = () => {
-  const savedLoginState = localStorage.getItem('isLoggedIn')
-  isLoggedIn.value = savedLoginState === 'true'
+  // This is now handled by the computed property
 }
 
 // Listen for localStorage changes (when user logs in/out in another tab or component)
 const handleStorageChange = (event) => {
   if (event.key === 'isLoggedIn') {
-    isLoggedIn.value = event.newValue === 'true'
+    // Reload bonds data when login state changes
+    console.log('Login state changed, reloading bonds data...')
+    loadBonds()
   }
 }
 
@@ -547,7 +617,18 @@ const testAPIDirectly = async () => {
 const loadBonds = async () => {
   try {
     loading.value = true
-    console.log('Starting to load bonds from API...')
+    console.log('Starting to load bonds...')
+    console.log('Current login state:', currentLoginState.value)
+    
+    if (!currentLoginState.value) {
+      // Use mock data for unlogged users
+      console.log('User not logged in, using mock data')
+      bonds.value = mockBonds
+      return
+    }
+    
+    // Load real data from API for logged in users
+    console.log('User logged in, loading from API...')
     console.log('API URL:', '/api/bonds')
     
     // First test API directly
@@ -567,14 +648,13 @@ const loadBonds = async () => {
       console.log('First item in response.data:', response.data[0])
     }
     
-    // Due to http interceptor, if success=true, response is already response.data from server
-    // So response.data contains the actual bond data array
-    if (response && response.data && Array.isArray(response.data)) {
-      console.log('Using response.data (intercepted structure)')
+    // Check if response has the expected structure
+    if (response && response.data && response.data.success && Array.isArray(response.data.data)) {
+      console.log('Using response.data.data (successful API response)')
+      bonds.value = response.data.data
+    } else if (response && response.data && Array.isArray(response.data)) {
+      console.log('Using response.data (direct array)')
       bonds.value = response.data
-    } else if (response && Array.isArray(response)) {
-      console.log('Using direct response (already intercepted)')
-      bonds.value = response
     } else {
       console.warn('Unexpected API response structure:', response)
       bonds.value = []
@@ -589,59 +669,80 @@ const loadBonds = async () => {
   } catch (error) {
     console.error('Failed to load bonds:', error)
     console.error('Error details:', error.response?.data || error.message)
-    ElMessage.error('Failed to load bonds: ' + (error.response?.data?.message || error.message))
-    // Fallback to empty array on error
-    bonds.value = []
+    
+    if (currentLoginState.value) {
+      // Only show error for logged in users
+      ElMessage.error('Failed to load bonds: ' + (error.response?.data?.message || error.message))
+    }
+    
+    // Fallback to mock data on error
+    bonds.value = mockBonds
   } finally {
     loading.value = false
   }
 }
 
 const resetForm = () => {
+  const today = new Date()
+  const maturityDate = new Date()
+  maturityDate.setFullYear(today.getFullYear() + 5) // Default 5 years from today
+  
   bondForm.value = {
     name: '',
     symbol: '',
     type: 'government',
     quantity: 100,
     purchase_price: 100.00,
-    purchase_date: new Date().toISOString().split('T')[0], // Today's date in YYYY-MM-DD format
+    purchase_date: today.toISOString().split('T')[0], // Today's date in YYYY-MM-DD format
     coupon_rate: 4.00,
-    maturity_date: '',
+    maturity_date: maturityDate.toISOString().split('T')[0], // 5 years from today
     face_value: 10000,
     sector: 'Government',
     notes: ''
   }
 }
 
-const buyBond = () => {
-  resetForm()
-  showAddBondDialog.value = true
-}
-
-const saveBond = async () => {
+const buyBond = async () => {
+  console.log('buyBond function called')
+  console.log('bondFormRef.value:', bondFormRef.value)
+  console.log('showAddBondDialog.value:', showAddBondDialog.value)
+  console.log('currentLoginState.value:', currentLoginState.value)
+  console.log('bondForm.value:', bondForm.value)
+  
+  if (!bondFormRef.value) {
+    console.error('bondFormRef.value is null or undefined')
+    ElMessage.error('Form reference not found. Please try again.')
+    return
+  }
+  
   try {
-    // Validate form
-    const formRef = document.querySelector('.el-form')
-    if (!formRef) {
-      ElMessage.error('Form validation failed')
-      return
-    }
-    
-    // Check if required fields are filled
-    if (!bondForm.value.name || !bondForm.value.symbol || !bondForm.value.quantity || 
-        !bondForm.value.purchase_price || !bondForm.value.coupon_rate || !bondForm.value.maturity_date || 
-        !bondForm.value.face_value) {
-      ElMessage.error('Please fill in all required fields')
-      return
-    }
-    
+    console.log('Starting form validation...')
+    await bondFormRef.value.validate()
+    console.log('Form validation passed')
     saving.value = true
     
-    // Prepare bond data with proper mapping
+    if (!currentLoginState.value) {
+      // For unlogged users, add to mock data
+      const newBond = {
+        id: Date.now(), // Generate a temporary ID
+        ...bondForm.value,
+        bond_type: bondForm.value.type,
+        current_yield: bondForm.value.coupon_rate,
+        current_price: bondForm.value.purchase_price,
+        face_value: bondForm.value.purchase_price * bondForm.value.quantity
+      }
+      bonds.value.push(newBond)
+      ElMessage.success('Bond purchased successfully (demo mode)')
+      showAddBondDialog.value = false
+      resetForm()
+      return
+    }
+    
+    // Prepare bond data with proper mapping for backend
     const bondData = {
       symbol: bondForm.value.symbol,
       name: bondForm.value.name,
-      bond_type: bondForm.value.type,
+      bond_type: bondForm.value.type, // Map 'type' to 'bond_type'
       quantity: parseFloat(bondForm.value.quantity),
       purchase_price: parseFloat(bondForm.value.purchase_price),
       purchase_date: formatDateForMySQL(bondForm.value.purchase_date),
@@ -656,14 +757,11 @@ const saveBond = async () => {
       notes: bondForm.value.notes || ''
     }
     
-    console.log('Sending bond data:', bondData)
-    
-    // Create new bond
+    console.log('Sending bond data to API:', bondData)
     const response = await bondsAPI.createBond(bondData)
-    console.log('Bond creation response:', response)
-    
     ElMessage.success('Bond purchased successfully')
     showAddBondDialog.value = false
+    resetForm()
     await loadBonds()
   } catch (error) {
     console.error('Failed to buy bond:', error)
@@ -689,6 +787,13 @@ const sellBond = async (bondId) => {
         type: 'warning'
       }
     )
+    
+    if (!currentLoginState.value) {
+      // For unlogged users, just remove from mock data
+      bonds.value = bonds.value.filter(bond => bond.id !== bondId)
+      ElMessage.success('Bond sold successfully (demo mode)')
+      return
+    }
     
     await bondsAPI.deleteBond(bondId)
     ElMessage.success('Bond sold successfully')
@@ -1187,8 +1292,11 @@ onMounted(() => {
   // Listen for localStorage changes
   window.addEventListener('storage', handleStorageChange)
   
-  // Always try to load from API first, fallback to demo data if needed
-  console.log('Loading bonds from API...')
+  // Initialize form with default values
+  resetForm()
+  
+  // Always load bonds data (mock for unlogged, real for logged)
+  console.log('Loading bonds data...')
   loadBonds()
 })
 

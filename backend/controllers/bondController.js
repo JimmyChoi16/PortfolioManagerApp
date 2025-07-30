@@ -119,24 +119,32 @@ const bondController = {
         });
       }
 
+      // Set default values for optional fields
+      const defaultCurrentYield = current_yield || coupon_rate;
+      const defaultCreditRating = credit_rating || 'A';
+      const defaultIssuer = issuer || sector || 'Unknown';
+      const defaultCurrentPrice = current_price || purchase_price;
+      const defaultSector = sector || 'Bond';
+      const defaultNotes = notes || '';
+
       // First create the holding record
-      console.log('Inserting into holdings table with values:', [symbol, name, quantity, purchase_price, purchase_date, current_price, sector, notes]);
+      console.log('Inserting into holdings table with values:', [symbol, name, quantity, purchase_price, purchase_date, defaultCurrentPrice, defaultSector, defaultNotes]);
       
       const [holdingResult] = await pool.execute(`
         INSERT INTO holdings (symbol, name, type, quantity, purchase_price, purchase_date, current_price, sector, notes)
         VALUES (?, ?, 'bond', ?, ?, ?, ?, ?, ?)
-      `, [symbol, name, quantity, purchase_price, purchase_date, current_price, sector, notes]);
+      `, [symbol, name, quantity, purchase_price, purchase_date, defaultCurrentPrice, defaultSector, defaultNotes]);
 
       const holdingId = holdingResult.insertId;
       console.log('Created holding with ID:', holdingId);
 
       // Then create the bond record
-      console.log('Inserting into bonds table with values:', [holdingId, symbol, name, bond_type, coupon_rate, maturity_date, face_value, current_yield, credit_rating, issuer]);
+      console.log('Inserting into bonds table with values:', [holdingId, symbol, name, bond_type, coupon_rate, maturity_date, face_value, defaultCurrentYield, defaultCreditRating, defaultIssuer]);
       
       const [bondResult] = await pool.execute(`
         INSERT INTO bonds (holding_id, symbol, name, bond_type, coupon_rate, maturity_date, face_value, current_yield, credit_rating, issuer)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `, [holdingId, symbol, name, bond_type, coupon_rate, maturity_date, face_value, current_yield, credit_rating, issuer]);
+      `, [holdingId, symbol, name, bond_type, coupon_rate, maturity_date, face_value, defaultCurrentYield, defaultCreditRating, defaultIssuer]);
 
       const bondId = bondResult.insertId;
       console.log('Created bond with ID:', bondId);
