@@ -14,7 +14,7 @@
 
     <!-- Header -->
     <div class="section-header">
-              <h1>📊 {{ $t('fund.title') }}</h1>
+              <h1>{{ $t('fund.title') }}</h1>
         <p>{{ $t('fund.subtitle') }}</p>
       <!-- <div class="login-notice" v-if="!isLoggedIn">
         <p>⚠️ You are not logged in. All data shown is for demonstration purposes only.</p>
@@ -30,7 +30,9 @@
           :key="category.type"
           class="fund-type-card"
         >
-          <div class="type-icon">{{ getCategoryIcon(category.type) }}</div>
+          <div class="type-icon">
+            <img :src="barChartIcon" alt="Bar Chart" class="type-icon-img" />
+          </div>
           <h3>{{ getCategoryName(category.type) }}</h3>
           <p>{{ getCategoryDescription(category.type) }}</p>
           <div class="fund-metrics">
@@ -78,8 +80,9 @@
           style="width: 100%"
           @row-click="showFundDetail"
           :row-class-name="getRowClassName"
+          :show-overflow-tooltip="false"
         >
-          <el-table-column prop="symbol" :label="$t('fund.tableHeaders.symbol')" width="120">
+          <el-table-column prop="symbol" :label="$t('fund.tableHeaders.symbol')" min-width="100" show-overflow-tooltip>
             <template #default="scope">
               <div class="symbol-cell">
                 <span class="symbol">{{ scope.row.symbol }}</span>
@@ -87,7 +90,7 @@
             </template>
           </el-table-column>
           
-          <el-table-column prop="name" :label="$t('fund.tableHeaders.name')" min-width="200">
+          <el-table-column prop="name" :label="$t('fund.tableHeaders.name')" min-width="200" show-overflow-tooltip>
             <template #default="scope">
               <div class="name-cell">
                 <div class="name">{{ scope.row.name }}</div>
@@ -96,33 +99,33 @@
             </template>
           </el-table-column>
           
-          <el-table-column prop="quantity" :label="$t('fund.tableHeaders.quantity')" width="120" align="right">
+          <el-table-column prop="quantity" :label="$t('fund.tableHeaders.quantity')" min-width="120" align="right" show-overflow-tooltip>
             <template #default="scope">
-                              <span>{{ parseFloat(scope.row.quantity || 0).toFixed(2) }}</span>
+              <span>{{ parseFloat(scope.row.quantity || 0).toFixed(2) }}</span>
             </template>
           </el-table-column>
           
-          <el-table-column prop="current_price" :label="$t('fund.tableHeaders.currentPrice')" width="130" align="right">
+          <el-table-column prop="current_price" :label="$t('fund.tableHeaders.currentPrice')" min-width="130" align="right" show-overflow-tooltip>
             <template #default="scope">
               <span class="price">${{ parseFloat(scope.row.current_price || 0).toFixed(2) }}</span>
             </template>
           </el-table-column>
           
-          <el-table-column :label="$t('fund.tableHeaders.currentValue')" width="140" align="right">
+          <el-table-column :label="$t('fund.tableHeaders.currentValue')" min-width="140" align="right" show-overflow-tooltip>
             <template #default="scope">
-                              <span class="value">${{ (parseFloat(scope.row.quantity || 0) * parseFloat(scope.row.current_price || 0)).toFixed(2) }}</span>
+              <span class="value">${{ (parseFloat(scope.row.quantity || 0) * parseFloat(scope.row.current_price || 0)).toFixed(2) }}</span>
             </template>
           </el-table-column>
           
-          <el-table-column :label="$t('fund.tableHeaders.gainLoss')" width="140" align="right">
+          <el-table-column :label="$t('fund.tableHeaders.gainLoss')" min-width="140" align="right" show-overflow-tooltip>
             <template #default="scope">
-                              <span :class="getGainLoss(scope.row) >= 0 ? 'positive' : 'negative'">
-                  {{ getGainLoss(scope.row) >= 0 ? '+' : '' }}${{ getGainLoss(scope.row).toFixed(2) }}
-                </span>
+              <span :class="getGainLoss(scope.row) >= 0 ? 'positive' : 'negative'">
+                {{ getGainLoss(scope.row) >= 0 ? '+' : '' }}${{ getGainLoss(scope.row).toFixed(2) }}
+              </span>
             </template>
           </el-table-column>
           
-          <el-table-column :label="$t('fund.tableHeaders.gainLossPercent')" width="120" align="right">
+          <el-table-column :label="$t('fund.tableHeaders.gainLossPercent')" min-width="120" align="right" show-overflow-tooltip>
             <template #default="scope">
               <span :class="getGainLossPercent(scope.row) >= 0 ? 'positive' : 'negative'">
                 {{ getGainLossPercent(scope.row) >= 0 ? '+' : '' }}{{ getGainLossPercent(scope.row).toFixed(2) }}%
@@ -130,7 +133,7 @@
             </template>
           </el-table-column>
           
-          <el-table-column :label="$t('fund.ytdReturn')" width="80" align="right">
+          <el-table-column :label="$t('fund.ytdReturn')" min-width="100" align="right" show-overflow-tooltip>
             <template #default="scope">
               <span :class="parseFloat(scope.row.ytd || 0) >= 0 ? 'positive' : 'negative'">
                 {{ parseFloat(scope.row.ytd || 0) >= 0 ? '+' : '' }}{{ parseFloat(scope.row.ytd || 0).toFixed(2) }}%
@@ -138,7 +141,7 @@
             </template>
           </el-table-column>
           
-          <el-table-column :label="$t('fund.oneYear')" width="80" align="right">
+          <el-table-column :label="$t('fund.oneYear')" min-width="100" align="right" show-overflow-tooltip>
             <template #default="scope">
               <span :class="parseFloat(scope.row.return_1y || 0) >= 0 ? 'positive' : 'negative'">
                 {{ parseFloat(scope.row.return_1y || 0) >= 0 ? '+' : '' }}{{ parseFloat(scope.row.return_1y || 0).toFixed(2) }}%
@@ -146,7 +149,7 @@
             </template>
           </el-table-column>
           
-          <el-table-column :label="$t('fund.threeYears')" width="80" align="right">
+          <el-table-column :label="$t('fund.threeYears')" min-width="100" align="right" show-overflow-tooltip>
             <template #default="scope">
               <span :class="parseFloat(scope.row.return_3y || 0) >= 0 ? 'positive' : 'negative'">
                 {{ parseFloat(scope.row.return_3y || 0) >= 0 ? '+' : '' }}{{ parseFloat(scope.row.return_3y || 0).toFixed(2) }}%
@@ -203,14 +206,18 @@
             <h4>{{ $t('fund.portfolioAnalysis') }}</h4>
             <div class="analysis-list">
               <div class="analysis-item">
-                <div class="analysis-icon positive">📈</div>
+                <div class="analysis-icon positive">
+                  <img :src="lineChartIcon" alt="Line Chart" class="analysis-icon-img" />
+                </div>
                 <div class="analysis-content">
                   <div class="analysis-title">{{ $t('fund.riskLevel') }}</div>
                   <div class="analysis-value">{{ $t('fund.moderate') }}</div>
                 </div>
               </div>
               <div class="analysis-item">
-                <div class="analysis-icon neutral">⚖️</div>
+                <div class="analysis-icon neutral">
+                  <img :src="techIcon" alt="Tech" class="analysis-icon-img" />
+                </div>
                 <div class="analysis-content">
                   <div class="analysis-title">{{ $t('fund.diversification') }}</div>
                   <div class="analysis-value">{{ $t('fund.good') }}</div>
@@ -509,6 +516,10 @@ import { Loading, Download, View, Plus, Minus } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import portfolioAPI from '../api/portfolio.js'
 import { useI18n } from 'vue-i18n'
+// Import image assets
+import barChartIcon from '@/assets/bar_chart.png'
+import lineChartIcon from '@/assets/line_chart.png'
+import techIcon from '@/assets/tech.png'
 
 const { t } = useI18n()
 
@@ -1337,6 +1348,16 @@ onMounted(async () => {
   font-size: 2.5em;
   margin-bottom: 15px;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.type-icon-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
 }
 
 .fund-type-card h3 {
@@ -1458,21 +1479,23 @@ onMounted(async () => {
 :deep(.el-table) {
   border-radius: 8px;
   overflow: hidden;
-  min-width: 1200px;
+  min-width: auto;
 }
 
 :deep(.el-table .cell) {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: break-word;
 }
 
 :deep(.el-table th .cell) {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
   line-height: 1.2;
   padding: 8px 4px;
+  word-break: break-word;
 }
 
 :deep(.el-table th) {
@@ -1696,6 +1719,12 @@ onMounted(async () => {
   justify-content: center;
   border-radius: 8px;
   background: white;
+}
+
+.analysis-icon-img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 .analysis-content {
