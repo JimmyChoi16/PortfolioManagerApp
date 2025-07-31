@@ -11,25 +11,25 @@
         
         <!-- Back Button -->
         <button class="back-btn" @click="goBackToHome">
-          ← Back to Home
+          {{ t('login.backToHome') }}
         </button>
 
         <!-- Main Form -->
         <div class="form-main">
           <div class="form-header">
-            <p class="form-subtitle">{{ isSignIn ? 'Welcome back' : 'Start your journey' }}</p>
-            <h1 class="form-title">{{ isSignIn ? 'Sign In to PortfolioManager' : 'Sign Up to PortfolioManager' }}</h1>
+            <p class="form-subtitle">{{ isSignIn ? t('login.welcomeBack') : t('login.startJourney') }}</p>
+            <h1 class="form-title">{{ isSignIn ? t('login.signInTitle') : t('login.signUpTitle') }}</h1>
           </div>
 
           <form @submit.prevent="handleSubmit" class="auth-form">
             <div class="form-group">
-              <label for="email">E-mail</label>
+              <label for="email">{{ t('login.email') }}</label>
               <div class="input-wrapper">
                 <input 
                   type="email" 
                   id="email" 
                   v-model="formData.email" 
-                  placeholder="example@email.com" 
+                  :placeholder="t('login.emailPlaceholder')" 
                   required
                 />
                 <div class="input-icon">✉️</div>
@@ -37,13 +37,13 @@
             </div>
 
             <div class="form-group">
-              <label for="password">Password</label>
+              <label for="password">{{ t('login.password') }}</label>
               <div class="input-wrapper">
                 <input 
                   :type="showPassword ? 'text' : 'password'" 
                   id="password" 
                   v-model="formData.password" 
-                  :placeholder="isSignIn ? 'Enter your password' : 'Create a password'" 
+                  :placeholder="isSignIn ? t('login.passwordSignInPlaceholder') : t('login.passwordSignUpPlaceholder')" 
                   required
                 />
                 <div class="input-icon password-toggle" @click="togglePassword">
@@ -57,19 +57,19 @@
               <label class="checkbox-label">
                 <input type="checkbox" v-model="formData.rememberMe" />
                 <span class="checkmark"></span>
-                Remember me
+                {{ t('login.rememberMe') }}
               </label>
             </div>
 
             <button type="submit" class="auth-btn" :disabled="loading">
-              <span v-if="loading">Loading...</span>
-              <span v-else>{{ isSignIn ? 'Sign In' : 'Sign Up' }}</span>
+              <span v-if="loading">{{ t('login.loading') }}</span>
+              <span v-else>{{ isSignIn ? t('login.signIn') : t('login.signUp') }}</span>
             </button>
           </form>
 
           <!-- Social Auth -->
           <div class="social-auth">
-            <p class="social-text">or {{ isSignIn ? 'sign in' : 'sign up' }} with</p>
+            <p class="social-text">{{ isSignIn ? t('login.orSignInWith') : t('login.orSignUpWith') }}</p>
             <div class="social-buttons">
               <button class="social-btn facebook">
                 <span class="social-icon">📘</span>
@@ -85,15 +85,15 @@
 
           <!-- Toggle Link -->
           <div class="toggle-link">
-            <span>{{ isSignIn ? "Don't have an account? " : 'Have an account? ' }}</span>
+            <span>{{ isSignIn ? t('login.dontHaveAccount') : t('login.haveAccount') }}</span>
             <a href="#" @click.prevent="toggleMode">
-              {{ isSignIn ? 'Sign up' : 'Sign in' }}
+              {{ isSignIn ? t('login.signUpLink') : t('login.signInLink') }}
             </a>
           </div>
 
           <!-- Forgot Password (Sign In only) -->
           <div v-if="isSignIn" class="forgot-password">
-            <a href="#" @click.prevent="forgotPassword">Forgot your password?</a>
+            <a href="#" @click.prevent="forgotPassword">{{ t('login.forgotPassword') }}</a>
           </div>
         </div>
       </div>
@@ -115,7 +115,9 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const emit = defineEmits(['goBack', 'loginSuccess'])
 
 const isSignIn = ref(true)
