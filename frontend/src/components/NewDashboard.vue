@@ -2,8 +2,8 @@
   <div class="new-dashboard">
     <!-- Header -->
     <div class="dashboard-header">
-      <h1>Portfolio Dashboard</h1>
-      <p>Your financial overview at a glance</p>
+      <h1>{{ t('dashboard.portfolioDashboard') }}</h1>
+      <p>{{ t('dashboard.financialOverview') }}</p>
     </div>
 
     <!-- Main Dashboard Grid -->
@@ -13,7 +13,7 @@
         <!-- Net Worth Card -->
         <div class="metric-card primary">
           <div class="metric-header">
-            <h2>NET WORTH</h2>
+            <h2>{{ t('dashboard.netWorth') }}</h2>
             <div class="metric-icon">💰</div>
           </div>
           <div class="metric-value">${{ formatNumber(getTotalPortfolioValue()) }}</div>
@@ -26,7 +26,7 @@
         <div class="kpi-grid">
           <div class="kpi-card">
             <div class="kpi-icon">📈</div>
-            <div class="kpi-label">Total Return</div>
+            <div class="kpi-label">{{ t('dashboard.totalReturn') }}</div>
             <div class="kpi-value" :class="getTotalReturn() >= 0 ? 'positive' : 'negative'">
               {{ getTotalReturn() >= 0 ? '+' : '' }}{{ getTotalReturn().toFixed(2) }}%
             </div>
@@ -34,37 +34,37 @@
           
           <div class="kpi-card">
             <div class="kpi-icon">⚖️</div>
-            <div class="kpi-label">Risk Level</div>
+            <div class="kpi-label">{{ t('dashboard.riskLevel') }}</div>
             <div class="kpi-value">{{ getRiskLevel() }}</div>
           </div>
           
           <div class="kpi-card">
             <div class="kpi-icon">🕒</div>
-            <div class="kpi-label">Portfolio Age</div>
+            <div class="kpi-label">{{ t('dashboard.portfolioAge') }}</div>
             <div class="kpi-value">{{ getPortfolioAge() }}</div>
           </div>
           
           <div class="kpi-card">
             <div class="kpi-icon">💵</div>
-            <div class="kpi-label">Cash Ratio</div>
+            <div class="kpi-label">{{ t('dashboard.cashRatio') }}</div>
             <div class="kpi-value">{{ getCashRatio().toFixed(1) }}%</div>
           </div>
         </div>
 
         <!-- Quick Actions -->
-        <div class="quick-actions-panel">
-          <h3>Quick Actions</h3>
+        <!-- <div class="quick-actions-panel">
+          <h3>{{ t('dashboard.quickActions') }}</h3>
           <div class="action-buttons">
             <el-button type="primary" size="small" @click="showAddHolding = true">
               <el-icon><Plus /></el-icon>
-              Add Holding
+              {{ t('dashboard.addHolding') }}
             </el-button>
             <el-button size="small" @click="updatePrices">
               <el-icon><Refresh /></el-icon>
-              Update Prices
+              {{ t('dashboard.updatePrices') }}
             </el-button>
           </div>
-        </div>
+        </div> -->
       </div>
 
       <!-- Center Column - Core Charts -->
@@ -72,16 +72,16 @@
         <!-- Net Worth Trend Chart -->
         <div class="chart-section">
           <div class="chart-header">
-            <div class="chart-title">Net Worth Trend</div>
+            <div class="chart-title">{{ t('dashboard.netWorthTrend') }}</div>
             <div class="chart-stats">
               <div class="stat-item">
-                <div class="stat-label">LAST 30 DAYS</div>
+                <div class="stat-label">{{ t('dashboard.last30Days') }}</div>
                 <div class="stat-value" :class="getLast30DaysChange() >= 0 ? 'positive' : 'negative'">
                   {{ getLast30DaysChange() >= 0 ? '+' : '' }}{{ getLast30DaysChange().toFixed(2) }}%
                 </div>
               </div>
               <div class="stat-item">
-                <div class="stat-label">TODAY'S CHANGE</div>
+                <div class="stat-label">{{ t('dashboard.todaysChange') }}</div>
                 <div class="stat-value" :class="getTodayChange() >= 0 ? 'positive' : 'negative'">
                   {{ getTodayChange() >= 0 ? '+' : '' }}{{ getTodayChange().toFixed(2) }}%
                 </div>
@@ -91,11 +91,11 @@
           <div class="chart-container">
             <PerformanceLineChart :data="historicalData" v-if="historicalData && historicalData.length > 0" />
             <div class="chart-placeholder" v-else>
-              <div class="placeholder-content">
-                <div class="placeholder-icon">📊</div>
-                <div class="placeholder-text">Net Worth Trend Chart</div>
-                <div class="placeholder-subtext">Loading historical data...</div>
-              </div>
+                              <div class="placeholder-content">
+                  <div class="placeholder-icon">📊</div>
+                  <div class="placeholder-text">{{ t('dashboard.netWorthTrendChart') }}</div>
+                  <div class="placeholder-subtext">{{ t('dashboard.loadingHistoricalData') }}</div>
+                </div>
             </div>
           </div>
         </div>
@@ -103,10 +103,10 @@
         <!-- Asset Allocation -->
         <div class="chart-section">
           <div class="chart-header">
-            <div class="chart-title">Asset Allocation</div>
+            <div class="chart-title">{{ t('dashboard.assetAllocation') }}</div>
                       <div class="chart-stats">
             <div class="stat-item">
-              <div class="stat-label">TOTAL HOLDINGS</div>
+              <div class="stat-label">{{ t('dashboard.totalHoldingsLabel') }}</div>
               <div class="stat-value">{{ holdings.length || 0 }}</div>
             </div>
           </div>
@@ -123,8 +123,8 @@
           <div class="chart-placeholder" v-else>
             <div class="placeholder-content">
               <div class="placeholder-icon">🥧</div>
-              <div class="placeholder-text">Asset Allocation Chart</div>
-              <div class="placeholder-subtext">Loading allocation data...</div>
+              <div class="placeholder-text">{{ t('dashboard.assetAllocationChart') }}</div>
+              <div class="placeholder-subtext">{{ t('dashboard.loadingAllocationData') }}</div>
             </div>
           </div>
         </div>
@@ -132,7 +132,7 @@
         <!-- Portfolio Health Score -->
         <div class="chart-section">
           <div class="chart-header">
-            <div class="chart-title">Portfolio Health</div>
+            <div class="chart-title">{{ t('dashboard.portfolioHealth') }}</div>
           </div>
           <div class="health-score-container">
             <div class="health-score">
@@ -142,20 +142,20 @@
               </div>
               <div class="health-status">{{ getHealthStatus() }}</div>
             </div>
-            <div class="health-metrics">
-              <div class="health-metric">
-                <span class="metric-label">Diversification</span>
-                <span class="metric-value">{{ getDiversificationScore() }}/100</span>
+                          <div class="health-metrics">
+                <div class="health-metric">
+                  <span class="metric-label">{{ t('dashboard.diversification') }}</span>
+                  <span class="metric-value">{{ getDiversificationScore() }}/100</span>
+                </div>
+                <div class="health-metric">
+                  <span class="metric-label">{{ t('dashboard.riskBalance') }}</span>
+                  <span class="metric-value">{{ getRiskBalanceScore() }}/100</span>
+                </div>
+                <div class="health-metric">
+                  <span class="metric-label">{{ t('dashboard.performance') }}</span>
+                  <span class="metric-value">{{ getPerformanceScore() }}/100</span>
+                </div>
               </div>
-              <div class="health-metric">
-                <span class="metric-label">Risk Balance</span>
-                <span class="metric-value">{{ getRiskBalanceScore() }}/100</span>
-              </div>
-              <div class="health-metric">
-                <span class="metric-label">Performance</span>
-                <span class="metric-value">{{ getPerformanceScore() }}/100</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -164,7 +164,7 @@
       <div class="insights-panel">
         <!-- Market Overview -->
         <div class="market-overview">
-          <h3>Market Overview</h3>
+          <h3>{{ t('dashboard.marketOverview') }}</h3>
           <div class="market-indices">
             <div class="market-index">
               <div class="index-name">S&P 500</div>
@@ -187,59 +187,59 @@
 
         <!-- Quick Insights -->
         <div class="quick-insights">
-          <h3>Quick Insights</h3>
+          <h3>{{ t('dashboard.quickInsights') }}</h3>
           <div class="insight-item" v-if="getTotalReturn() > 5">
             <div class="insight-icon">📈</div>
-            <div class="insight-text">Strong performance! Your portfolio is up {{ getTotalReturn().toFixed(1) }}%</div>
+            <div class="insight-text">{{ t('dashboard.strongPerformance', { percent: getTotalReturn().toFixed(1) }) }}</div>
           </div>
           <div class="insight-item" v-if="getCashRatio() < 10">
             <div class="insight-icon">⚠️</div>
-            <div class="insight-text">Low cash ratio ({{ getCashRatio().toFixed(1) }}%). Consider adding liquidity.</div>
+            <div class="insight-text">{{ t('dashboard.lowCashRatio', { percent: getCashRatio().toFixed(1) }) }}</div>
           </div>
           <div class="insight-item" v-if="getCashRatio() > 30">
             <div class="insight-icon">💡</div>
-            <div class="insight-text">High cash ratio ({{ getCashRatio().toFixed(1) }}%). Consider investing excess cash.</div>
+            <div class="insight-text">{{ t('dashboard.highCashRatio', { percent: getCashRatio().toFixed(1) }) }}</div>
           </div>
           <div class="insight-item" v-if="allocationData.length > 0 && getTopAssetPercentage() > 50">
             <div class="insight-icon">🎯</div>
-            <div class="insight-text">Heavy concentration in {{ getTopAssetType() }} ({{ getTopAssetPercentage() }}%). Consider diversification.</div>
+            <div class="insight-text">{{ t('dashboard.heavyConcentration', { type: getTopAssetType(), percent: getTopAssetPercentage() }) }}</div>
           </div>
           <div class="insight-item">
             <div class="insight-icon">📊</div>
-            <div class="insight-text">Portfolio age: {{ getPortfolioAge() }}. Long-term perspective is key.</div>
+            <div class="insight-text">{{ t('dashboard.portfolioAgeInsight', { age: getPortfolioAge() }) }}</div>
           </div>
         </div>
 
         <!-- Top Performers -->
         <div class="top-performers">
-          <h3>Top Performers</h3>
+          <h3>{{ t('dashboard.topPerformers') }}</h3>
           <div class="performer-item" v-for="holding in topGainers.slice(0, 3)" :key="holding.id">
             <div class="performer-symbol">{{ holding.symbol }}</div>
             <div class="performer-change positive">+{{ (parseFloat(holding.gain_percent || 0) || 0).toFixed(1) }}%</div>
           </div>
           <div v-if="topGainers.length === 0" class="no-data">
-            No data available
+            {{ t('dashboard.noDataAvailable') }}
           </div>
         </div>
 
         <!-- Next Actions -->
         <div class="next-actions">
-          <h3>Suggested Actions</h3>
+          <h3>{{ t('dashboard.suggestedActions') }}</h3>
           <div class="action-item" v-if="getCashRatio() < 10">
             <div class="action-icon">💰</div>
-            <div class="action-text">Add more cash for liquidity</div>
+            <div class="action-text">{{ t('dashboard.addMoreCash') }}</div>
           </div>
           <div class="action-item" v-if="getCashRatio() > 30">
             <div class="action-icon">📈</div>
-            <div class="action-text">Consider investing excess cash</div>
+            <div class="action-text">{{ t('dashboard.investExcessCash') }}</div>
           </div>
           <div class="action-item" v-if="allocationData.length > 0 && getTopAssetPercentage() > 50">
             <div class="action-icon">⚖️</div>
-            <div class="action-text">Diversify your portfolio</div>
+            <div class="action-text">{{ t('dashboard.diversifyPortfolio') }}</div>
           </div>
           <div class="action-item">
             <div class="action-icon">📋</div>
-            <div class="action-text">Review your holdings monthly</div>
+            <div class="action-text">{{ t('dashboard.reviewHoldings') }}</div>
           </div>
         </div>
       </div>
@@ -250,7 +250,7 @@
     <!-- Add/Edit Holding Dialog -->
     <el-dialog
       v-model="showAddHolding"
-      :title="editingHolding ? 'Edit Holding' : 'Add New Holding'"
+      :title="editingHolding ? t('dashboard.editHolding') : t('dashboard.addNewHolding')"
       width="500px"
     >
       <el-form
@@ -259,52 +259,52 @@
         :rules="holdingRules"
         label-width="120px"
       >
-        <el-form-item label="Symbol" prop="symbol">
-          <el-input v-model="holdingForm.symbol" placeholder="e.g., AAPL" />
+        <el-form-item :label="t('dashboard.symbol')" prop="symbol">
+          <el-input v-model="holdingForm.symbol" :placeholder="t('dashboard.symbolPlaceholder')" />
         </el-form-item>
-        <el-form-item label="Name" prop="name">
-          <el-input v-model="holdingForm.name" placeholder="e.g., Apple Inc." />
+        <el-form-item :label="t('dashboard.name')" prop="name">
+          <el-input v-model="holdingForm.name" :placeholder="t('dashboard.namePlaceholder')" />
         </el-form-item>
-        <el-form-item label="Type" prop="type">
-          <el-select v-model="holdingForm.type" placeholder="Select type">
-            <el-option label="Stock" value="stock" />
-            <el-option label="Bond" value="bond" />
-            <el-option label="Fund" value="fund" />
-            <el-option label="Cash" value="cash" />
-            <el-option label="Crypto" value="crypto" />
+        <el-form-item :label="t('dashboard.type')" prop="type">
+          <el-select v-model="holdingForm.type" :placeholder="t('dashboard.selectType')">
+            <el-option :label="t('dashboard.stock')" value="stock" />
+            <el-option :label="t('dashboard.bond')" value="bond" />
+            <el-option :label="t('dashboard.fund')" value="fund" />
+            <el-option :label="t('dashboard.cash')" value="cash" />
+            <el-option :label="t('dashboard.crypto')" value="crypto" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Quantity" prop="quantity">
+        <el-form-item :label="t('dashboard.quantity')" prop="quantity">
           <el-input-number v-model="holdingForm.quantity" :min="0.000001" :precision="6" />
         </el-form-item>
-        <el-form-item label="Purchase Price" prop="purchase_price">
+        <el-form-item :label="t('dashboard.purchasePrice')" prop="purchase_price">
           <el-input-number v-model="holdingForm.purchase_price" :min="0.01" :precision="2" />
         </el-form-item>
-        <el-form-item label="Purchase Date" prop="purchase_date">
+        <el-form-item :label="t('dashboard.purchaseDate')" prop="purchase_date">
           <el-date-picker
             v-model="holdingForm.purchase_date"
             type="date"
-            placeholder="Select date"
+            :placeholder="t('dashboard.selectDate')"
             format="YYYY-MM-DD"
             value-format="YYYY-MM-DD"
           />
         </el-form-item>
-        <el-form-item label="Sector" prop="sector">
-          <el-input v-model="holdingForm.sector" placeholder="e.g., Technology" />
+        <el-form-item :label="t('dashboard.sector')" prop="sector">
+          <el-input v-model="holdingForm.sector" :placeholder="t('dashboard.sectorPlaceholder')" />
         </el-form-item>
-        <el-form-item label="Notes" prop="notes">
+        <el-form-item :label="t('dashboard.notes')" prop="notes">
           <el-input
             v-model="holdingForm.notes"
             type="textarea"
             :rows="3"
-            placeholder="Additional notes..."
+            :placeholder="t('dashboard.notesPlaceholder')"
           />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showAddHolding = false">Cancel</el-button>
+        <el-button @click="showAddHolding = false">{{ t('dashboard.cancel') }}</el-button>
         <el-button type="primary" @click="saveHolding" :loading="saving">
-          {{ editingHolding ? 'Update' : 'Add' }}
+          {{ editingHolding ? t('dashboard.update') : t('dashboard.add') }}
         </el-button>
       </template>
     </el-dialog>
@@ -314,7 +314,7 @@
     <!-- Create Portfolio Dialog -->
     <el-dialog
       v-model="showCreatePortfolio"
-      title="Create New Portfolio"
+      :title="t('dashboard.createNewPortfolio')"
       width="600px"
     >
       <Portfolio 
@@ -327,6 +327,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh, Plus, DataAnalysis, Collection } from '@element-plus/icons-vue'
 import portfolioAPI from '../api/portfolio.js'
@@ -334,6 +335,8 @@ import AllocationPieChart from './charts/AllocationPieChart.vue'
 import SectorPieChart from './charts/SectorPieChart.vue'
 import PerformanceLineChart from './charts/PerformanceLineChart.vue'
 import Portfolio from './Portfolio.vue'
+
+const { t } = useI18n()
 
 const emit = defineEmits(['goToAssetPage'])
 
@@ -465,7 +468,14 @@ const loadData = async () => {
     
     // Process allocation data
     if (allocationRes.data && allocationRes.data.success) {
-      allocationData.value = allocationRes.data.data || []
+      const rawAllocationData = allocationRes.data.data || []
+      // Ensure all numeric values are properly parsed
+      allocationData.value = rawAllocationData.map(item => ({
+        ...item,
+        total_value: parseFloat(item.total_value) || 0,
+        percentage: parseFloat(item.percentage) || 0,
+        count: parseInt(item.count) || 0
+      }))
       console.log('Allocation data loaded:', allocationData.value.length)
     } else {
       console.warn('Allocation data not available:', allocationRes)
@@ -513,7 +523,7 @@ const loadData = async () => {
     
     console.log('All data loaded successfully')
   } catch (error) {
-    ElMessage.error('Failed to load portfolio data')
+    ElMessage.error(t('dashboard.failedToLoadPortfolioData'))
     console.error('Error loading data:', error)
     
     // Set default values on error
@@ -538,17 +548,23 @@ const generateMockAllocation = (holdings) => {
   holdings.forEach(holding => {
     const type = holding.type || 'stock'
     typeCount[type] = (typeCount[type] || 0) + 1
-    typeValue[type] = (typeValue[type] || 0) + (holding.current_value || 0)
+    const currentValue = parseFloat(holding.current_value) || 0
+    typeValue[type] = (typeValue[type] || 0) + currentValue
   })
   
-  const totalValue = Object.values(typeValue).reduce((sum, val) => sum + val, 0)
+  const totalValue = Object.values(typeValue).reduce((sum, val) => sum + parseFloat(val || 0), 0)
   
-  return Object.keys(typeCount).map(type => ({
-    type: type.charAt(0).toUpperCase() + type.slice(1),
-    count: typeCount[type],
-    total_value: typeValue[type],
-    percentage: totalValue > 0 ? Math.round((typeValue[type] / totalValue) * 100) : 0
-  })).sort((a, b) => b.percentage - a.percentage)
+  return Object.keys(typeCount).map(type => {
+    const typeValueNum = parseFloat(typeValue[type] || 0)
+    const percentage = totalValue > 0 ? Math.round((typeValueNum / totalValue) * 100) : 0
+    
+    return {
+      type: type.charAt(0).toUpperCase() + type.slice(1),
+      count: typeCount[type],
+      total_value: typeValueNum,
+      percentage: percentage
+    }
+  }).sort((a, b) => b.percentage - a.percentage)
 }
 
 const generateMockHistoricalData = () => {
@@ -577,15 +593,13 @@ const generateMockHistoricalData = () => {
 const updatePrices = async () => {
   try {
     await portfolioAPI.updateCurrentPrices()
-    ElMessage.success('Prices updated successfully')
+    ElMessage.success(t('dashboard.pricesUpdatedSuccessfully'))
     loadData()
   } catch (error) {
-    ElMessage.error('Failed to update prices')
+    ElMessage.error(t('dashboard.failedToUpdatePrices'))
     console.error('Error updating prices:', error)
   }
 }
-
-
 
 const editHolding = (holding) => {
   editingHolding.value = holding
@@ -598,10 +612,10 @@ const saveHolding = async () => {
   try {
     if (editingHolding.value) {
       await portfolioAPI.updateHolding(editingHolding.value.id, holdingForm.value)
-      ElMessage.success('Holding updated successfully')
+      ElMessage.success(t('dashboard.holdingUpdatedSuccessfully'))
     } else {
       await portfolioAPI.createHolding(holdingForm.value)
-      ElMessage.success('Holding added successfully')
+      ElMessage.success(t('dashboard.holdingAddedSuccessfully'))
     }
     
     showAddHolding.value = false
@@ -618,7 +632,7 @@ const saveHolding = async () => {
     }
     loadData()
   } catch (error) {
-    ElMessage.error('Failed to save holding')
+    ElMessage.error(t('dashboard.failedToSaveHolding'))
     console.error('Error saving holding:', error)
   } finally {
     saving.value = false
@@ -627,7 +641,7 @@ const saveHolding = async () => {
 
 const onPortfolioCreated = () => {
   showCreatePortfolio.value = false
-  ElMessage.success('Portfolio created successfully!')
+  ElMessage.success(t('dashboard.portfolioCreatedSuccessfully'))
 }
 
 const getTopAssetType = () => {
@@ -767,10 +781,10 @@ const getHealthScoreClass = () => {
 
 const getHealthStatus = () => {
   const score = getHealthScore()
-  if (score >= 80) return 'Excellent'
-  if (score >= 60) return 'Good'
-  if (score >= 40) return 'Fair'
-  return 'Needs Attention'
+  if (score >= 80) return t('dashboard.excellent')
+  if (score >= 60) return t('dashboard.good')
+  if (score >= 40) return t('dashboard.fair')
+  return t('dashboard.needsAttention')
 }
 
 const getDiversificationScore = () => {
@@ -1184,9 +1198,9 @@ onMounted(() => {
 }
 
 .metric-value {
-  font-size: 0.8rem;
+  font-size: 1.8rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: #ffffff;
 }
 
 .performance-summary-grid {

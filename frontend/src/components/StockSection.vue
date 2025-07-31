@@ -20,7 +20,7 @@
         <p>{{ getSectorDescription(category.sector) }}</p>
         <div class="category-metrics">
           <div class="metric">
-            <span class="label">{{ t('stock.holdings') }}</span>
+                      <span class="label">{{ t('stock.holdings') }}</span>
             <span class="value">{{ category.count }} {{ t('stock.stocks') }}</span>
           </div>
           <div class="metric">
