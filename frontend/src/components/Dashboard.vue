@@ -800,7 +800,7 @@ onMounted(() => {
 .allocation-fill,
 .sector-fill {
   height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          background: linear-gradient(135deg, #6A95CC 0%, #53A7D8 100%);
   transition: width 0.3s ease;
 }
 

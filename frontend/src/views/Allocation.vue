@@ -193,7 +193,7 @@
       <div class="suggestions-grid">
         <div class="suggestion-card">
           <div class="suggestion-icon">
-            <el-icon size="24" color="#409eff"><Warning /></el-icon>
+            <el-icon size="24" color="#6A95CC"><Warning /></el-icon>
           </div>
           <div class="suggestion-content">
             <h4>High Concentration Risk</h4>
@@ -257,7 +257,7 @@ const allocationView = ref('holdings')
 
 // Color schemes
 const typeColors = {
-  stock: '#409eff',
+        stock: '#6A95CC',
   bond: '#67c23a',
   fund: '#e6a23c',
   crypto: '#f56c6c',
@@ -265,7 +265,7 @@ const typeColors = {
 }
 
 const holdingColors = [
-  '#409eff', '#67c23a', '#e6a23c', '#f56c6c', '#909399',
+      '#6A95CC', '#67c23a', '#e6a23c', '#f56c6c', '#909399',
   '#ff7f50', '#87ceeb', '#dda0dd', '#98fb98', '#f0e68c'
 ]
 
@@ -452,7 +452,7 @@ const getRiskLevel = (type) => {
 }
 
 const getProgressColor = (type) => {
-  return typeColors[type] || '#409eff'
+      return typeColors[type] || '#6A95CC'
 }
 
 // Lifecycle

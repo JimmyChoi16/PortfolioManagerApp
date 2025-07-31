@@ -125,7 +125,7 @@
         </template>
         <div class="suggestions-content">
           <div class="suggestion-item">
-            <el-icon color="#409eff"><InfoFilled /></el-icon>
+            <el-icon color="#6A95CC"><InfoFilled /></el-icon>
             <div>
               <h4>Diversify into Tech ETFs</h4>
               <p>Consider adding QQQ to balance your individual stock holdings</p>
@@ -248,7 +248,7 @@ const chartOption = computed(() => ({
       data: historicalData.value.map(item => item.total_value),
       smooth: true,
       lineStyle: {
-        color: '#409eff',
+        color: '#6A95CC',
         width: 3
       },
       areaStyle: {
@@ -374,7 +374,7 @@ onMounted(async () => {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #409eff;
+  background: #6A95CC;
   color: white;
   display: flex;
   align-items: center;

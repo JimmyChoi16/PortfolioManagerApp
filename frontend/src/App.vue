@@ -340,7 +340,7 @@ onMounted(() => {
 }
 
 .logo:hover {
-  color: #0071e3;
+  color: #6A95CC;
 }
 
 .nav-actions {
@@ -404,7 +404,7 @@ onMounted(() => {
 
 .asset-menu .el-dropdown-menu__item .el-icon {
   font-size: 16px;
-  color: #0071e3;
+  color: #6A95CC;
 }
 
 .login-btn {
@@ -422,8 +422,8 @@ onMounted(() => {
 
 .logout-btn:hover {
   background: #e9ecef;
-  border-color: #0071e3;
-  color: #0071e3;
+  border-color: #6A95CC;
+  color: #6A95CC;
 }
 
 .app-main {
@@ -435,7 +435,7 @@ onMounted(() => {
 /* Element Plus Overrides */
 .el-button.active {
   font-weight: bold;
-  color: #0071e3;
+  color: #6A95CC;
 }
 
 .el-header {
@@ -449,7 +449,7 @@ onMounted(() => {
 
 .el-button.active {
   font-weight: bold;
-  color: #0071e3;
+  color: #6A95CC;
 }
 
 /* Footer */
@@ -635,7 +635,7 @@ onMounted(() => {
   position: absolute;
   left: 0;
   top: 0;
-  color: #0071e3;
+  color: #6A95CC;
   font-size: 1.2rem;
   font-weight: bold;
 }
@@ -673,7 +673,7 @@ onMounted(() => {
   box-shadow: 0 8px 32px rgba(0,0,0,0.13);
   background: #f0f4ff;
   transform: translateY(-6px) scale(1.04);
-  border: 2px solid #0071e3;
+  border: 2px solid #6A95CC;
 }
 
 .feature-title {
@@ -696,7 +696,7 @@ onMounted(() => {
 }
 
 .feature-insights {
-  background: linear-gradient(120deg, #f3e8ff 0%, #e9eafc 100%);
+  background: linear-gradient(120deg, #6A95CC 0%, #53A7D8 100%);
 }
 
 .feature-privacy {
@@ -765,7 +765,7 @@ onMounted(() => {
 }
 
 .modal-close:hover {
-  color: #0071e3;
+  color: #6A95CC;
 }
 
 .modal-dashboard {
@@ -777,7 +777,7 @@ onMounted(() => {
 }
 
 .modal-insights {
-  background: linear-gradient(120deg, #f3e8ff 0%, #e9eafc 100%);
+  background: linear-gradient(120deg, #6A95CC 0%, #53A7D8 100%);
 }
 
 .modal-privacy {

@@ -258,7 +258,7 @@ const performanceChartOption = computed(() => ({
       data: historicalData.value.map(item => item.total_value),
       smooth: true,
       lineStyle: {
-        color: '#409eff',
+        color: '#6A95CC',
         width: 3
       },
       areaStyle: {

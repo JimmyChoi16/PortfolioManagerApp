@@ -234,7 +234,7 @@
                   <polyline 
                     :points="correctCurvePoints" 
                     fill="none" 
-                    stroke="#2563eb" 
+                    stroke="#6A95CC" 
                     stroke-width="3"
                     stroke-linecap="round"
                     stroke-linejoin="round"
@@ -247,7 +247,7 @@
                     :cx="getCorrectX(point.duration)"
                     :cy="getCorrectY(point.yield)"
                     r="6"
-                    fill="#2563eb"
+                    fill="#6A95CC"
                     stroke="white"
                     stroke-width="2"
                     class="data-circle"
@@ -1251,10 +1251,10 @@ watch(() => bondForm.value.type, (newType) => {
 
 const getBondColor = (bondType) => {
   const colors = {
-    government: '#3b82f6',
+    government: '#6A95CC',
     corporate: '#10b981',
     municipal: '#f59e0b',
-    international: '#8b5cf6'
+    international: '#53A7D8'
   }
   return colors[bondType] || '#6b7280'
 }
@@ -1315,7 +1315,7 @@ const getBondColor = (bondType) => {
 }
 
 .bond-type-card {
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  background: linear-gradient(135deg, #6A95CC 0%, #53A7D8 100%);
   color: white;
   padding: 32px 24px;
   border-radius: 16px;
@@ -1775,7 +1775,7 @@ const getBondColor = (bondType) => {
 .chart-loading .el-icon {
   font-size: 2rem;
   margin-bottom: 12px;
-  color: #409eff;
+  color: #6A95CC;
 }
 
 .chart-loading p {
@@ -1867,7 +1867,7 @@ const getBondColor = (bondType) => {
 }
 
 .health-excellent { color: #10b981; }
-.health-good { color: #3b82f6; }
+.health-good { color: #6A95CC; }
 .health-poor { color: #ef4444; }
 .health-neutral { color: #6b7280; }
 

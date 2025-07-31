@@ -34,8 +34,8 @@ const createChart = () => {
       backgroundColor: [
         '#11998e',
         '#38ef7d',
-        '#667eea',
-        '#764ba2',
+        '#6A95CC',
+        '#53A7D8',
         '#f093fb',
         '#f5576c',
         '#4facfe',
