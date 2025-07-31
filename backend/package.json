@@ -1,7 +1,7 @@
 {
   "name": "wealthu-backend",
   "version": "1.0.0",
-      "description": "WealthU Backend API",
+  "description": "WealthU Backend API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
