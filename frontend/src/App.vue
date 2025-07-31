@@ -13,27 +13,27 @@
           <template #dropdown>
             <el-dropdown-menu class="asset-menu">
               <el-dropdown-item @click="setActivePage('dashboard')" v-if="isLoggedIn">
-                📊
+                <img :src="barChartIcon" alt="Dashboard" class="nav-icon-img" />
                 <span>{{ $t('nav.dashboard') }}</span>
               </el-dropdown-item>
               <el-dropdown-item @click="setActivePage('home')" v-if="!isLoggedIn">
-                🏠
+                <img :src="houseIcon" alt="Home" class="nav-icon-img" />
                 <span>{{ $t('nav.home') }}</span>
               </el-dropdown-item>
               <el-dropdown-item @click="setActivePage('stock')">
-                📈
+                <img :src="lineChartIcon" alt="Stock" class="nav-icon-img" />
                 <span>{{ $t('nav.stock') }}</span>
               </el-dropdown-item>
               <el-dropdown-item @click="setActivePage('fund')">
-                💰
+                <img :src="moneyIcon" alt="Fund" class="nav-icon-img" />
                 <span>{{ $t('nav.fund') }}</span>
               </el-dropdown-item>
               <el-dropdown-item @click="setActivePage('bond')">
-                💳
+                <img :src="cardIcon" alt="Bond" class="nav-icon-img" />
                 <span>{{ $t('nav.bonds') }}</span>
               </el-dropdown-item>
               <el-dropdown-item @click="setActivePage('cash')">
-                💵
+                <img :src="cashIcon" alt="Cash" class="nav-icon-img" />
                 <span>{{ $t('nav.cash') }}</span>
               </el-dropdown-item>
             </el-dropdown-menu>
@@ -45,8 +45,7 @@
         <!-- Show login/logout button based on auth status -->
         <el-button 
           v-if="!isLoggedIn" 
-          type="primary" 
-          class="login-btn" 
+          class="dashboard-yellow-btn" 
           @click="goLogin"
         >
           {{ $t('nav.login') }}
@@ -54,7 +53,7 @@
         <el-button 
           v-else 
           @click="logout" 
-          class="logout-btn"
+          class="dashboard-yellow-btn"
         >
           {{ $t('nav.logout') }}
         </el-button>
@@ -189,6 +188,12 @@ import LoginPage from './components/LoginPage.vue'
 import Dashboard from './components/Dashboard.vue'
 import NewDashboard from './components/NewDashboard.vue'
 import LanguageSwitcher from './components/LanguageSwitcher.vue'
+import houseIcon from '@/assets/house.png'
+import barChartIcon from '@/assets/bar_chart.png'
+import lineChartIcon from '@/assets/line_chart.png'
+import moneyIcon from '@/assets/money.png'
+import cardIcon from '@/assets/card.png'
+import cashIcon from '@/assets/cash.png'
 
 const router = useRouter()
 const { locale, t } = useI18n()
@@ -355,27 +360,22 @@ onMounted(() => {
 }
 
 .asset-btn {
-  background: linear-gradient(135deg, #f8b500 0%, #f8b500 100%);
-  border: none;
-  color: white;
-  font-weight: 500;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+  border: none !important;
+  color: #1f2937 !important;
+  font-weight: 600 !important;
   padding: 8px 16px;
-  border-radius: 20px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  border-radius: 20px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
   min-width: 120px;
   position: relative;
 }
 
 .asset-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-.asset-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-  background: linear-gradient(135deg, #fceabb 0%, #f8b500 100%);
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3) !important;
 }
 
 .asset-menu {
@@ -405,6 +405,12 @@ onMounted(() => {
 .asset-menu .el-dropdown-menu__item .el-icon {
   font-size: 16px;
   color: #6A95CC;
+}
+
+.nav-icon-img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 .login-btn {
@@ -854,5 +860,21 @@ onMounted(() => {
   .market-table {
     min-width: 400px;
   }
+}
+
+/* Dashboard yellow button style */
+.dashboard-yellow-btn {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+  border: none !important;
+  color: #1f2937 !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  border-radius: 20px !important;
+}
+
+.dashboard-yellow-btn:hover {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3) !important;
 }
 </style>

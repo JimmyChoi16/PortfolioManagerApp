@@ -14,7 +14,9 @@
         <div class="metric-card primary">
           <div class="metric-header">
             <h2>NET WORTH</h2>
-            <div class="metric-icon">💰</div>
+            <div class="metric-icon">
+              <img :src="moneyIcon" alt="Money" class="metric-icon-img" />
+            </div>
           </div>
           <div class="metric-value">${{ formatNumber(getTotalPortfolioValue()) }}</div>
           <div class="metric-change" :class="getTotalReturn() >= 0 ? 'positive' : 'negative'">
@@ -25,7 +27,9 @@
         <!-- Key Performance Indicators -->
         <div class="kpi-grid">
           <div class="kpi-card">
-            <div class="kpi-icon">📈</div>
+            <div class="kpi-icon">
+              <img :src="lineChartIcon" alt="Total Return" class="kpi-icon-img" />
+            </div>
             <div class="kpi-label">Total Return</div>
             <div class="kpi-value" :class="getTotalReturn() >= 0 ? 'positive' : 'negative'">
               {{ getTotalReturn() >= 0 ? '+' : '' }}{{ getTotalReturn().toFixed(2) }}%
@@ -33,19 +37,25 @@
           </div>
           
           <div class="kpi-card">
-            <div class="kpi-icon">⚖️</div>
+            <div class="kpi-icon">
+              <img :src="techIcon" alt="Risk Level" class="kpi-icon-img" />
+            </div>
             <div class="kpi-label">Risk Level</div>
             <div class="kpi-value">{{ getRiskLevel() }}</div>
           </div>
           
           <div class="kpi-card">
-            <div class="kpi-icon">🕒</div>
+            <div class="kpi-icon">
+              <img :src="barChartIcon" alt="Portfolio Age" class="kpi-icon-img" />
+            </div>
             <div class="kpi-label">Portfolio Age</div>
             <div class="kpi-value">{{ getPortfolioAge() }}</div>
           </div>
           
           <div class="kpi-card">
-            <div class="kpi-icon">💵</div>
+            <div class="kpi-icon">
+              <img :src="cashIcon" alt="Cash Ratio" class="kpi-icon-img" />
+            </div>
             <div class="kpi-label">Cash Ratio</div>
             <div class="kpi-value">{{ getCashRatio().toFixed(1) }}%</div>
           </div>
@@ -189,23 +199,33 @@
         <div class="quick-insights">
           <h3>Quick Insights</h3>
           <div class="insight-item" v-if="getTotalReturn() > 5">
-            <div class="insight-icon">📈</div>
+            <div class="insight-icon">
+              <img :src="alertIcon" alt="Alert" class="insight-icon-img" />
+            </div>
             <div class="insight-text">Strong performance! Your portfolio is up {{ getTotalReturn().toFixed(1) }}%</div>
           </div>
           <div class="insight-item" v-if="getCashRatio() < 10">
-            <div class="insight-icon">⚠️</div>
+            <div class="insight-icon">
+              <img :src="alertIcon" alt="Alert" class="insight-icon-img" />
+            </div>
             <div class="insight-text">Low cash ratio ({{ getCashRatio().toFixed(1) }}%). Consider adding liquidity.</div>
           </div>
           <div class="insight-item" v-if="getCashRatio() > 30">
-            <div class="insight-icon">💡</div>
+            <div class="insight-icon">
+              <img :src="targetIcon" alt="Target" class="insight-icon-img" />
+            </div>
             <div class="insight-text">High cash ratio ({{ getCashRatio().toFixed(1) }}%). Consider investing excess cash.</div>
           </div>
           <div class="insight-item" v-if="allocationData.length > 0 && getTopAssetPercentage() > 50">
-            <div class="insight-icon">🎯</div>
+            <div class="insight-icon">
+              <img :src="targetIcon" alt="Target" class="insight-icon-img" />
+            </div>
             <div class="insight-text">Heavy concentration in {{ getTopAssetType() }} ({{ getTopAssetPercentage() }}%). Consider diversification.</div>
           </div>
           <div class="insight-item">
-            <div class="insight-icon">📊</div>
+            <div class="insight-icon">
+              <img :src="barChartIcon" alt="Bar Chart" class="insight-icon-img" />
+            </div>
             <div class="insight-text">Portfolio age: {{ getPortfolioAge() }}. Long-term perspective is key.</div>
           </div>
         </div>
@@ -226,19 +246,27 @@
         <div class="next-actions">
           <h3>Suggested Actions</h3>
           <div class="action-item" v-if="getCashRatio() < 10">
-            <div class="action-icon">💰</div>
+            <div class="action-icon">
+              <img :src="moneyIcon" alt="Money" class="action-icon-img" />
+            </div>
             <div class="action-text">Add more cash for liquidity</div>
           </div>
           <div class="action-item" v-if="getCashRatio() > 30">
-            <div class="action-icon">📈</div>
+            <div class="action-icon">
+              <img :src="techIcon" alt="Tech" class="action-icon-img" />
+            </div>
             <div class="action-text">Consider investing excess cash</div>
           </div>
           <div class="action-item" v-if="allocationData.length > 0 && getTopAssetPercentage() > 50">
-            <div class="action-icon">⚖️</div>
+            <div class="action-icon">
+              <img :src="techIcon" alt="Tech" class="action-icon-img" />
+            </div>
             <div class="action-text">Diversify your portfolio</div>
           </div>
           <div class="action-item">
-            <div class="action-icon">📋</div>
+            <div class="action-icon">
+              <img :src="barChartIcon" alt="Bar Chart" class="action-icon-img" />
+            </div>
             <div class="action-text">Review your holdings monthly</div>
           </div>
         </div>
@@ -334,6 +362,13 @@ import AllocationPieChart from './charts/AllocationPieChart.vue'
 import SectorPieChart from './charts/SectorPieChart.vue'
 import PerformanceLineChart from './charts/PerformanceLineChart.vue'
 import Portfolio from './Portfolio.vue'
+import moneyIcon from '@/assets/money.png'
+import lineChartIcon from '@/assets/line_chart.png'
+import techIcon from '@/assets/tech.png'
+import cashIcon from '@/assets/cash.png'
+import alertIcon from '@/assets/loss.png'
+import targetIcon from '@/assets/trophy-line.png'
+import barChartIcon from '@/assets/bar_chart.png'
 
 const emit = defineEmits(['goToAssetPage'])
 
@@ -913,7 +948,21 @@ onMounted(() => {
 
 .metric-icon {
   font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+        .metric-icon-img {
+          width: 24px;
+          height: 24px;
+          object-fit: contain;
+        }
+
+        /* Make Net Worth icon white */
+        .metric-icon .metric-icon-img {
+          filter: brightness(0) invert(1);
+        }
 
 .metric-value {
   font-size: 2rem;
@@ -952,6 +1001,15 @@ onMounted(() => {
 .kpi-icon {
   font-size: 1.5rem;
   margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kpi-icon-img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 .kpi-label {
@@ -1186,7 +1244,7 @@ onMounted(() => {
 .metric-value {
   font-size: 1.8rem;
   font-weight: 600;
-  color: #ffffff  ;
+  color: #d1d6dc  ;
 }
 
 .performance-summary-grid {
@@ -1316,6 +1374,15 @@ onMounted(() => {
   font-size: 1.2rem;
   flex-shrink: 0;
   margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.insight-icon-img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
 }
 
 .insight-text {
@@ -1390,6 +1457,15 @@ onMounted(() => {
 .action-icon {
   font-size: 1.2rem;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-icon-img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 .action-text {
@@ -1425,6 +1501,7 @@ onMounted(() => {
   font-size: 3rem;
   margin-bottom: 16px;
   opacity: 0.5;
+  filter: brightness(0) invert(1);
 }
 
 .placeholder-text {

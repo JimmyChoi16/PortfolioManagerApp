@@ -32,7 +32,9 @@
                   :placeholder="t('login.emailPlaceholder')" 
                   required
                 />
-                <div class="input-icon">✉️</div>
+                <div class="input-icon">
+                  <img :src="letterIcon" alt="email" class="icon-img" />
+                </div>
               </div>
             </div>
 
@@ -47,7 +49,7 @@
                   required
                 />
                 <div class="input-icon password-toggle" @click="togglePassword">
-                  {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+                  <img :src="passwordIcon" alt="password toggle" class="icon-img" />
                 </div>
               </div>
             </div>
@@ -72,13 +74,13 @@
             <p class="social-text">{{ isSignIn ? t('login.orSignInWith') : t('login.orSignUpWith') }}</p>
             <div class="social-buttons">
               <button class="social-btn facebook">
-                <span class="social-icon">📘</span>
+                <img :src="bookIcon" alt="Facebook" class="social-icon-img" />
               </button>
               <button class="social-btn google">
-                <span class="social-icon">🔍</span>
+                <img :src="classIcon" alt="Google" class="social-icon-img" />
               </button>
               <button class="social-btn apple">
-                <span class="social-icon">🍎</span>
+                <img :src="appleIcon" alt="Apple" class="social-icon-img" />
               </button>
             </div>
           </div>
@@ -114,8 +116,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import letterIcon from '@/assets/letter.png'
+import eyeIcon from '@/assets/eye.png'
+import noEyeIcon from '@/assets/no-eye.png'
+import bookIcon from '@/assets/book.png'
+import classIcon from '@/assets/class.png'
+import appleIcon from '@/assets/apple.png'
 
 const { t } = useI18n()
 const emit = defineEmits(['goBack', 'loginSuccess'])
@@ -127,6 +135,10 @@ const formData = ref({
   email: '',
   password: '',
   rememberMe: false
+})
+
+const passwordIcon = computed(() => {
+  return showPassword.value ? noEyeIcon : eyeIcon
 })
 
 const togglePassword = () => {
@@ -311,10 +323,19 @@ const forgotPassword = () => {
   font-size: 1.2rem;
   color: #7f8c8d;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .password-toggle {
   user-select: none;
+}
+
+.icon-img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 .auth-btn {
@@ -376,6 +397,12 @@ const forgotPassword = () => {
 
 .social-icon {
   font-size: 1.2rem;
+}
+
+.social-icon-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 /* Toggle Link */

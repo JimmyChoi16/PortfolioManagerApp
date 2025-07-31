@@ -19,7 +19,9 @@
     <!-- Bond Types Overview -->
     <div class="bond-types">
       <div class="bond-type-card" v-for="(stats, type) in bondTypeStats" :key="type">
-        <div class="type-icon">{{ getBondTypeIcon(type) }}</div>
+        <div class="type-icon">
+          <img :src="getBondTypeIcon(type)" alt="Bond Type" class="type-icon-img" />
+        </div>
         <h3>{{ getBondTypeName(type) }}</h3>
         <p>{{ getBondTypeDescription(type) }}</p>
         <div class="bond-metrics">
@@ -329,28 +331,36 @@
       <div class="ladder-dashboard">
         <div class="dashboard-cards">
           <div class="dashboard-card">
-            <div class="card-icon">🎯</div>
+            <div class="card-icon">
+              <img :src="targetIcon" alt="Target" class="card-icon-img" />
+            </div>
             <div class="card-content">
               <h3>Total Ladder Value</h3>
               <p class="card-value">${{ ladderStats.totalValue.toLocaleString() }}</p>
             </div>
           </div>
           <div class="dashboard-card">
-            <div class="card-icon">📅</div>
+            <div class="card-icon">
+              <img :src="calendarIcon" alt="Calendar" class="card-icon-img" />
+            </div>
             <div class="card-content">
               <h3>Average Maturity</h3>
               <p class="card-value">{{ ladderStats.avgMaturity }} years</p>
             </div>
           </div>
           <div class="dashboard-card">
-            <div class="card-icon">📊</div>
+            <div class="card-icon">
+              <img :src="barChartIcon" alt="Bar Chart" class="card-icon-img" />
+            </div>
             <div class="card-content">
               <h3>Weighted Yield</h3>
               <p class="card-value">{{ ladderStats.weightedYield }}%</p>
             </div>
           </div>
           <div class="dashboard-card">
-            <div class="card-icon">⚖️</div>
+            <div class="card-icon">
+              <img :src="techIcon" alt="Tech" class="card-icon-img" />
+            </div>
             <div class="card-content">
               <h3>Ladder Health</h3>
               <p class="card-value" :class="ladderHealthClass">{{ ladderStats.health }}</p>
@@ -407,6 +417,15 @@ import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Edit, Delete, Loading } from '@element-plus/icons-vue'
 import bondsAPI from '@/api/bonds'
+// Import image assets
+import governIcon from '@/assets/govern.png'
+import houseIcon from '@/assets/house.png'
+import buildingsIcon from '@/assets/buildings.png'
+import earthIcon from '@/assets/earth.png'
+import targetIcon from '@/assets/trophy-line.png'
+import calendarIcon from '@/assets/bar_chart.png' // Using bar_chart as calendar alternative
+import barChartIcon from '@/assets/bar_chart.png'
+import techIcon from '@/assets/tech.png' // Using tech as tian alternative
 
 const { t } = useI18n()
 
@@ -1054,12 +1073,12 @@ const correctCurvePoints = computed(() => {
 // Helper functions for bond type display
 const getBondTypeIcon = (type) => {
   const icons = {
-    government: '🏛️',
-    corporate: '🏢',
-    municipal: '🏘️',
-    international: '🌍'
+    government: governIcon,
+    corporate: houseIcon,
+    municipal: buildingsIcon,
+    international: earthIcon
   }
-  return icons[type] || '📊'
+  return icons[type] || barChartIcon
 }
 
 const getBondTypeName = (type) => {
@@ -1331,6 +1350,16 @@ const getBondColor = (bondType) => {
 .type-icon {
   font-size: 3rem;
   margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.type-icon-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: brightness(0) invert(1); /* Make icons white on blue background */
 }
 
 .bond-type-card h3 {
@@ -1848,6 +1877,15 @@ const getBondColor = (bondType) => {
 .card-icon {
   font-size: 2rem;
   margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-icon-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 
 .card-content h3 {
@@ -2049,6 +2087,21 @@ const getBondColor = (bondType) => {
   display: block;
   margin: 0 auto 8px auto;
   filter: brightness(0) invert(1);
+}
+
+/* Dashboard yellow button style */
+.dashboard-yellow-btn {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+  border: none !important;
+  color: #1f2937 !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+}
+
+.dashboard-yellow-btn:hover {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3) !important;
 }
 
 @media (max-width: 768px) {

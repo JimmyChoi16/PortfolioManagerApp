@@ -15,7 +15,9 @@
     <!-- Stock Categories Overview -->
     <div class="stock-categories" v-if="stockAllocation.length > 0">
       <div v-for="category in stockAllocation" :key="category.sector" class="category-card">
-        <div class="category-icon">📈</div>
+        <div class="category-icon">
+          <img :src="lineChartIcon" alt="Line Chart" class="category-icon-img" />
+        </div>
         <h3>{{ category.sector || 'Other' }}</h3>
         <p>{{ getSectorDescription(category.sector) }}</p>
         <div class="category-metrics">
@@ -33,7 +35,9 @@
 
     <!-- Empty State -->
           <div v-else class="empty-state">
-        <div class="empty-icon">📈</div>
+        <div class="empty-icon">
+          <img :src="lineChartIcon" alt="Line Chart" class="empty-icon-img" />
+        </div>
         <h3>{{ t('stock.noHoldings') }}</h3>
         <p>{{ t('stock.noHoldingsDesc') }}</p>
       <el-button type="primary" @click="goToDashboard">
@@ -48,7 +52,9 @@
     <h2 style="margin-bottom: 12px;">{{ t('stock.performanceMetrics') }}</h2>
     <div class="performance-cards" style="margin-bottom: 32px;">
       <div class="performance-card" @click="showCagrDialog = true" style="cursor:pointer;">
-        <div class="card-icon">📈</div>
+        <div class="card-icon">
+          <img :src="lineChartIcon" alt="CAGR" class="card-icon-img" />
+        </div>
         <div class="card-content">
           <h4>{{ t('stock.cagr') }}</h4>
           <p class="card-value">{{ (cagr * 100).toFixed(2) }}%</p>
@@ -56,7 +62,9 @@
         </div>
       </div>
       <div class="performance-card" @click="showSharpeDialog = true" style="cursor:pointer;">
-        <div class="card-icon">📊</div>
+        <div class="card-icon">
+          <img :src="barChartIcon" alt="Sharpe Ratio" class="card-icon-img" />
+        </div>
         <div class="card-content">
           <h4>{{ t('stock.sharpeRatio') }}</h4>
           <p class="card-value">{{ sharpe.toFixed(2) }}</p>
@@ -64,7 +72,9 @@
         </div>
       </div>
       <div class="performance-card" @click="showDrawdownDialog = true" style="cursor:pointer;">
-        <div class="card-icon">📉</div>
+        <div class="card-icon">
+          <img :src="lossIcon" alt="Max Drawdown" class="card-icon-img" />
+        </div>
         <div class="card-content">
           <h4>{{ t('stock.maxDrawdown') }}</h4>
           <p class="card-value">{{ (maxDrawdown * 100).toFixed(2) }}%</p>
@@ -95,7 +105,9 @@
              <h2>{{ t('stock.portfolioPerformance') }}</h2>
       <div class="performance-cards">
         <div class="performance-card">
-          <div class="card-icon">📊</div>
+          <div class="card-icon">
+            <img :src="barChartIcon" alt="Total Value" class="card-icon-img" />
+          </div>
           <div class="card-content">
             <h4>{{ t('stock.totalValue') }}</h4>
             <p class="card-value">${{ formatNumber(stockPerformance.total_value) }}</p>
@@ -107,7 +119,9 @@
         </div>
 
         <div class="performance-card">
-          <div class="card-icon">📈</div>
+          <div class="card-icon">
+            <img :src="lineChartIcon" alt="Total Holdings" class="card-icon-img" />
+          </div>
           <div class="card-content">
             <h4>{{ t('stock.totalHoldings') }}</h4>
             <p class="card-value">{{ stockPerformance.total_holdings }}</p>
@@ -116,7 +130,9 @@
         </div>
 
         <div class="performance-card">
-          <div class="card-icon">🎯</div>
+          <div class="card-icon">
+            <img :src="targetIcon" alt="Best Performer" class="card-icon-img" />
+          </div>
           <div class="card-content">
             <h4>{{ t('stock.bestPerformer') }}</h4>
             <p class="card-value">{{ bestPerformer?.symbol || 'N/A' }}</p>
@@ -127,7 +143,9 @@
         </div>
 
         <div class="performance-card">
-          <div class="card-icon">📉</div>
+          <div class="card-icon">
+            <img :src="lossIcon" alt="Worst Performer" class="card-icon-img" />
+          </div>
           <div class="card-content">
             <h4>{{ t('stock.worstPerformer') }}</h4>
             <p class="card-value">{{ worstPerformer?.symbol || 'N/A' }}</p>
@@ -213,7 +231,9 @@
       
       <!-- Empty state when no holdings -->
       <div v-else class="empty-state">
-        <div class="empty-icon">📈</div>
+        <div class="empty-icon">
+          <img :src="lineChartIcon" alt="Line Chart" class="empty-icon-img" />
+        </div>
         <h3>{{ t('stock.noHoldingsYet') }}</h3>
                  <p>{{ t('stock.noHoldingsYetDesc') }}</p>
       </div>
@@ -478,6 +498,12 @@ import marketAPI from '../api/market.js'
 import http from '../api/http.js'
 import PerformanceLineChart from './charts/PerformanceLineChart.vue'
 import { Chart, registerables } from 'chart.js'
+// Import image assets
+import lineChartIcon from '@/assets/line_chart.png'
+import barChartIcon from '@/assets/bar_chart.png'
+import lossIcon from '@/assets/loss.png'
+import targetIcon from '@/assets/trophy-line.png'
+
 Chart.register(...registerables)
 
 const { t } = useI18n()
@@ -1686,6 +1712,9 @@ const sellIndividualHolding = async (holding) => {
 .category-icon {
   font-size: 3rem;
   margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .category-icon-img {
@@ -1694,6 +1723,7 @@ const sellIndividualHolding = async (holding) => {
   object-fit: contain;
   display: block;
   margin: 0 auto 8px auto;
+  filter: brightness(0) invert(1);
 }
 
 .category-card h3 {
@@ -1801,6 +1831,31 @@ const sellIndividualHolding = async (holding) => {
   object-fit: contain;
   display: block;
   margin: 0 auto 8px auto;
+}
+
+.card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-icon-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-icon-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
 }
 
 @media (max-width: 768px) {
