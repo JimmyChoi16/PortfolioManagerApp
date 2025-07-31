@@ -51,10 +51,10 @@ export default {
   // Home Page
   home: {
     title: 'Welcome to WealthU!',
-    subtitle: 'Monitor stocks, bonds, cash and more—all in one place.',
+    subtitle: 'Monitor stocks, bonds and more—all in one place.',
     description: 'The smart, simple way to track and manage your investments. Gain insights into your portfolio\'s performance, make data-driven decisions, and achieve your financial goals with ease.',
     aboutTitle: 'What is WealthU?',
-    aboutDesc: 'WealthU is an intuitive platform designed to help investors like you manage, track, and analyze your financial portfolio in real time. Whether you hold stocks, bonds, funds, or cash, WealthU centralizes your assets, so you always have a clear view of your investment performance.',
+    aboutDesc: 'WealthU is an intuitive platform designed to help investors like you manage, track, and analyze your financial portfolio in real time. Whether you hold stocks, bonds or funds, WealthU centralizes your assets, so you always have a clear view of your investment performance.',
     features: {
       title: 'Key Features',
       realTime: 'Real-time Market Data',
@@ -66,7 +66,30 @@ export default {
       privacy: 'Simple, Secure & Private'
     },
     getStarted: 'Get Started',
-    learnMore: 'Learn More'
+    learnMore: 'Learn More',
+    // Feature cards
+    featureCards: {
+      dashboard: {
+        title: 'Unified Dashboard',
+        brief: 'Effortlessly manage all your investments in a single, organized dashboard.',
+        content: 'Effortlessly manage all your investments—stocks, bonds, funds, cash, and more—in a single, organized dashboard. Portfolio Manager brings clarity to your financial life by consolidating your holdings and showing you the big picture at a glance.'
+      },
+      realtime: {
+        title: 'Real-Time Data',
+        brief: 'Get up-to-the-minute market prices and portfolio updates.',
+        content: 'Get up-to-the-minute market prices and portfolio updates. Portfolio Manager fetches live data for your assets, ensuring you always know the current value of your investments. Make timely decisions based on accurate, real-world information.'
+      },
+      insights: {
+        title: 'Performance Insights',
+        brief: 'Visualize your portfolio\'s growth with interactive charts and clear summaries.',
+        content: 'Visualize your portfolio\'s growth with interactive charts and clear summaries. Instantly see your gains, losses, and asset performance over time, helping you spot trends and optimize your investment strategy.'
+      },
+      privacy: {
+        title: 'Simple, Secure & Private',
+        brief: 'Quick sign-up, no complexity.',
+        content: 'Quick sign-up, no complexity. Portfolio Manager is designed for seamless, single-user access—making it easy to get started while keeping your financial data private, secure, and fully under your control.'
+      }
+    }
   },
 
   // Dashboard

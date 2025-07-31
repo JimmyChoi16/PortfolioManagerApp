@@ -66,7 +66,30 @@ export default {
       privacy: 'Yksinkertainen, turvallinen ja yksityinen'
     },
     getStarted: 'Aloita',
-    learnMore: 'Lue lisää'
+    learnMore: 'Lue lisää',
+    // Feature cards
+    featureCards: {
+      dashboard: {
+        title: 'Yhdistetty hallintapaneeli',
+        brief: 'Hallitse kaikki sijoituksesi helposti yhdessä järjestellyssä hallintapaneelissa.',
+        content: 'Hallitse kaikki sijoituksesi helposti yhdessä järjestellyssä hallintapaneelissa - osakkeet, joukkovelkakirjat, rahastot, käteinen ja muut. Salkunhallinta tuo selkeyttä taloudelliseen elämääsi konsolidoimalla omistuksesi ja näyttämällä sinulle kokonaiskuvan yhdellä silmäyksellä.'
+      },
+      realtime: {
+        title: 'Reaaliaikaiset tiedot',
+        brief: 'Saa ajantasaiset markkinahinnat ja salkun päivitykset.',
+        content: 'Saa ajantasaiset markkinahinnat ja salkun päivitykset. Salkunhallinta hakee live-tietoja varoistasi, varmistaen että tiedät aina sijoituksesi nykyarvon. Tee ajallisia päätöksiä tarkan, todellisen maailman tiedon perusteella.'
+      },
+      insights: {
+        title: 'Suorituskyvyn analyysi',
+        brief: 'Visualisoi salkkusi kasvua interaktiivisilla kaavioilla ja selkeillä yhteenvedoilla.',
+        content: 'Visualisoi salkkusi kasvua interaktiivisilla kaavioilla ja selkeillä yhteenvedoilla. Näe heti voittosi, tappiosi ja omaisuuden suorituskyvyn ajan myötä, auttaen sinua havaitsemaan trendejä ja optimoimaan sijoitusstrategiasi.'
+      },
+      privacy: {
+        title: 'Yksinkertainen, turvallinen ja yksityinen',
+        brief: 'Nopea rekisteröityminen, ei monimutkaisuutta.',
+        content: 'Nopea rekisteröityminen, ei monimutkaisuutta. Salkunhallinta on suunniteltu saumattomaan yksittäiskäyttäjän pääsyyn - tekee aloittamisesta helppoa samalla kun pitää taloudelliset tietosi yksityisinä, turvallisina ja täysin hallinnassasi.'
+      }
+    }
   },
 
   // Dashboard
