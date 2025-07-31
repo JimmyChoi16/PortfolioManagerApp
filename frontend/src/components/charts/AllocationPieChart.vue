@@ -32,8 +32,8 @@ const createChart = () => {
     datasets: [{
       data: props.data.map(item => item.total_value),
       backgroundColor: [
-        '#667eea',
-        '#764ba2', 
+        '#6A95CC',
+        '#53A7D8', 
         '#f093fb',
         '#f5576c',
         '#4facfe',

@@ -1,6 +1,12 @@
 const mysql = require('mysql2');
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '../.env') });
+
+// Try to load .env file if it exists, but don't fail if it doesn't
+try {
+  require('dotenv').config({ path: path.join(__dirname, '../.env') });
+} catch (error) {
+  console.log('No .env file found, using default configuration');
+}
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',

@@ -1002,7 +1002,7 @@ const initPerformanceChart = async () => {
         data: performanceData,
         smooth: true,
         lineStyle: {
-          color: '#409eff',
+          color: '#6A95CC',
           width: 2
         },
         areaStyle: {
@@ -1097,10 +1097,10 @@ const initPerformanceChart = async () => {
           type: 'line',
           data: performanceData,
           smooth: true,
-          lineStyle: {
-            color: '#409eff',
-            width: 2
-          },
+                  lineStyle: {
+          color: '#6A95CC',
+          width: 2
+        },
           areaStyle: {
             color: {
               type: 'linear',
@@ -1318,7 +1318,7 @@ onMounted(async () => {
 }
 
 .fund-type-card {
-  background: white;
+  background: linear-gradient(135deg, #6A95CC 0%, #53A7D8 100%);
   border-radius: 12px;
   padding: 25px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -1340,14 +1340,14 @@ onMounted(async () => {
 }
 
 .fund-type-card h3 {
-  color: #2c3e50;
+  color: white;
   margin-bottom: 10px;
   font-size: 1.3em;
   text-align: center;
 }
 
 .fund-type-card p {
-  color: #7f8c8d;
+  color: rgba(255, 255, 255, 0.9);
   text-align: center;
   margin-bottom: 20px;
   line-height: 1.5;

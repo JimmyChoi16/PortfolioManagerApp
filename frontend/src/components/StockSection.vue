@@ -1339,7 +1339,7 @@ watch(showSharpeDialog, async (val) => {
         datasets: [{
           label: t('stock.frequency'),
           data: bins,
-          backgroundColor: '#667eea',
+          backgroundColor: '#6A95CC',
         }]
       },
       options: {
@@ -1371,7 +1371,7 @@ watch(showDrawdownDialog, async (val) => {
           {
             label: t('stock.netValue'),
             data: chartData.data,
-            borderColor: '#667eea',
+            borderColor: '#6A95CC',
             backgroundColor: 'rgba(102,126,234,0.08)',
             borderWidth: 3,
             fill: true,
@@ -1644,10 +1644,10 @@ const sellIndividualHolding = async (holding) => {
 }
 
 .market-type-btn.active {
-  background: #667eea;
+  background: #6A95CC;
   color: #fff;
-  border-color: #667eea;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
+  border-color: #6A95CC;
+  box-shadow: 0 2px 8px rgba(106, 149, 204, 0.08);
 }
 
 .market-type-btn:hover:not(.active) {
@@ -1670,7 +1670,7 @@ const sellIndividualHolding = async (holding) => {
 }
 
 .category-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #6A95CC 0%, #53A7D8 100%);
   color: white;
   padding: 32px 24px;
   border-radius: 16px;
@@ -1680,12 +1680,20 @@ const sellIndividualHolding = async (holding) => {
 
 .category-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 12px 32px rgba(106, 149, 204, 0.3);
 }
 
 .category-icon {
   font-size: 3rem;
   margin-bottom: 16px;
+}
+
+.category-icon-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 8px auto;
 }
 
 .category-card h3 {
@@ -1776,7 +1784,7 @@ const sellIndividualHolding = async (holding) => {
 
 .allocation-fill {
   height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #6A95CC 0%, #53A7D8 100%);
   transition: width 0.3s ease;
 }
 
@@ -1785,6 +1793,14 @@ const sellIndividualHolding = async (holding) => {
   text-align: right;
   font-weight: 600;
   color: #2c3e50;
+}
+
+.performance-icon-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 8px auto;
 }
 
 @media (max-width: 768px) {

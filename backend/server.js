@@ -2,7 +2,13 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-require('dotenv').config();
+
+// Try to load .env file if it exists, but don't fail if it doesn't
+try {
+  require('dotenv').config();
+} catch (error) {
+  console.log('No .env file found, using default configuration');
+}
 
 const { testConnection } = require('./config/database');
 const holdingsRoutes = require('./routes/holdings');
@@ -12,7 +18,7 @@ const portfolioRoutes = require('./routes/portfolio');
 const portfolioHistoryScheduler = require('./services/portfolioHistoryScheduler');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Security middleware
 app.use(helmet());
@@ -99,8 +105,12 @@ app.use('*', (req, res) => {
 // Start server
 const startServer = async () => {
   try {
-    // Test database connection
-    await testConnection();
+    // Test database connection (optional for now)
+    try {
+      await testConnection();
+    } catch (dbError) {
+      console.warn('Database connection failed, but server will continue:', dbError.message);
+    }
     
     // Start portfolio history scheduler
     portfolioHistoryScheduler.start();

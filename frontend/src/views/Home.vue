@@ -167,8 +167,8 @@ const handleLogin = () => {
 
 .nav-link:hover,
 .nav-link.router-link-active {
-  color: #409eff;
-  border-bottom: 2px solid #409eff;
+  color: #6A95CC;
+  border-bottom: 2px solid #6A95CC;
 }
 
 .nav-right {
@@ -244,14 +244,14 @@ const handleLogin = () => {
 }
 
 .feature-item .el-icon {
-  color: #409eff;
+  color: #6A95CC;
   font-size: 1.3rem;
 }
 
 .cta-button {
-  background: #409eff;
+  background: #6A95CC;
   color: #fff;
-  border: 1px solid #409eff;
+  border: 1px solid #6A95CC;
   padding: 14px 28px;
   font-size: 1.1rem;
   font-weight: 600;
@@ -318,7 +318,7 @@ const handleLogin = () => {
 }
 
 .contact-item .el-icon {
-  color: #409eff;
+  color: #6A95CC;
   font-size: 1.2rem;
 }
 

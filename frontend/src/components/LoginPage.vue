@@ -222,7 +222,7 @@ const forgotPassword = () => {
 
 .logo-icon {
   font-size: 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #6A95CC 0%, #53A7D8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -248,8 +248,8 @@ const forgotPassword = () => {
 
 .back-btn:hover {
   background: #f8f9fa;
-  border-color: #667eea;
-  color: #667eea;
+  border-color: #6A95CC;
+  color: #6A95CC;
 }
 
 .form-header {
@@ -302,7 +302,7 @@ const forgotPassword = () => {
 
 .input-wrapper input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #6A95CC;
 }
 
 .input-icon {
@@ -319,7 +319,7 @@ const forgotPassword = () => {
 
 .auth-btn {
   width: 100%;
-  background: #667eea;
+  background: #6A95CC;
   color: white;
   border: none;
   padding: 16px;
@@ -331,7 +331,7 @@ const forgotPassword = () => {
 }
 
 .auth-btn:hover:not(:disabled) {
-  background: #5a6fd8;
+  background: #53A7D8;
 }
 
 .auth-btn:disabled {
@@ -371,7 +371,7 @@ const forgotPassword = () => {
 }
 
 .social-btn:hover {
-  border-color: #667eea;
+  border-color: #6A95CC;
 }
 
 .social-icon {
@@ -390,7 +390,7 @@ const forgotPassword = () => {
 }
 
 .toggle-link a {
-  color: #667eea;
+  color: #6A95CC;
   text-decoration: none;
   font-weight: 500;
 }
@@ -416,7 +416,7 @@ const forgotPassword = () => {
   margin-right: 8px;
   width: 16px;
   height: 16px;
-  accent-color: #667eea;
+  accent-color: #6A95CC;
 }
 
 /* Forgot Password */
@@ -426,7 +426,7 @@ const forgotPassword = () => {
 }
 
 .forgot-password a {
-  color: #667eea;
+  color: #6A95CC;
   text-decoration: none;
   font-weight: 500;
 }
@@ -438,7 +438,7 @@ const forgotPassword = () => {
 /* Right Section - Decorative Background */
 .decorative-section {
   flex: 1;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #6A95CC 0%, #53A7D8 100%);
   position: relative;
   overflow: hidden;
 }

@@ -859,7 +859,7 @@ onMounted(() => {
 }
 
 .dashboard-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #6A95CC 0%, #53A7D8 100%);
   color: white;
   border-radius: 16px;
   padding: 30px;
@@ -899,7 +899,7 @@ onMounted(() => {
 }
 
 .metric-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #6A95CC 0%, #53A7D8 100%);
   color: white;
   border-radius: 12px;
   padding: 24px;
@@ -908,7 +908,7 @@ onMounted(() => {
 }
 
 .metric-card.primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #6A95CC 0%, #53A7D8 100%);
 }
 
 .metric-header {
@@ -1523,7 +1523,7 @@ onMounted(() => {
 .allocation-fill,
 .sector-fill {
   height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #6A95CC 0%, #53A7D8 100%);
   transition: width 0.3s ease;
 }
 

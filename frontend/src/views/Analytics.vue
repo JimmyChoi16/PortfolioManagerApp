@@ -320,7 +320,7 @@ const performanceAttribution = computed(() => {
 const sectorExposure = computed(() => {
   // Mock sector data (in real app, would be mapped from stock symbols)
   const sectors = [
-    { name: 'Technology', percentage: 65, color: '#409eff' },
+          { name: 'Technology', percentage: 65, color: '#6A95CC' },
     { name: 'Consumer Discretionary', percentage: 20, color: '#67c23a' },
     { name: 'Healthcare', percentage: 10, color: '#e6a23c' },
     { name: 'Financial Services', percentage: 5, color: '#f56c6c' }
@@ -375,7 +375,7 @@ const riskReturnChart = computed(() => ({
         ]
       })),
       itemStyle: {
-        color: '#409eff',
+        color: '#6A95CC',
         opacity: 0.7
       }
     }

@@ -235,8 +235,8 @@ const features = ref([
   {
     key: 'privacy',
     title: 'Simple, Secure & Private',
-    brief: 'No sign-ups, passwords, or unnecessary complexity.',
-    content: 'No sign-ups, passwords, or unnecessary complexity. Portfolio Manager is designed for single-user, local management, ensuring your financial data remains private and easy to control.'
+    brief: 'Quick sign-up, no complexity.',
+    content: 'Quick sign-up, no complexity. Portfolio Manager is designed for seamless, single-user access—making it easy to get started while keeping your financial data private, secure, and fully under your control.'
   }
 ])
 
@@ -340,7 +340,7 @@ onMounted(() => {
 }
 
 .logo:hover {
-  color: #0071e3;
+  color: #6A95CC;
 }
 
 .nav-actions {
@@ -355,7 +355,7 @@ onMounted(() => {
 }
 
 .asset-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #f8b500 0%, #f8b500 100%);
   border: none;
   color: white;
   font-weight: 500;
@@ -375,7 +375,7 @@ onMounted(() => {
 .asset-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  background: linear-gradient(135deg, #fceabb 0%, #f8b500 100%);
 }
 
 .asset-menu {
@@ -398,13 +398,13 @@ onMounted(() => {
 
 .asset-menu .el-dropdown-menu__item:hover {
   background: linear-gradient(135deg, #f0f4ff 0%, #e8f4fd 100%);
-  color: #0071e3;
+  color: #000000;
   transform: translateX(4px);
 }
 
 .asset-menu .el-dropdown-menu__item .el-icon {
   font-size: 16px;
-  color: #0071e3;
+  color: #6A95CC;
 }
 
 .login-btn {
@@ -422,8 +422,8 @@ onMounted(() => {
 
 .logout-btn:hover {
   background: #e9ecef;
-  border-color: #0071e3;
-  color: #0071e3;
+  border-color: #6A95CC;
+  color: #6A95CC;
 }
 
 .app-main {
@@ -435,7 +435,7 @@ onMounted(() => {
 /* Element Plus Overrides */
 .el-button.active {
   font-weight: bold;
-  color: #0071e3;
+  color: #6A95CC;
 }
 
 .el-header {
@@ -449,7 +449,7 @@ onMounted(() => {
 
 .el-button.active {
   font-weight: bold;
-  color: #0071e3;
+  color: #6A95CC;
 }
 
 /* Footer */
@@ -635,7 +635,7 @@ onMounted(() => {
   position: absolute;
   left: 0;
   top: 0;
-  color: #0071e3;
+  color: #6A95CC;
   font-size: 1.2rem;
   font-weight: bold;
 }
@@ -673,7 +673,7 @@ onMounted(() => {
   box-shadow: 0 8px 32px rgba(0,0,0,0.13);
   background: #f0f4ff;
   transform: translateY(-6px) scale(1.04);
-  border: 2px solid #0071e3;
+  border: 2px solid #6A95CC;
 }
 
 .feature-title {
@@ -696,7 +696,7 @@ onMounted(() => {
 }
 
 .feature-insights {
-  background: linear-gradient(120deg, #f3e8ff 0%, #e9eafc 100%);
+  background: linear-gradient(120deg, #6A95CC 0%, #53A7D8 100%);
 }
 
 .feature-privacy {
@@ -765,7 +765,7 @@ onMounted(() => {
 }
 
 .modal-close:hover {
-  color: #0071e3;
+  color: #6A95CC;
 }
 
 .modal-dashboard {
@@ -777,7 +777,7 @@ onMounted(() => {
 }
 
 .modal-insights {
-  background: linear-gradient(120deg, #f3e8ff 0%, #e9eafc 100%);
+  background: linear-gradient(120deg, #6A95CC 0%, #53A7D8 100%);
 }
 
 .modal-privacy {

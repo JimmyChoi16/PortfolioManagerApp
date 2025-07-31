@@ -4,7 +4,7 @@
     <header class="top-nav">
       <div class="nav-left">
         <div class="logo">
-          <el-icon size="32" color="#409eff">
+          <el-icon size="32" color="#6A95CC">
             <TrendCharts />
           </el-icon>
           <h2>Portfolio Manager</h2>
@@ -163,8 +163,8 @@ const refreshData = async () => {
 
 .nav-link.active,
 .nav-link:hover {
-  color: #409eff;
-  border-bottom: 2px solid #409eff;
+  color: #6A95CC;
+  border-bottom: 2px solid #6A95CC;
 }
 
 .nav-right {

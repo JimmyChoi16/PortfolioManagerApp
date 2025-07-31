@@ -279,7 +279,7 @@
 }
 
 .pagination button {
-  background: #667eea;
+  background: #409eff;
   color: white;
   border: none;
   border-radius: 6px;
@@ -290,7 +290,7 @@
 }
 
 .pagination button:hover:not(:disabled) {
-  background: #5a6fd8;
+  background: #409eff;
 }
 
 .pagination button:disabled {
@@ -320,7 +320,7 @@
 
 /* ===== GRADIENT CARDS ===== */
 .gradient-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #6A95CC 0%, #53A7D8 100%);
   color: white;
   padding: 32px 24px;
   border-radius: 16px;
@@ -334,7 +334,7 @@
 }
 
 .gradient-card.green {
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  background: linear-gradient(135deg, #6A95CC 0%, #53A7D8 100%);
 }
 
 .gradient-card.green:hover {
@@ -478,7 +478,7 @@
 
 .allocation-fill {
   height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #6A95CC 0%, #53A7D8 100%);
   border-radius: 4px;
   transition: width 0.3s ease;
 }
