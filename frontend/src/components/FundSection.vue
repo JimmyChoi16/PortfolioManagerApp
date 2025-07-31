@@ -1,7 +1,7 @@
 <template>
   <div class="fund-section">
     <!-- Login Warning -->
-    <div v-if="!isLoggedIn" class="login-warning">
+    <div v-if="!props.isLoggedIn" class="login-warning">
       <el-alert :title="t('stock.loginWarning')" type="warning"
         :closable="false" show-icon />
     </div>
@@ -9,13 +9,13 @@
     <!-- Loading Overlay -->
     <div v-if="loading" class="loading-overlay">
       <el-icon class="is-loading"><Loading /></el-icon>
-      <span>Loading fund data...</span>
+      <span>{{ $t('fund.loadingFundData') }}</span>
     </div>
 
     <!-- Header -->
     <div class="section-header">
-      <h1>📊 Fund Management</h1>
-      <p>Track and manage your investment funds with real-time data and insights</p>
+              <h1>📊 {{ $t('fund.title') }}</h1>
+        <p>{{ $t('fund.subtitle') }}</p>
       <!-- <div class="login-notice" v-if="!isLoggedIn">
         <p>⚠️ You are not logged in. All data shown is for demonstration purposes only.</p>
       </div> -->
@@ -23,7 +23,7 @@
 
     <!-- Fund Types Overview -->
     <div class="fund-types-container">
-      <h2>Fund Categories ({{ fundCategories.length }})</h2>
+              <h2>{{ $t('fund.fundCategories') }} ({{ fundCategories.length }})</h2>
       <div class="fund-types-scroll">
         <div 
           v-for="category in fundCategories" 
@@ -56,21 +56,21 @@
     <!-- Holdings Table -->
     <div class="holdings-section">
       <div class="holdings-header">
-        <h2>Current Fund Holdings</h2>
+        <h2>{{ $t('fund.currentHoldings') }}</h2>
         <div class="holdings-actions">
-          <el-button v-if="isLoggedIn" type="primary" @click="showAddFundModal">
-            Add Fund Holdings
+          <el-button v-if="props.isLoggedIn" type="primary" @click="showAddFundModal">
+            {{ $t('fund.addFundHoldings') }}
           </el-button>
-          <el-button v-if="isLoggedIn" @click="exportData">
+          <el-button v-if="props.isLoggedIn" @click="exportData">
             <el-icon><Download /></el-icon>
-            Export Data
+            {{ $t('fund.exportData') }}
           </el-button>
         </div>
       </div>
 
       <div class="holdings-table">
         <div v-if="holdingsData.length === 0" style="padding: 20px; text-align: center; color: #999;">
-          No data available. Data length: {{ holdingsData.length }}
+          {{ $t('fund.noDataAvailable', { length: holdingsData.length }) }}
         </div>
         <el-table 
           v-else
@@ -79,7 +79,7 @@
           @row-click="showFundDetail"
           :row-class-name="getRowClassName"
         >
-          <el-table-column prop="symbol" label="Symbol" width="120">
+          <el-table-column prop="symbol" :label="$t('fund.tableHeaders.symbol')" width="120">
             <template #default="scope">
               <div class="symbol-cell">
                 <span class="symbol">{{ scope.row.symbol }}</span>
@@ -87,7 +87,7 @@
             </template>
           </el-table-column>
           
-          <el-table-column prop="name" label="Name" min-width="200">
+          <el-table-column prop="name" :label="$t('fund.tableHeaders.name')" min-width="200">
             <template #default="scope">
               <div class="name-cell">
                 <div class="name">{{ scope.row.name }}</div>
@@ -96,25 +96,25 @@
             </template>
           </el-table-column>
           
-          <el-table-column prop="quantity" label="Quantity" width="120" align="right">
+          <el-table-column prop="quantity" :label="$t('fund.tableHeaders.quantity')" width="120" align="right">
             <template #default="scope">
                               <span>{{ parseFloat(scope.row.quantity || 0).toFixed(2) }}</span>
             </template>
           </el-table-column>
           
-          <el-table-column prop="current_price" label="Current Price" width="130" align="right">
+          <el-table-column prop="current_price" :label="$t('fund.tableHeaders.currentPrice')" width="130" align="right">
             <template #default="scope">
               <span class="price">${{ parseFloat(scope.row.current_price || 0).toFixed(2) }}</span>
             </template>
           </el-table-column>
           
-          <el-table-column label="Current Value" width="140" align="right">
+          <el-table-column :label="$t('fund.tableHeaders.currentValue')" width="140" align="right">
             <template #default="scope">
                               <span class="value">${{ (parseFloat(scope.row.quantity || 0) * parseFloat(scope.row.current_price || 0)).toFixed(2) }}</span>
             </template>
           </el-table-column>
           
-          <el-table-column label="Gain/Loss" width="140" align="right">
+          <el-table-column :label="$t('fund.tableHeaders.gainLoss')" width="140" align="right">
             <template #default="scope">
                               <span :class="getGainLoss(scope.row) >= 0 ? 'positive' : 'negative'">
                   {{ getGainLoss(scope.row) >= 0 ? '+' : '' }}${{ getGainLoss(scope.row).toFixed(2) }}
@@ -122,7 +122,7 @@
             </template>
           </el-table-column>
           
-          <el-table-column label="Gain/Loss %" width="120" align="right">
+          <el-table-column :label="$t('fund.tableHeaders.gainLossPercent')" width="120" align="right">
             <template #default="scope">
               <span :class="getGainLossPercent(scope.row) >= 0 ? 'positive' : 'negative'">
                 {{ getGainLossPercent(scope.row) >= 0 ? '+' : '' }}{{ getGainLossPercent(scope.row).toFixed(2) }}%
@@ -130,7 +130,7 @@
             </template>
           </el-table-column>
           
-          <el-table-column label="YTD" width="80" align="right">
+          <el-table-column :label="$t('fund.ytdReturn')" width="80" align="right">
             <template #default="scope">
               <span :class="parseFloat(scope.row.ytd || 0) >= 0 ? 'positive' : 'negative'">
                 {{ parseFloat(scope.row.ytd || 0) >= 0 ? '+' : '' }}{{ parseFloat(scope.row.ytd || 0).toFixed(2) }}%
@@ -138,7 +138,7 @@
             </template>
           </el-table-column>
           
-          <el-table-column label="1Y" width="80" align="right">
+          <el-table-column :label="$t('fund.oneYear')" width="80" align="right">
             <template #default="scope">
               <span :class="parseFloat(scope.row.return_1y || 0) >= 0 ? 'positive' : 'negative'">
                 {{ parseFloat(scope.row.return_1y || 0) >= 0 ? '+' : '' }}{{ parseFloat(scope.row.return_1y || 0).toFixed(2) }}%
@@ -146,7 +146,7 @@
             </template>
           </el-table-column>
           
-          <el-table-column label="3Y" width="80" align="right">
+          <el-table-column :label="$t('fund.threeYears')" width="80" align="right">
             <template #default="scope">
               <span :class="parseFloat(scope.row.return_3y || 0) >= 0 ? 'positive' : 'negative'">
                 {{ parseFloat(scope.row.return_3y || 0) >= 0 ? '+' : '' }}{{ parseFloat(scope.row.return_3y || 0).toFixed(2) }}%
@@ -172,79 +172,79 @@
 
     <!-- Fund Allocation -->
     <div class="fund-allocation">
-      <h2>Fund Allocation Chart</h2>
+              <h2>{{ $t('fund.fundAllocationChart') }}</h2>
       <div class="allocation-container">
         <div class="allocation-chart">
           <div ref="pieChart" class="chart-container"></div>
         </div>
         <div class="allocation-summary">
-          <h3>Portfolio Summary</h3>
+          <h3>{{ $t('fund.portfolioSummary') }}</h3>
           <div class="summary-stats">
             <div class="summary-item">
-              <span class="label">Total Value:</span>
-                              <span class="value">${{ parseFloat(totalValue || 0).toFixed(2) }}</span>
+              <span class="label">{{ $t('fund.totalValue') }}:</span>
+              <span class="value">${{ parseFloat(totalValue || 0).toFixed(2) }}</span>
             </div>
             <div class="summary-item">
-              <span class="label">Fund Count:</span>
+              <span class="label">{{ $t('fund.fundCount') }}:</span>
               <span class="value">{{ parseFloat(portfolioSummary.summary?.total_holdings || holdingsData.length).toLocaleString() }}</span>
             </div>
             <div class="summary-item">
-              <span class="label">Avg Expense:</span>
+              <span class="label">{{ $t('fund.avgExpense') }}:</span>
               <span class="value">{{ averageExpense }}%</span>
             </div>
             <div class="summary-item">
-              <span class="label">YTD Return:</span>
-                              <span class="value" :class="totalYTD >= 0 ? 'positive' : 'negative'">
-                  {{ totalYTD >= 0 ? '+' : '' }}{{ parseFloat(totalYTD || 0).toFixed(2) }}%
-                </span>
+              <span class="label">{{ $t('fund.ytdReturn') }}:</span>
+              <span class="value" :class="totalYTD >= 0 ? 'positive' : 'negative'">
+                {{ totalYTD >= 0 ? '+' : '' }}{{ parseFloat(totalYTD || 0).toFixed(2) }}%
+              </span>
             </div>
           </div>
           <div class="portfolio-analysis">
-            <h4>Portfolio Analysis</h4>
+            <h4>{{ $t('fund.portfolioAnalysis') }}</h4>
             <div class="analysis-list">
               <div class="analysis-item">
                 <div class="analysis-icon positive">📈</div>
                 <div class="analysis-content">
-                  <div class="analysis-title">Risk Level</div>
-                  <div class="analysis-value">Moderate</div>
+                  <div class="analysis-title">{{ $t('fund.riskLevel') }}</div>
+                  <div class="analysis-value">{{ $t('fund.moderate') }}</div>
                 </div>
               </div>
               <div class="analysis-item">
                 <div class="analysis-icon neutral">⚖️</div>
                 <div class="analysis-content">
-                  <div class="analysis-title">Diversification</div>
-                  <div class="analysis-value">Good</div>
+                  <div class="analysis-title">{{ $t('fund.diversification') }}</div>
+                  <div class="analysis-value">{{ $t('fund.good') }}</div>
                 </div>
               </div>
               <div class="analysis-item">
                 <div class="analysis-icon positive">🎯</div>
                 <div class="analysis-content">
-                  <div class="analysis-title">Performance</div>
-                  <div class="analysis-value">Above Avg</div>
+                  <div class="analysis-title">{{ $t('fund.performance') }}</div>
+                  <div class="analysis-value">{{ $t('fund.aboveAvg') }}</div>
                 </div>
               </div>
               <div class="analysis-item">
                 <div class="analysis-icon warning">⚠️</div>
                 <div class="analysis-content">
-                  <div class="analysis-title">Volatility</div>
-                  <div class="analysis-value">Medium</div>
+                  <div class="analysis-title">{{ $t('fund.volatility') }}</div>
+                  <div class="analysis-value">{{ $t('fund.medium') }}</div>
                 </div>
               </div>
             </div>
             
             <div class="prediction-section">
-              <h5>Market Outlook</h5>
+              <h5>{{ $t('fund.marketOutlook') }}</h5>
               <div class="prediction-content">
                 <div class="prediction-item">
-                  <span class="prediction-label">3-Month Forecast:</span>
+                  <span class="prediction-label">{{ $t('fund.threeMonthForecast') }}:</span>
                   <span class="prediction-value positive">+8.50%</span>
                 </div>
                 <div class="prediction-item">
-                  <span class="prediction-label">6-Month Forecast:</span>
+                  <span class="prediction-label">{{ $t('fund.sixMonthForecast') }}:</span>
                   <span class="prediction-value positive">+12.30%</span>
                 </div>
                 <div class="prediction-item">
-                  <span class="prediction-label">1-Year Forecast:</span>
+                  <span class="prediction-label">{{ $t('fund.oneYearForecast') }}:</span>
                   <span class="prediction-value positive">+18.70%</span>
                 </div>
               </div>
@@ -270,7 +270,7 @@
             </div>
             <div class="fund-actions">
               <el-button 
-                v-if="selectedFund.quantity > 0 && isLoggedIn" 
+                v-if="selectedFund.quantity > 0 && props.isLoggedIn" 
                 type="danger" 
                 @click="showTradeModal(selectedFund, 'sell')"
               >
@@ -279,7 +279,7 @@
               <el-button 
                 type="success" 
                 @click="showTradeModal(selectedFund, 'buy')"
-                v-if="isLoggedIn"
+                v-if="props.isLoggedIn"
               >
                 Buy
               </el-button>
@@ -288,51 +288,51 @@
           
                       <div class="fund-stats-grid">
               <div class="stat-card">
-                <div class="stat-label">Current Price</div>
+                <div class="stat-label">{{ $t('fund.currentPrice') }}</div>
                 <div class="stat-value">${{ parseFloat(selectedFund.current_price || 0).toFixed(2) }}</div>
               </div>
               <div class="stat-card">
-                <div class="stat-label">Quantity Held</div>
+                <div class="stat-label">{{ $t('fund.quantityHeld') }}</div>
                 <div class="stat-value">{{ parseFloat(selectedFund.quantity || 0).toFixed(2) }}</div>
               </div>
               <div class="stat-card">
-                <div class="stat-label">Purchase Price</div>
+                <div class="stat-label">{{ $t('fund.purchasePrice') }}</div>
                 <div class="stat-value">${{ parseFloat(selectedFund.purchase_price || 0).toFixed(2) }}</div>
               </div>
               <div class="stat-card">
-                <div class="stat-label">Purchase Date</div>
+                <div class="stat-label">{{ $t('fund.purchaseDate') }}</div>
                 <div class="stat-value">{{ formatDate(selectedFund.purchase_date) }}</div>
               </div>
             </div>
         
           <div class="fund-performance-chart">
-            <h4>Historical Performance</h4>
+            <h4>{{ $t('fund.historicalPerformance') }}</h4>
             <div ref="performanceChart" class="chart-container"></div>
           </div>
           
           <div class="fund-volatility">
-            <h4>Return Analysis</h4>
+            <h4>{{ $t('fund.returnAnalysis') }}</h4>
             <div class="volatility-grid">
               <div class="volatility-item">
-                <span class="period">3 Years</span>
+                <span class="period">{{ $t('fund.threeYears') }}</span>
                 <span class="value" :class="getReturnClass(selectedFund.return_3y)">
                   {{ parseFloat(selectedFund.return_3y || 0) >= 0 ? '+' : '' }}{{ parseFloat(selectedFund.return_3y || 0).toFixed(2) }}%
                 </span>
               </div>
               <div class="volatility-item">
-                <span class="period">1 Year</span>
+                <span class="period">{{ $t('fund.oneYear') }}</span>
                 <span class="value" :class="getReturnClass(selectedFund.return_1y)">
                   {{ parseFloat(selectedFund.return_1y || 0) >= 0 ? '+' : '' }}{{ parseFloat(selectedFund.return_1y || 0).toFixed(2) }}%
                 </span>
               </div>
               <div class="volatility-item">
-                <span class="period">6 Months</span>
+                <span class="period">{{ $t('fund.sixMonths') }}</span>
                 <span class="value" :class="getReturnClass(selectedFund.return_6m)">
                   {{ parseFloat(selectedFund.return_6m || 0) >= 0 ? '+' : '' }}{{ parseFloat(selectedFund.return_6m || 0).toFixed(2) }}%
                 </span>
               </div>
               <div class="volatility-item">
-                <span class="period">3 Months</span>
+                <span class="period">{{ $t('fund.threeMonths') }}</span>
                 <span class="value" :class="getReturnClass(selectedFund.return_3m)">
                   {{ parseFloat(selectedFund.return_3m || 0) >= 0 ? '+' : '' }}{{ parseFloat(selectedFund.return_3m || 0).toFixed(2) }}%
                 </span>
@@ -357,13 +357,13 @@
         </div>
         
         <el-form :model="tradeForm" label-width="100px">
-          <el-form-item label="Trade Type">
+          <el-form-item :label="$t('fund.tradeType')">
             <el-tag :type="tradeType === 'buy' ? 'success' : 'danger'">
-              {{ tradeType === 'buy' ? 'Buy' : 'Sell' }}
+              {{ tradeType === 'buy' ? $t('fund.buy') : $t('fund.sell') }}
             </el-tag>
           </el-form-item>
           
-          <el-form-item label="Quantity">
+          <el-form-item :label="$t('fund.quantity')">
             <el-input-number 
               v-model="tradeForm.quantity" 
               :min="0.01" 
@@ -373,7 +373,7 @@
             />
           </el-form-item>
           
-          <el-form-item label="Price">
+          <el-form-item :label="$t('fund.currentPrice')">
             <el-input-number 
               v-model="tradeForm.price" 
               :min="0.01" 
@@ -383,18 +383,18 @@
             />
           </el-form-item>
           
-          <el-form-item label="Total Amount">
+          <el-form-item :label="$t('fund.totalAmount')">
             <span class="total-amount">
               ${{ (tradeForm.quantity * tradeForm.price).toFixed(2) }}
             </span>
           </el-form-item>
           
-          <el-form-item label="Notes">
+          <el-form-item :label="$t('fund.notes')">
             <el-input 
               v-model="tradeForm.notes" 
               type="textarea" 
               :rows="3"
-              placeholder="Trade notes (optional)"
+              :placeholder="$t('fund.tradeNotes')"
             />
           </el-form-item>
         </el-form>
@@ -402,9 +402,9 @@
       
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="tradeModalVisible = false">Cancel</el-button>
+          <el-button @click="tradeModalVisible = false">{{ $t('fund.cancel') }}</el-button>
           <el-button type="primary" @click="executeTrade">
-            {{ tradeType === 'buy' ? 'Buy' : 'Sell' }}
+            {{ tradeType === 'buy' ? $t('fund.buy') : $t('fund.sell') }}
           </el-button>
         </span>
       </template>
@@ -413,34 +413,32 @@
     <!-- Add Fund Holdings Modal -->
     <el-dialog 
       v-model="addFundModalVisible" 
-      title="Add Fund Holdings" 
+      :title="$t('fund.addFundHoldings')" 
       width="600px"
     >
       <div class="add-fund-form">
         <el-form :model="addFundForm" :rules="addFundRules" ref="addFundFormRef" label-width="120px">
-          <el-form-item label="Fund Symbol" prop="symbol">
+          <el-form-item :label="$t('fund.symbol')" prop="symbol">
             <el-input 
               v-model="addFundForm.symbol" 
-              placeholder="Enter fund symbol (e.g., VTI, SPY)"
+              :placeholder="$t('fund.symbol') + ' (e.g., VTI, SPY)'"
               maxlength="10"
             />
           </el-form-item>
-          
-          <el-form-item label="Fund Name" prop="name">
+          <el-form-item :label="$t('fund.name')" prop="name">
             <el-input 
               v-model="addFundForm.name" 
-              placeholder="Enter fund name"
+              :placeholder="$t('fund.name')"
             />
           </el-form-item>
-          
-          <el-form-item label="Sector" prop="sector">
-            <el-select v-model="addFundForm.sector" placeholder="Select sector" style="width: 100%">
-              <el-option label="Index Funds" value="Index Funds" />
+          <el-form-item :label="$t('fund.sector')" prop="sector">
+            <el-select v-model="addFundForm.sector" :placeholder="$t('fund.selectSector')" style="width: 100%">
+              <el-option :label="$t('fund.categories.index')" value="Index Funds" />
+              <el-option :label="$t('fund.categories.bond')" value="Bond Funds" />
+              <el-option :label="$t('fund.categories.international')" value="International Funds" />
+              <el-option :label="$t('fund.categories.sector')" value="Sector Funds" />
+              <el-option :label="$t('fund.categories.moneyMarket')" value="Money Market" />
               <el-option label="Growth Funds" value="Growth Funds" />
-              <el-option label="International Funds" value="International Funds" />
-              <el-option label="Bond Funds" value="Bond Funds" />
-              <el-option label="Sector Funds" value="Sector Funds" />
-              <el-option label="Money Market" value="Money Market" />
               <el-option label="Real Estate" value="Real Estate" />
               <el-option label="Commodity" value="Commodity" />
               <el-option label="Emerging Markets" value="Emerging Markets" />
@@ -451,46 +449,42 @@
               <el-option label="Consumer" value="Consumer" />
             </el-select>
           </el-form-item>
-          
-          <el-form-item label="Quantity" prop="quantity">
+          <el-form-item :label="$t('fund.quantity')" prop="quantity">
             <el-input-number 
               v-model="addFundForm.quantity" 
               :min="0.01" 
               :precision="2"
               :step="0.01"
               style="width: 100%"
-              placeholder="Enter quantity"
+              :placeholder="$t('fund.quantity')"
             />
           </el-form-item>
-          
-          <el-form-item label="Purchase Price" prop="purchase_price">
+          <el-form-item :label="$t('fund.purchasePrice')" prop="purchase_price">
             <el-input-number 
               v-model="addFundForm.purchase_price" 
               :min="0.01" 
               :precision="2"
               :step="0.01"
               style="width: 100%"
-              placeholder="Enter purchase price per share"
+              :placeholder="$t('fund.purchasePrice')"
             />
           </el-form-item>
-          
-          <el-form-item label="Purchase Date" prop="purchase_date">
+          <el-form-item :label="$t('fund.purchaseDate')" prop="purchase_date">
             <el-date-picker
               v-model="addFundForm.purchase_date"
               type="date"
-              placeholder="Select purchase date"
+              :placeholder="$t('fund.selectPurchaseDate')"
               style="width: 100%"
               format="YYYY-MM-DD"
               value-format="YYYY-MM-DD"
             />
           </el-form-item>
-          
-          <el-form-item label="Notes">
+          <el-form-item :label="$t('fund.notes')">
             <el-input 
               v-model="addFundForm.notes" 
               type="textarea" 
               :rows="3"
-              placeholder="Additional notes (optional)"
+              :placeholder="$t('fund.notesPlaceholder')"
             />
           </el-form-item>
         </el-form>
@@ -500,7 +494,7 @@
         <span class="dialog-footer">
           <el-button @click="addFundModalVisible = false">Cancel</el-button>
           <el-button type="primary" @click="addFundHoldings" :loading="addingFund">
-            Add Fund Holdings
+            {{ $t('fund.addFundHoldings') }}
           </el-button>
         </span>
       </template>
@@ -517,6 +511,14 @@ import portfolioAPI from '../api/portfolio.js'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
+
+// Props
+const props = defineProps({
+  isLoggedIn: {
+    type: Boolean,
+    default: false
+  }
+})
 
 // 响应式数据
 const loading = ref(true)
@@ -656,7 +658,7 @@ const exportData = () => {
   a.download = 'fund-portfolio-data.json'
   a.click()
   URL.revokeObjectURL(url)
-  ElMessage.success('Data exported successfully')
+  ElMessage.success(t('fund.dataExportedSuccessfully'))
 }
 
 const showFundDetail = async (fund) => {
@@ -715,7 +717,7 @@ const executeTrade = async () => {
     const response = await portfolioAPI.executeTrade(tradeData)
     
     if (response.data.success) {
-      ElMessage.success('Trade executed successfully')
+      ElMessage.success(t('fund.tradeExecutedSuccessfully'))
       tradeModalVisible.value = false
       await loadFundData()
       
@@ -729,7 +731,7 @@ const executeTrade = async () => {
     }
   } catch (error) {
     console.error('Error executing trade:', error)
-    ElMessage.error('Failed to execute trade')
+    ElMessage.error(t('fund.failedToExecuteTrade'))
   }
 }
 
@@ -1167,7 +1169,7 @@ const addFundHoldings = async () => {
         })
 
         if (response.data.success) {
-          ElMessage.success('Fund holdings added successfully')
+          ElMessage.success(t('fund.fundHoldingsAddedSuccessfully'))
           addFundModalVisible.value = false
           await loadFundData()
           
@@ -1179,11 +1181,11 @@ const addFundHoldings = async () => {
             }
           }
         } else {
-          ElMessage.error(response.data.message || 'Failed to add fund holdings')
+          ElMessage.error(t('fund.failedToAddFundHoldings'))
         }
       } catch (error) {
         console.error('Error adding fund holdings:', error)
-        ElMessage.error('Failed to add fund holdings')
+        ElMessage.error(t('fund.failedToAddFundHoldings'))
       } finally {
         addingFund.value = false
       }

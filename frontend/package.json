@@ -1,7 +1,7 @@
 {
-  "name": "portfolio-frontend",
+  "name": "wealthu-frontend",
   "version": "1.0.0",
-  "description": "Portfolio Manager Frontend",
+      "description": "WealthU Frontend",
   "private": true,
   "scripts": {
     "dev": "vite",

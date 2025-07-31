@@ -1,7 +1,7 @@
 {
-  "name": "portfolio-manager",
+  "name": "wealthu",
   "version": "1.0.0",
-  "description": "Financial Portfolio Management Application",
+      "description": "WealthU - Financial Portfolio Management Application",
   "main": "index.js",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",

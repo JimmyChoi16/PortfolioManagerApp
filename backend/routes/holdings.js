@@ -65,6 +65,25 @@ router.get('/analysis/realtime-metrics', holdingController.getRealTimePerformanc
 // POST /api/holdings/update-history - Update portfolio history
 router.post('/update-history', holdingController.updatePortfolioHistory);
 
+// POST /api/holdings/update-portfolio-history - Manual portfolio history update
+router.post('/update-portfolio-history', async (req, res) => {
+  try {
+    const portfolioHistoryScheduler = require('../services/portfolioHistoryScheduler');
+    await portfolioHistoryScheduler.manualUpdate();
+    res.json({
+      success: true,
+      message: 'Portfolio history updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating portfolio history:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update portfolio history',
+      error: error.message
+    });
+  }
+});
+
 // GET /api/holdings/:id - Get holding by ID
 router.get('/:id', holdingController.getHoldingById);
 

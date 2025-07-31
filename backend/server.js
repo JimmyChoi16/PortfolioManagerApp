@@ -15,6 +15,7 @@ const holdingsRoutes = require('./routes/holdings');
 const marketRoutes = require('./routes/market');
 const bondsRoutes = require('./routes/bonds');
 const portfolioRoutes = require('./routes/portfolio');
+const portfolioHistoryScheduler = require('./services/portfolioHistoryScheduler');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -64,9 +65,9 @@ app.use('/api/portfolio', portfolioRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
-  res.json({
-    message: 'Portfolio Manager API',
-    version: '1.0.0',
+      res.json({
+      message: 'WealthU API',
+      version: '1.0.0',
     endpoints: {
       holdings: '/api/holdings',
       market: '/api/market',
@@ -111,11 +112,15 @@ const startServer = async () => {
       console.warn('Database connection failed, but server will continue:', dbError.message);
     }
     
+    // Start portfolio history scheduler
+    portfolioHistoryScheduler.start();
+    
     app.listen(PORT, () => {
-      console.log(`🚀 Portfolio Manager API running on port ${PORT}`);
+      console.log(`🚀 WealthU API running on port ${PORT}`);
       console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🔗 API URL: http://localhost:${PORT}`);
       console.log(`📈 Health check: http://localhost:${PORT}/health`);
+      console.log(`⏰ Portfolio history scheduler started`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
