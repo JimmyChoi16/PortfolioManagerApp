@@ -22,6 +22,32 @@ CREATE TABLE IF NOT EXISTS holdings (
     INDEX idx_sector (sector)
 );
 
+-- Bonds table to store bond-specific information
+CREATE TABLE IF NOT EXISTS bonds (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    holding_id INT NOT NULL,
+    symbol VARCHAR(10) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    bond_type ENUM('government', 'corporate', 'municipal', 'international') NOT NULL DEFAULT 'government',
+    coupon_rate DECIMAL(5, 2) NOT NULL,
+    maturity_date DATE NOT NULL,
+    face_value DECIMAL(15, 2) NOT NULL,
+    current_yield DECIMAL(5, 2) DEFAULT NULL,
+    credit_rating VARCHAR(5) DEFAULT 'A',
+    issuer VARCHAR(255) DEFAULT NULL,
+    callable BOOLEAN DEFAULT FALSE,
+    call_date DATE DEFAULT NULL,
+    call_price DECIMAL(15, 2) DEFAULT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (holding_id) REFERENCES holdings(id) ON DELETE CASCADE,
+    INDEX idx_symbol (symbol),
+    INDEX idx_bond_type (bond_type),
+    INDEX idx_maturity_date (maturity_date),
+    INDEX idx_credit_rating (credit_rating)
+);
+
 -- Portfolio summary table for storing aggregated data
 CREATE TABLE IF NOT EXISTS portfolio_summary (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -70,6 +96,25 @@ CREATE TABLE IF NOT EXISTS simple_recommendations (
     INDEX idx_symbol (symbol)
 );
 
+CREATE TABLE portfolio (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    user_name VARCHAR(255) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE portfolio_holding (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    portfolio_id INTEGER NOT NULL,
+    holding_id INTEGER NOT NULL,
+    allocation_percent DECIMAL(5,2),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (portfolio_id) REFERENCES portfolio(id),
+    FOREIGN KEY (holding_id) REFERENCES holding(id)
+);
+
 -- Insert initial portfolio summary record
 INSERT INTO portfolio_summary (total_value, daily_change, daily_change_percent, total_holdings) 
 VALUES (107125.00, 7675.00, 7.72, 4) 
@@ -82,6 +127,26 @@ INSERT INTO holdings (symbol, name, type, quantity, purchase_price, purchase_dat
 ('MSFT', 'Microsoft Corp.', 'stock', 75, 280.00, '2023-03-05', 420.00, 'Technology', 'Cloud and software leader'),
 ('TSLA', 'Tesla Inc.', 'stock', 25, 200.00, '2023-04-12', 250.00, 'Automotive', 'Electric vehicle pioneer')
 ON DUPLICATE KEY UPDATE current_price=VALUES(current_price), sector=VALUES(sector), notes=VALUES(notes);
+
+-- Insert sample bond holdings
+INSERT INTO holdings (symbol, name, type, quantity, purchase_price, purchase_date, current_price, sector, notes) VALUES
+('UST10Y', 'U.S. Treasury 10-Year', 'bond', 100.000000, 150.00, '2023-01-14', 175.50, 'Government', 'Core government holding'),
+('AAPL5Y', 'Apple Inc. 5-Year', 'bond', 50.000000, 400.00, '2023-02-09', 520.00, 'Technology', 'Tech sector exposure'),
+('CAMUNI7', 'California Muni 7-Year', 'bond', 75.000000, 280.00, '2023-03-04', 420.00, 'Municipal', 'Tax-advantaged income'),
+('DEBUND5', 'German Bund 5-Year', 'bond', 25.000000, 200.00, '2023-04-11', 250.00, 'International', 'International diversification'),
+('UST30Y', 'U.S. Treasury 30-Year', 'bond', 40.000000, 130.00, '2023-05-31', 145.00, 'Government', 'Long-term government bond'),
+('MSFT7Y', 'Microsoft Corp. 7-Year', 'bond', 200.000000, 200.00, '2023-01-24', 245.00, 'Technology', 'Tech corporate bond')
+ON DUPLICATE KEY UPDATE current_price=VALUES(current_price), sector=VALUES(sector), notes=VALUES(notes);
+
+-- Insert sample bond data
+INSERT INTO bonds (holding_id, symbol, name, bond_type, coupon_rate, maturity_date, face_value, current_yield, credit_rating, issuer) VALUES
+((SELECT id FROM holdings WHERE symbol = 'UST10Y' LIMIT 1), 'UST10Y', 'U.S. Treasury 10-Year', 'government', 4.25, '2034-05-14', 50000.00, 4.28, 'AAA', 'U.S. Treasury'),
+((SELECT id FROM holdings WHERE symbol = 'AAPL5Y' LIMIT 1), 'AAPL5Y', 'Apple Inc. 5-Year', 'corporate', 3.85, '2029-03-14', 25000.00, 4.12, 'AA+', 'Apple Inc.'),
+((SELECT id FROM holdings WHERE symbol = 'CAMUNI7' LIMIT 1), 'CAMUNI7', 'California Muni 7-Year', 'municipal', 3.45, '2031-08-19', 30000.00, 3.52, 'AA', 'State of California'),
+((SELECT id FROM holdings WHERE symbol = 'DEBUND5' LIMIT 1), 'DEBUND5', 'German Bund 5-Year', 'international', 2.15, '2029-12-09', 20000.00, 2.18, 'AAA', 'German Government'),
+((SELECT id FROM holdings WHERE symbol = 'UST30Y' LIMIT 1), 'UST30Y', 'U.S. Treasury 30-Year', 'government', 3.75, '2053-01-14', 100000.00, 3.95, 'AAA', 'U.S. Treasury'),
+((SELECT id FROM holdings WHERE symbol = 'MSFT7Y' LIMIT 1), 'MSFT7Y', 'Microsoft Corp. 7-Year', 'corporate', 4.15, '2030-02-19', 75000.00, 4.05, 'AA+', 'Microsoft Corp.')
+ON DUPLICATE KEY UPDATE current_yield=VALUES(current_yield), credit_rating=VALUES(credit_rating), issuer=VALUES(issuer);
 
 -- Insert sample historical data with new fields
 INSERT INTO portfolio_history (date, total_value, daily_change, total_cost, total_gain_loss, gain_loss_percent) VALUES

@@ -1,0 +1,33 @@
+module.exports = {
+  // US Stocks
+  AAPL: 'Apple Inc.',
+  MSFT: 'Microsoft Corporation',
+  NVDA: 'NVIDIA Corporation',
+  TSLA: 'Tesla Inc.',
+  AMZN: 'Amazon.com Inc.',
+  GOOGL: 'Alphabet Inc.',
+  META: 'Meta Platforms Inc.',
+  NFLX: 'Netflix Inc.',
+  JPM: 'JPMorgan Chase & Co.',
+  JNJ: 'Johnson & Johnson',
+  PG: 'Procter & Gamble Co.',
+  V: 'Visa Inc.',
+  SPY: 'SPDR S&P 500 ETF Trust',
+  BND: 'Vanguard Total Bond Market ETF',
+  QQQ: 'Invesco QQQ Trust',
+  VTI: 'Vanguard Total Stock Market ETF',
+  MCHI: 'iShares MSCI China ETF',
+  AGG: 'iShares Core U.S. Aggregate Bond ETF',
+
+  // A-shares (CN)
+  'SH600519': 'Kweichow Moutai Co., Ltd.',
+  'SH601318': 'Ping An Insurance (Group) Company of China, Ltd.',
+  'SH600036': 'China Merchants Bank Co., Ltd.',
+  'SH601166': 'Industrial Bank Co., Ltd.',
+  'SZ000858': 'Wuliangye Yibin Co., Ltd.',
+  'SH601888': 'China Tourism Group Duty Free Corporation Limited',
+  'SZ000333': 'Midea Group Co., Ltd.',
+  'SH600276': 'Jiangsu Hengrui Pharmaceuticals Co., Ltd.',
+  'SH601398': 'Industrial and Commercial Bank of China Limited',
+  'SH601988': 'Bank of China Limited',
+}; 

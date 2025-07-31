@@ -64,6 +64,10 @@
           <el-icon><Plus /></el-icon>
           Add Holding
         </el-button>
+        <el-button @click="showCreatePortfolio = true">
+          <el-icon><Collection /></el-icon>
+          Create Portfolio
+        </el-button>
         <el-button @click="updatePrices">
           <el-icon><Refresh /></el-icon>
           Update Prices
@@ -323,17 +327,30 @@
         </el-tab-pane>
       </el-tabs>
     </el-dialog>
+
+    <!-- Create Portfolio Dialog -->
+    <el-dialog
+      v-model="showCreatePortfolio"
+      title="Create New Portfolio"
+      width="600px"
+    >
+      <Portfolio 
+        :holdings="holdings" 
+        @portfolio-created="onPortfolioCreated"
+      />
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Refresh, SwitchButton, Plus, DataAnalysis, Search } from '@element-plus/icons-vue'
+import { Refresh, SwitchButton, Plus, DataAnalysis, Search, Collection } from '@element-plus/icons-vue'
 import portfolioAPI from '../api/portfolio.js'
 import AllocationPieChart from './charts/AllocationPieChart.vue'
 import SectorPieChart from './charts/SectorPieChart.vue'
 import PerformanceLineChart from './charts/PerformanceLineChart.vue'
+import Portfolio from './Portfolio.vue'
 
 const emit = defineEmits(['goToAssetPage'])
 
@@ -341,6 +358,7 @@ const emit = defineEmits(['goToAssetPage'])
 const loading = ref(false)
 const saving = ref(false)
 const showAddHolding = ref(false)
+const showCreatePortfolio = ref(false)
 const showAnalysis = ref(false)
 const activeAnalysisTab = ref('allocation')
 const searchQuery = ref('')
@@ -534,6 +552,19 @@ const deleteHolding = async (id) => {
     }
   }
 }
+
+const onPortfolioCreated = () => {
+  showCreatePortfolio.value = false
+  ElMessage.success('Portfolio created successfully!')
+  // Optionally refresh data or navigate to portfolio list
+}
+
+// const logout = () => {
+//   // Clear localStorage and emit logout event
+//   localStorage.removeItem('isLoggedIn')
+//   localStorage.removeItem('activePage')
+//   emit('logout')
+// }
 
 const getTypeTagType = (type) => {
   const types = {

@@ -52,6 +52,21 @@ const portfolioAPI = {
 
   getDetailedHistoryAnalysis() {
     return http.get('/holdings/analysis/history')
+  },
+
+  // Real-time performance metrics
+  getRealTimePerformanceMetrics() {
+    return http.get('/holdings/analysis/realtime-metrics')
+  },
+
+  // Update portfolio history
+  updatePortfolioHistory() {
+    return http.post('/holdings/update-history')
+  },
+
+  // New Portfolio Management endpoints
+  createPortfolio(data) {
+    return http.post('/portfolio', data);
   }
 }
 

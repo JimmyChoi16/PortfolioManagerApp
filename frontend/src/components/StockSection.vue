@@ -2,12 +2,8 @@
   <div class="stock-section">
     <!-- Login Warning -->
     <div v-if="!isLoggedIn" class="login-warning">
-      <el-alert
-        title="⚠️ You are not logged in. All data shown is for demonstration purposes only."
-        type="warning"
-        :closable="false"
-        show-icon
-      />
+      <el-alert title="⚠️ You are not logged in. All data shown is for demonstration purposes only." type="warning"
+        :closable="false" show-icon />
     </div>
 
     <!-- Header -->
@@ -18,11 +14,8 @@
 
     <!-- Stock Categories Overview -->
     <div class="stock-categories" v-if="stockAllocation.length > 0">
-      <div 
-        v-for="category in stockAllocation" 
-        :key="category.sector"
-        class="category-card"
-      >
+      <div v-for="category in stockAllocation" :key="category.sector" class="category-card">
+        <div class="category-icon">📈</div>
         <h3>{{ category.sector || 'Other' }}</h3>
         <p>{{ getSectorDescription(category.sector) }}</p>
         <div class="category-metrics">
@@ -44,149 +37,65 @@
       <h3>No Stock Holdings</h3>
       <p>You don't have any stock holdings yet. Add some stocks to get started!</p>
       <el-button type="primary" @click="goToDashboard">
-        <el-icon><Plus /></el-icon>
+        <el-icon>
+          <Plus />
+        </el-icon>
         Add Stock Holding
       </el-button>
     </div>
 
-    <!-- Real-time Market Data -->
-    <div class="market-data">
-      <div class="market-header">
-        <h2>Real-time Market Data</h2>
-        <el-button @click="fetchMarketData" :loading="marketDataLoading" size="small">
-          <el-icon><Refresh /></el-icon>
-          Refresh
-        </el-button>
+    <!-- Performance Metrics Title and Cards -->
+    <h2 style="margin-bottom: 12px;">Performance Metrics</h2>
+    <div class="performance-cards" style="margin-bottom: 32px;">
+      <div class="performance-card" @click="showCagrDialog = true" style="cursor:pointer;">
+        <div class="card-icon">📈</div>
+        <div class="card-content">
+          <h4>CAGR</h4>
+          <p class="card-value">{{ (cagr * 100).toFixed(2) }}%</p>
+          <span class="card-subtitle">Annualized Return</span>
+        </div>
       </div>
-      <div class="market-table-wrapper">
-        <table class="market-table">
-          <thead>
-            <tr>
-              <th>Symbol</th>
-              <th>Name</th>
-              <th>Price</th>
-              <th>Change</th>
-              <th>Change %</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="marketDataLoading && pagedMarketData.length === 0">
-              <td colspan="5" style="text-align: center; padding: 40px;">
-                <el-icon class="is-loading"><Loading /></el-icon>
-                <span style="margin-left: 8px;">Loading market data...</span>
-              </td>
-            </tr>
-            <tr v-else-if="!marketDataLoading && pagedMarketData.length === 0">
-              <td colspan="5" style="text-align: center; padding: 40px; color: #7f8c8d;">
-                <div>No market data available</div>
-                <div style="font-size: 0.9rem; margin-top: 8px;">Try refreshing the data</div>
-              </td>
-            </tr>
-            <tr
-              v-for="item in pagedMarketData"
-              :key="item.symbol"
-              @mouseover="hoveredRow = item.symbol"
-              @mouseleave="hoveredRow = null"
-              :class="[
-                { hovered: hoveredRow === item.symbol },
-                rowFlash[item.symbol] === 'up' ? 'flash-up' : '',
-                rowFlash[item.symbol] === 'down' ? 'flash-down' : ''
-              ]"
-            >
-              <td>{{ item.symbol }}</td>
-              <td>{{ item.name }}</td>
-              <td>${{ formatNumber(item.currentPrice) }}</td>
-              <td :class="{ up: item.change > 0, down: item.change < 0 }">
-                {{ item.change > 0 ? '+' : '' }}{{ formatNumber(item.change) }}
-              </td>
-              <td :class="{ up: item.change > 0, down: item.change < 0 }">
-                {{ item.change > 0 ? '+' : '' }}{{ formatNumber(item.changePercent) }}%
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        
-        <!-- Pagination -->
-        <div class="pagination">
-          <button @click="prevPage" :disabled="currentPage === 1">Previous</button>
-          <span>Page {{ currentPage }} of {{ totalPages }}</span>
-          <button @click="nextPage" :disabled="currentPage === totalPages">Next</button>
+      <div class="performance-card" @click="showSharpeDialog = true" style="cursor:pointer;">
+        <div class="card-icon">📊</div>
+        <div class="card-content">
+          <h4>Sharpe Ratio</h4>
+          <p class="card-value">{{ sharpe.toFixed(2) }}</p>
+          <span class="card-subtitle">Risk-adjusted</span>
+        </div>
+      </div>
+      <div class="performance-card" @click="showDrawdownDialog = true" style="cursor:pointer;">
+        <div class="card-icon">📉</div>
+        <div class="card-content">
+          <h4>Max Drawdown</h4>
+          <p class="card-value">{{ (maxDrawdown * 100).toFixed(2) }}%</p>
+          <span class="card-subtitle">Worst Loss</span>
         </div>
       </div>
     </div>
-
-    <!-- Your Stock Holdings -->
-    <div class="holdings-data" v-if="stockHoldings.length > 0">
-      <h2>Your Stock Holdings</h2>
-      <div class="market-table-wrapper">
-        <table class="market-table">
-          <thead>
-            <tr>
-              <th>Symbol</th>
-              <th>Name</th>
-              <th>Quantity</th>
-              <th>Current Price</th>
-              <th>Current Value</th>
-              <th>Gain/Loss</th>
-              <th>Gain/Loss %</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="item in pagedStockHoldings"
-              :key="item.symbol"
-              @mouseover="hoveredRow = item.symbol"
-              @mouseleave="hoveredRow = null"
-              :class="[
-                { hovered: hoveredRow === item.symbol },
-                rowFlash[item.symbol] === 'up' ? 'flash-up' : '',
-                rowFlash[item.symbol] === 'down' ? 'flash-down' : ''
-              ]"
-            >
-              <td>{{ item.symbol }}</td>
-              <td>{{ item.name }}</td>
-              <td>{{ formatNumber(item.quantity) }}</td>
-              <td>${{ formatNumber(item.current_price) }}</td>
-              <td>${{ formatNumber(item.current_value) }}</td>
-              <td :class="{ up: item.unrealized_gain > 0, down: item.unrealized_gain < 0 }">
-                {{ item.unrealized_gain > 0 ? '+' : '' }}${{ formatNumber(item.unrealized_gain) }}
-              </td>
-              <td :class="{ up: item.gain_percent > 0, down: item.gain_percent < 0 }">
-                {{ item.gain_percent > 0 ? '+' : '' }}{{ item.gain_percent }}%
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <!-- CAGR Dialog -->
+    <el-dialog v-model="showCagrDialog" title="CAGR - Historical Net Value" width="700px">
+      <PerformanceLineChart :data="effectiveHistoricalData" />
+    </el-dialog>
+    <!-- Sharpe Ratio Dialog -->
+    <el-dialog v-model="showSharpeDialog" title="Sharpe Ratio - Daily Returns Distribution" width="700px" @close="onSharpeDialogClose">
+      <div style="height:350px;width:100%;">
+        <canvas v-if="showSharpeDialog" ref="sharpeChart"></canvas>
+        <div v-else-if="!dailyReturns.length" style="text-align:center;color:#aaa;">No data available</div>
       </div>
-      
-      <!-- Holdings Pagination -->
-      <div class="pagination" v-if="holdingsTotalPages > 1">
-        <el-button 
-          @click="holdingsPrevPage" 
-          :disabled="holdingsCurrentPage === 1"
-          size="small"
-        >
-          Previous
-        </el-button>
-        <span>Page {{ holdingsCurrentPage }} of {{ holdingsTotalPages }}</span>
-        <el-button 
-          @click="holdingsNextPage" 
-          :disabled="holdingsCurrentPage === holdingsTotalPages"
-          size="small"
-        >
-          Next
-        </el-button>
+    </el-dialog>
+    <!-- Max Drawdown Dialog -->
+    <el-dialog v-model="showDrawdownDialog" title="Max Drawdown - Net Value Curve" width="700px" @close="onDrawdownDialogClose">
+      <div style="height:350px;width:100%;">
+        <canvas v-if="showDrawdownDialog" ref="drawdownChart"></canvas>
+        <div v-else-if="!drawdownChartData.data.length" style="text-align:center;color:#aaa;">No data available</div>
       </div>
-    </div>
-
-    <!-- Portfolio Performance -->
+    </el-dialog>
+    <!-- Stock Portfolio Performance (move below metrics) -->
     <div class="portfolio-performance" v-if="stockPerformance">
       <h2>Stock Portfolio Performance</h2>
       <div class="performance-cards">
         <div class="performance-card">
-          <div class="card-icon">
-            <img class="performance-icon-img" src="@/assets/bar_chart.png" alt="Bar Chart" />
-          </div>
+          <div class="card-icon">📊</div>
           <div class="card-content">
             <h4>Total Value</h4>
             <p class="card-value">${{ formatNumber(stockPerformance.total_value) }}</p>
@@ -196,23 +105,18 @@
             </span>
           </div>
         </div>
-        
+
         <div class="performance-card">
-          <div class="card-icon">
-            <img class="performance-icon-img" src="@/assets/line_chart.png" alt="Line Chart" />
-          </div>
+          <div class="card-icon">📈</div>
           <div class="card-content">
             <h4>Total Holdings</h4>
             <p class="card-value">{{ stockPerformance.total_holdings }}</p>
             <span class="card-subtitle">Stock positions</span>
           </div>
         </div>
-        
-        <div class="performance-card"> 
-          <div class="card-icon">
-            <img class="performance-icon-img" src="@/assets/trophy-line.png" alt="Trophy line" />
-          </div>
-          
+
+        <div class="performance-card">
+          <div class="card-icon">🎯</div>
           <div class="card-content">
             <h4>Best Performer</h4>
             <p class="card-value">{{ bestPerformer?.symbol || 'N/A' }}</p>
@@ -221,11 +125,9 @@
             </span>
           </div>
         </div>
-        
+
         <div class="performance-card">
-          <div class="card-icon">
-            <img class="performance-icon-img" src="@/assets/loss.png" alt="Loss" />
-          </div>
+          <div class="card-icon">📉</div>
           <div class="card-content">
             <h4>Worst Performer</h4>
             <p class="card-value">{{ worstPerformer?.symbol || 'N/A' }}</p>
@@ -236,28 +138,329 @@
         </div>
       </div>
     </div>
+    <!-- Your Real-time Stock Holdings -->
+    <div class="holdings-data" v-if="isLoggedIn">
+      <div class="holdings-header">
+        <h2>Your Real-time Stock Holdings</h2>
+        <el-button type="primary" @click="showCreateDialog = true" size="small">
+          <el-icon>
+            <Plus />
+          </el-icon>
+          Add Holding
+        </el-button>
+      </div>
+      
+      <div v-if="stockHoldings.length > 0" class="market-table-wrapper">
+        <table class="market-table">
+          <thead>
+            <tr>
+              <th>Symbol</th>
+              <th>Name</th>
+              <th>Quantity</th>
+              <th>Avg Purchase Price</th>
+              <th>Current Price</th>
+              <th>Current Value</th>
+              <th>Gain/Loss</th>
+              <th>Gain/Loss %</th>
+              <th v-if="isLoggedIn">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in pagedComputedStockHoldings" :key="item.symbol" @mouseover="hoveredRow = item.symbol"
+              @mouseleave="hoveredRow = null" :class="[
+                { hovered: hoveredRow === item.symbol },
+                holdingsRowFlash[item.symbol] === 'up' ? 'flash-up' : '',
+                holdingsRowFlash[item.symbol] === 'down' ? 'flash-down' : ''
+              ]">
+              <td>{{ item.symbol }}</td>
+              <td>{{ item.name }}</td>
+              <td>{{ formatNumber(item.quantity) }}</td>
+              <td>${{ formatNumber(item.avg_purchase_price) }}</td>
+              <td>${{ formatNumber(item.current_price) }}</td>
+              <td>${{ formatNumber(item.current_value) }}</td>
+              <td :class="{ up: item.unrealized_gain > 0, down: item.unrealized_gain < 0 }">
+                {{ item.unrealized_gain > 0 ? '+' : '' }}${{ formatNumber(item.unrealized_gain) }}
+              </td>
+              <td :class="{ up: item.gain_percent > 0, down: item.gain_percent < 0 }">
+                {{ item.gain_percent > 0 ? '+' : '' }}{{ item.gain_percent }}%
+              </td>
+              <td v-if="isLoggedIn" class="actions-cell">
+                <div class="action-buttons">
+                  <el-button 
+                    v-if="item.holdings_count === 1" 
+                    type="danger" 
+                    size="small" 
+                    @click="sellHolding(item)"
+                    :icon="Delete"
+                    circle
+                    title="Sell"
+                  />
+                  <el-button 
+                    v-if="item.holdings_count > 1" 
+                    type="info" 
+                    size="small" 
+                    @click="showHoldingDetails(item)"
+                    :icon="View"
+                    circle
+                    title="View Details"
+                  />
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Empty state when no holdings -->
+      <div v-else class="empty-state">
+        <div class="empty-icon">📈</div>
+        <h3>No Holdings Yet</h3>
+        <p>Start building your portfolio by adding your first stock holding.</p>
+      </div>
 
-    <!-- Stock Allocation Chart -->
-    <div class="stock-allocation" v-if="stockAllocation.length > 0">
-      <h2>Stock Allocation by Sector</h2>
-      <div class="allocation-chart">
-        <div
-          v-for="item in stockAllocation"
-          :key="item.sector"
-          class="allocation-item"
-        >
-          <div class="allocation-label">
-            <span class="allocation-sector">{{ item.sector || 'Other' }}</span>
-            <span class="allocation-count">({{ item.count }} holdings)</span>
+      <!-- Holdings Pagination -->
+      <div class="pagination" v-if="holdingsTotalPages > 1">
+        <el-button @click="holdingsPrevPage" :disabled="holdingsCurrentPage === 1" size="small">
+          Previous
+        </el-button>
+        <span>Page {{ holdingsCurrentPage }} of {{ holdingsTotalPages }}</span>
+        <el-button @click="holdingsNextPage" :disabled="holdingsCurrentPage === holdingsTotalPages" size="small">
+          Next
+        </el-button>
+      </div>
+    </div>
+
+    <!-- Create Holding Dialog -->
+    <el-dialog v-model="showCreateDialog" title="Add New Stock Holding" width="500px">
+      <el-form
+        ref="createFormRef"
+        :model="createForm"
+        :rules="createRules"
+        label-width="120px"
+      >
+        <el-form-item label="Symbol" prop="symbol">
+          <el-input 
+            v-model="createForm.symbol" 
+            placeholder="e.g., AAPL, SH600519"
+            @blur="fetchStockInfo"
+            clearable
+          />
+        </el-form-item>
+        <el-form-item label="Name" prop="name">
+          <el-input v-model="createForm.name" disabled />
+        </el-form-item>
+        <el-form-item label="Quantity" prop="quantity">
+          <el-input-number 
+            v-model="createForm.quantity" 
+            :min="0.000001" 
+            :precision="6" 
+            :step="1"
+            :controls="true"
+            style="width: 100%" 
+          />
+        </el-form-item>
+        <el-form-item label="Purchase Price" prop="purchase_price">
+          <el-input-number 
+            v-model="createForm.purchase_price" 
+            :min="0.01" 
+            :precision="2" 
+            :step="0.01"
+            :controls="true"
+            style="width: 100%" 
+          />
+        </el-form-item>
+        <el-form-item label="Purchase Date" prop="purchase_date">
+          <el-date-picker
+            v-model="createForm.purchase_date"
+            type="date"
+            placeholder="Select purchase date"
+            style="width: 100%"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+            clearable
+          />
+        </el-form-item>
+        <el-form-item label="Sector" prop="sector">
+          <el-select v-model="createForm.sector" placeholder="Select sector" style="width: 100%" clearable>
+            <el-option label="Technology" value="Technology" />
+            <el-option label="Healthcare" value="Healthcare" />
+            <el-option label="Financial" value="Financial" />
+            <el-option label="Consumer" value="Consumer" />
+            <el-option label="Energy" value="Energy" />
+            <el-option label="Industrial" value="Industrial" />
+            <el-option label="Other" value="Other" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Notes" prop="notes">
+          <el-input
+            v-model="createForm.notes"
+            type="textarea"
+            :rows="3"
+            placeholder="Additional notes..."
+            maxlength="1000"
+            show-word-limit
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showCreateDialog = false">Cancel</el-button>
+        <el-button type="primary" @click="createHolding" :loading="creating">Create</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- Holding Details Dialog -->
+    <el-dialog v-model="showDetailsDialog" :title="`${selectedHolding?.symbol} - Holding Details`" width="800px">
+      <div v-if="selectedHolding">
+        <div class="holding-summary">
+          <h4>Summary</h4>
+          <div class="summary-grid">
+            <div class="summary-item">
+              <span class="label">Total Quantity:</span>
+              <span class="value">{{ formatNumber(selectedHolding.quantity) }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="label">Average Purchase Price:</span>
+              <span class="value">${{ formatNumber(selectedHolding.avg_purchase_price) }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="label">Current Price:</span>
+              <span class="value">${{ formatNumber(selectedHolding.current_price) }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="label">Total Value:</span>
+              <span class="value">${{ formatNumber(selectedHolding.current_value) }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="label">Total Gain/Loss:</span>
+              <span class="value" :class="{ up: selectedHolding.unrealized_gain > 0, down: selectedHolding.unrealized_gain < 0 }">
+                {{ selectedHolding.unrealized_gain > 0 ? '+' : '' }}${{ formatNumber(selectedHolding.unrealized_gain) }}
+              </span>
+            </div>
+            <div class="summary-item">
+              <span class="label">Gain/Loss %:</span>
+              <span class="value" :class="{ up: selectedHolding.gain_percent > 0, down: selectedHolding.gain_percent < 0 }">
+                {{ selectedHolding.gain_percent > 0 ? '+' : '' }}{{ selectedHolding.gain_percent }}%
+              </span>
+            </div>
           </div>
-          <div class="allocation-bar">
-            <div
-              class="allocation-fill"
-              :style="{ width: item.percentage + '%' }"
-            ></div>
+        </div>
+        
+        <div class="individual-holdings">
+          <h4>Individual Holdings ({{ selectedHolding.holdings_count }})</h4>
+          <table class="details-table">
+            <thead>
+              <tr>
+                <th>Purchase Date</th>
+                <th>Quantity</th>
+                <th>Purchase Price</th>
+                <th>Current Value</th>
+                <th>Gain/Loss</th>
+                <th>Gain/Loss %</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="holding in selectedHolding.individual_holdings" :key="holding.id">
+                <td>{{ formatDate(holding.purchase_date) }}</td>
+                <td>{{ formatNumber(holding.quantity) }}</td>
+                <td>${{ formatNumber(holding.purchase_price) }}</td>
+                <td>${{ formatNumber(holding.current_value) }}</td>
+                <td :class="{ up: holding.unrealized_gain > 0, down: holding.unrealized_gain < 0 }">
+                  {{ holding.unrealized_gain > 0 ? '+' : '' }}${{ formatNumber(holding.unrealized_gain) }}
+                </td>
+                <td :class="{ up: holding.gain_percent > 0, down: holding.gain_percent < 0 }">
+                  {{ holding.gain_percent > 0 ? '+' : '' }}{{ holding.gain_percent }}%
+                </td>
+                <td>
+                  <el-button 
+                    type="danger" 
+                    size="small" 
+                    @click="sellIndividualHolding(holding)"
+                    :icon="Delete"
+                    circle
+                    title="Sell"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <template #footer>
+        <el-button @click="showDetailsDialog = false">Close</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- Real-time Market Data -->
+    <div class="market-data" v-if="!isLoggedIn">
+      <div class="market-data">
+        <div class="market-header">
+          <h2>Real-time Market Data</h2>
+          <div class="market-type-toggle">
+            <button :class="['market-type-btn', marketType === 'us' ? 'active' : '']" @click="marketType = 'us'">
+              US Stocks/ETF
+            </button>
+            <button :class="['market-type-btn', marketType === 'cn' ? 'active' : '']" @click="marketType = 'cn'">
+              China A-Shares
+            </button>
           </div>
-          <div class="allocation-value">
-            ${{ formatNumber(item.total_value) }} ({{ item.percentage }}%)
+          <el-button @click="fetchMarketData" :loading="marketDataLoading" size="small">
+            <el-icon>
+              <Refresh />
+            </el-icon>
+            Refresh
+          </el-button>
+        </div>
+        <div class="market-table-wrapper">
+          <table class="market-table">
+            <thead>
+              <tr>
+                <th>Symbol</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Change</th>
+                <th>Change %</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="marketDataLoading && pagedMarketData.length === 0">
+                <td colspan="5" style="text-align: center; padding: 40px;">
+                  <el-icon class="is-loading">
+                    <Loading />
+                  </el-icon>
+                  <span style="margin-left: 8px;">Loading market data...</span>
+                </td>
+              </tr>
+              <tr v-else-if="!marketDataLoading && pagedMarketData.length === 0">
+                <td colspan="5" style="text-align: center; padding: 40px; color: #7f8c8d;">
+                  <div>No market data available</div>
+                  <div style="font-size: 0.9rem; margin-top: 8px;">Try refreshing the data</div>
+                </td>
+              </tr>
+              <tr v-for="item in pagedMarketData" :key="item.symbol" @mouseover="hoveredRow = item.symbol"
+                @mouseleave="hoveredRow = null" :class="[
+                  { hovered: hoveredRow === item.symbol },
+                  rowFlash[item.symbol] === 'up' ? 'flash-up' : '',
+                  rowFlash[item.symbol] === 'down' ? 'flash-down' : ''
+                ]">
+                <td>{{ item.symbol }}</td>
+                <td>{{ item.name }}</td>
+                <td>${{ formatNumber(item.currentPrice) }}</td>
+                <td :class="{ up: item.change > 0, down: item.change < 0 }">
+                  {{ item.change > 0 ? '+' : '' }}{{ formatNumber(item.change) }}
+                </td>
+                <td :class="{ up: item.change > 0, down: item.change < 0 }">
+                  {{ item.change > 0 ? '+' : '' }}{{ formatNumber(item.changePercent) }}%
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Pagination -->
+          <div class="pagination">
+            <button @click="prevPage" :disabled="currentPage === 1">Previous</button>
+            <span>Page {{ currentPage }} of {{ totalPages }}</span>
+            <button @click="nextPage" :disabled="currentPage === totalPages">Next</button>
           </div>
         </div>
       </div>
@@ -266,10 +469,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { Plus, Refresh, Loading } from '@element-plus/icons-vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { Plus, Refresh, Loading, Edit, View, Delete } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import portfolioAPI from '../api/portfolio.js'
 import marketAPI from '../api/market.js'
+import http from '../api/http.js'
+import PerformanceLineChart from './charts/PerformanceLineChart.vue'
+import { Chart, registerables } from 'chart.js'
+Chart.register(...registerables)
 
 const props = defineProps({
   isLoggedIn: {
@@ -284,46 +492,234 @@ const hoveredRow = ref(null)
 const stockHoldings = ref([])
 const marketData = ref([])
 const rowFlash = ref({})
+const holdingsRowFlash = ref({})
 const prevDataMap = ref({})
+const prevUsDataMap = ref({})
+const prevCnDataMap = ref({})
+const prevHoldingsDataMap = ref({})
 const timer = ref(null)
 const currentPage = ref(1)
 const pageSize = 10
 const marketDataLoading = ref(false)
 const holdingsCurrentPage = ref(1)
 const holdingsPageSize = 10
+const marketType = ref('us') // 'us' or 'cn'
+
+// Lifecycle
+let holdingsPriceTimer = null
+const REFRESH_INTERVAL_MS = 10000 // Global refresh interval in milliseconds
+
+const historicalData = ref([])
+// Real-time performance metrics
+const realTimeMetrics = ref({
+  cagr: 0,
+  sharpeRatio: 0,
+  maxDrawdown: 0,
+  totalValue: 0,
+  totalCost: 0,
+  totalGainLoss: 0,
+  gainLossPercent: 0
+})
+
+// Static mock data for unauthenticated users
+const staticMockHistoricalData = [
+  { date: '2025-01-01', total_value: 100000 },
+  { date: '2025-02-01', total_value: 108333 },
+  { date: '2025-03-01', total_value: 117361 },
+  { date: '2025-04-01', total_value: 127141 },
+  { date: '2025-05-01', total_value: 137736 },
+  { date: '2025-06-01', total_value: 149212 },
+  { date: '2025-07-01', total_value: 161646 },
+  { date: '2025-07-30', total_value: 175116 }
+]
+const staticMockCagr = 0.13 // 13% annualized return
+
+const effectiveHistoricalData = computed(() => props.isLoggedIn ? historicalData.value : staticMockHistoricalData)
+
+// Fetch real-time performance metrics
+const fetchRealTimeMetrics = async () => {
+  if (!props.isLoggedIn) return
+  
+  try {
+    const response = await portfolioAPI.getRealTimePerformanceMetrics()
+    if (response.data.success) {
+      realTimeMetrics.value = response.data.data
+    }
+  } catch (error) {
+    console.error('Error fetching real-time metrics:', error)
+  }
+}
+
+// Update portfolio history
+const updatePortfolioHistory = async () => {
+  if (!props.isLoggedIn) return
+  
+  try {
+    await portfolioAPI.updatePortfolioHistory()
+  } catch (error) {
+    console.error('Error updating portfolio history:', error)
+  }
+}
+
+const cagr = computed(() => {
+  if (!props.isLoggedIn) {
+    return staticMockCagr
+  }
+  return realTimeMetrics.value.cagr || 0
+})
+
+const sharpe = computed(() => {
+  if (!props.isLoggedIn) {
+    const data = effectiveHistoricalData.value
+    if (!data || data.length < 2) return 0
+    const returns = []
+    for (let i = 1; i < data.length; i++) {
+      returns.push((data[i].total_value / data[i - 1].total_value) - 1)
+    }
+    const avgReturn = returns.reduce((a, b) => a + b, 0) / returns.length
+    const stdDev = Math.sqrt(returns.reduce((a, b) => a + Math.pow(b - avgReturn, 2), 0) / returns.length)
+    const riskFreeRate = 0.02
+    return stdDev > 0 ? (cagr.value - riskFreeRate) / (stdDev * Math.sqrt(252)) : 0
+  }
+  return realTimeMetrics.value.sharpeRatio || 0
+})
+
+const maxDrawdown = computed(() => {
+  if (!props.isLoggedIn) {
+    const data = effectiveHistoricalData.value
+    if (!data || data.length < 2) return 0
+    let maxDd = 0, peak = data[0].total_value
+    for (let i = 1; i < data.length; i++) {
+      if (data[i].total_value > peak) peak = data[i].total_value
+      const drawdown = (peak - data[i].total_value) / peak
+      if (drawdown > maxDd) maxDd = drawdown
+    }
+    return maxDd
+  }
+  return realTimeMetrics.value.maxDrawdown || 0
+})
+const dailyReturns = computed(() => {
+  const data = effectiveHistoricalData.value
+  if (!data || data.length < 2) return []
+  const arr = []
+  for (let i = 1; i < data.length; i++) {
+    arr.push((data[i].total_value / data[i - 1].total_value) - 1)
+  }
+  return arr
+})
+const drawdownChartData = computed(() => {
+  const data = effectiveHistoricalData.value
+  if (!data || data.length < 2) return { labels: [], data: [], drawdownArea: [] }
+  let peak = data[0].total_value
+  let maxDd = 0, maxDdStart = 0, maxDdEnd = 0
+  const drawdowns = []
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].total_value > peak) peak = data[i].total_value
+    const dd = (peak - data[i].total_value) / peak
+    drawdowns.push(dd)
+    if (dd > maxDd) {
+      maxDd = dd
+      maxDdEnd = i
+    }
+  }
+  peak = data[0].total_value
+  for (let i = 0; i <= maxDdEnd; i++) {
+    if (data[i].total_value >= peak) {
+      peak = data[i].total_value
+      maxDdStart = i
+    }
+  }
+  return {
+    labels: data.map(d => d.date),
+    data: data.map(d => d.total_value),
+    drawdownArea: [maxDdStart, maxDdEnd]
+  }
+})
+
+const showCagrDialog = ref(false)
+const showSharpeDialog = ref(false)
+const showDrawdownDialog = ref(false)
+const showCreateDialog = ref(false)
+const showDetailsDialog = ref(false)
+const saving = ref(false)
+const creating = ref(false)
+const selectedHolding = ref(null)
+const createFormRef = ref(null)
+
+// Create form data
+const createForm = ref({
+  symbol: '',
+  name: '',
+  quantity: 1,
+  purchase_price: 0,
+  purchase_date: '',
+  sector: '',
+  notes: ''
+})
+
+// Create form validation rules
+const createRules = {
+  symbol: [
+    { required: true, message: 'Symbol is required', trigger: 'blur' },
+    { min: 1, max: 10, message: 'Symbol must be between 1 and 10 characters', trigger: 'blur' }
+  ],
+  name: [
+    { required: true, message: 'Name is required', trigger: 'blur' }
+  ],
+  quantity: [
+    { required: true, message: 'Quantity is required', trigger: 'blur' },
+    { type: 'number', min: 0.000001, message: 'Quantity must be positive', trigger: 'blur' }
+  ],
+  purchase_price: [
+    { required: true, message: 'Purchase price is required', trigger: 'blur' },
+    { type: 'number', min: 0.01, message: 'Purchase price must be positive', trigger: 'blur' }
+  ],
+  purchase_date: [
+    { required: true, message: 'Purchase date is required', trigger: 'blur' }
+  ]
+}
 
 // Computed properties
 const stockPerformance = computed(() => {
-  if (stockHoldings.value.length === 0) return null
-  
-  const totalValue = stockHoldings.value.reduce((sum, item) => {
+  if (!props.isLoggedIn) {
+    // mock performance for not logged in
+    return {
+      total_value: 114392.71,
+      total_gain: 21535.79,
+      avg_gain_percent: 12.67,
+      total_holdings: 10
+    }
+  }
+  if (computedStockHoldings.value.length === 0) return null
+
+  const totalValue = computedStockHoldings.value.reduce((sum, item) => {
     const currentValue = parseFloat(item.current_value) || 0
     return sum + currentValue
   }, 0)
-  
-  const totalGain = stockHoldings.value.reduce((sum, item) => {
+
+  const totalGain = computedStockHoldings.value.reduce((sum, item) => {
     const unrealizedGain = parseFloat(item.unrealized_gain) || 0
     return sum + unrealizedGain
   }, 0)
-  
-  const avgGainPercent = stockHoldings.value.length > 0 ? 
-    stockHoldings.value.reduce((sum, item) => {
+
+  const avgGainPercent = computedStockHoldings.value.length > 0 ?
+    computedStockHoldings.value.reduce((sum, item) => {
       const gainPercent = parseFloat(item.gain_percent) || 0
       return sum + gainPercent
-    }, 0) / stockHoldings.value.length : 0
-  
+    }, 0) / computedStockHoldings.value.length : 0
+
   return {
     total_value: totalValue,
     total_gain: totalGain,
     avg_gain_percent: avgGainPercent,
-    total_holdings: stockHoldings.value.length
+    total_holdings: computedStockHoldings.value.length
   }
 })
 
 const stockAllocation = computed(() => {
   const allocation = {}
-  
-  stockHoldings.value.forEach(holding => {
+
+  computedStockHoldings.value.forEach(holding => {
     const sector = holding.sector || 'Other'
     if (!allocation[sector]) {
       allocation[sector] = {
@@ -336,12 +732,12 @@ const stockAllocation = computed(() => {
     const currentValue = parseFloat(holding.current_value) || 0
     allocation[sector].total_value += currentValue
   })
-  
-  const totalValue = stockHoldings.value.reduce((sum, item) => {
+
+  const totalValue = computedStockHoldings.value.reduce((sum, item) => {
     const currentValue = parseFloat(item.current_value) || 0
     return sum + currentValue
   }, 0)
-  
+
   return Object.values(allocation)
     .map(item => ({
       ...item,
@@ -351,8 +747,15 @@ const stockAllocation = computed(() => {
 })
 
 const bestPerformer = computed(() => {
-  if (stockHoldings.value.length === 0) return null
-  return stockHoldings.value.reduce((best, current) => {
+  if (!props.isLoggedIn) {
+    // mock best performer for not logged in
+    return {
+      symbol: 'MSFT',
+      gain_percent: 50.00
+    }
+  }
+  if (computedStockHoldings.value.length === 0) return null
+  return computedStockHoldings.value.reduce((best, current) => {
     const bestGain = parseFloat(best.gain_percent) || 0
     const currentGain = parseFloat(current.gain_percent) || 0
     return currentGain > bestGain ? current : best
@@ -360,26 +763,158 @@ const bestPerformer = computed(() => {
 })
 
 const worstPerformer = computed(() => {
-  if (stockHoldings.value.length === 0) return null
-  return stockHoldings.value.reduce((worst, current) => {
+  if (!props.isLoggedIn) {
+    // mock worst performer for not logged in
+    return {
+      symbol: 'SH601318',
+      gain_percent: -15.01
+    }
+  }
+  if (computedStockHoldings.value.length === 0) return null
+  return computedStockHoldings.value.reduce((worst, current) => {
     const worstGain = parseFloat(worst.gain_percent) || 0
     const currentGain = parseFloat(current.gain_percent) || 0
     return currentGain < worstGain ? current : worst
   })
 })
 
+const holdingsRealtimePrices = ref({})
+
+const fetchHoldingsRealtimePrices = async () => {
+  if (!stockHoldings.value.length) return
+  const usSymbols = stockHoldings.value.filter(h => !/^S[HZ]/i.test(h.symbol)).map(h => h.symbol)
+  const cnSymbols = stockHoldings.value.filter(h => /^S[HZ]/i.test(h.symbol)).map(h => h.symbol)
+  let usPrices = {}, cnPrices = {}
+  if (usSymbols.length) {
+    const resUs = await marketAPI.getUsMultipleQuotes(usSymbols)
+    if (resUs.data && resUs.data.data) {
+      for (const item of resUs.data.data) {
+        usPrices[item.symbol] = item.currentPrice
+      }
+    }
+  }
+  if (cnSymbols.length) {
+    const resCn = await marketAPI.getCnMultipleQuotes(cnSymbols)
+    if (resCn.data && resCn.data.data) {
+      for (const item of resCn.data.data) {
+        cnPrices[item.symbol] = item.currentPrice
+      }
+    }
+  }
+  
+  // 合并价格数据
+  const newPrices = { ...usPrices, ...cnPrices }
+  
+  // 高亮逻辑 - 检查价格变化
+  const newHoldingsFlash = {}
+  Object.keys(newPrices).forEach(symbol => {
+    const prevPrice = prevHoldingsDataMap.value[symbol]
+    const currentPrice = newPrices[symbol]
+    if (prevPrice !== undefined && prevPrice !== currentPrice) {
+      if (currentPrice > prevPrice) {
+        newHoldingsFlash[symbol] = 'up'
+      } else if (currentPrice < prevPrice) {
+        newHoldingsFlash[symbol] = 'down'
+      }
+    }
+  })
+  
+  // 设置高亮效果
+  holdingsRowFlash.value = newHoldingsFlash
+  if (Object.keys(newHoldingsFlash).length > 0) {
+    setTimeout(() => { holdingsRowFlash.value = {} }, 1000)
+  }
+  
+  // 更新价格映射
+  prevHoldingsDataMap.value = { ...newPrices }
+  holdingsRealtimePrices.value = newPrices
+}
+
+watch(stockHoldings, () => {
+  fetchHoldingsRealtimePrices()
+})
+
+const computedStockHoldings = computed(() => {
+  const result = stockHoldings.value.map(h => {
+    const realPrice = holdingsRealtimePrices.value[h.symbol]
+    const current_price = (realPrice !== undefined && realPrice !== null) ? realPrice : h.purchase_price
+    const current_value = current_price * h.quantity
+    const purchase_value = h.purchase_price * h.quantity
+    const unrealized_gain = current_value - purchase_value
+    const gain_percent = purchase_value > 0 ? (unrealized_gain / purchase_value) * 100 : 0
+    return {
+      ...h,
+      current_price,
+      current_value,
+      unrealized_gain,
+      gain_percent: gain_percent.toFixed(2)
+    }
+  })
+  
+  // Group holdings by symbol and aggregate data
+  const groupedHoldings = {}
+  result.forEach(holding => {
+    if (!groupedHoldings[holding.symbol]) {
+      groupedHoldings[holding.symbol] = {
+        symbol: holding.symbol,
+        name: holding.name,
+        quantity: 0,
+        purchase_value: 0,
+        current_value: 0,
+        unrealized_gain: 0,
+        avg_purchase_price: 0,
+        current_price: holding.current_price,
+        sector: holding.sector,
+        type: holding.type,
+        holdings_count: 0,
+        individual_holdings: []
+      }
+    }
+    
+    const group = groupedHoldings[holding.symbol]
+    // Ensure proper number parsing for Avg calculation
+    const quantity = parseFloat(holding.quantity) || 0
+    const purchase_price = parseFloat(holding.purchase_price) || 0
+    const current_price = parseFloat(holding.current_price) || 0
+    
+    // Calculate values using original data for Avg calculation
+    const purchase_value = purchase_price * quantity
+    const current_value = current_price * quantity
+    const unrealized_gain = current_value - purchase_value
+    
+    group.quantity += quantity
+    group.purchase_value += purchase_value
+    group.current_value += current_value
+    group.unrealized_gain += unrealized_gain
+    group.holdings_count += 1
+    group.individual_holdings.push(holding)
+  })
+  
+  // Calculate average purchase price and gain percentage
+  Object.values(groupedHoldings).forEach(group => {
+    // Ensure proper number calculations
+    const quantity = parseFloat(group.quantity) || 0
+    const purchase_value = parseFloat(group.purchase_value) || 0
+    const unrealized_gain = parseFloat(group.unrealized_gain) || 0
+    
+    group.avg_purchase_price = quantity > 0 ? purchase_value / quantity : 0
+    group.gain_percent = purchase_value > 0 ? (unrealized_gain / purchase_value) * 100 : 0
+    group.gain_percent = group.gain_percent.toFixed(2)
+    
+    // Ensure all values are numbers
+    group.quantity = quantity
+    group.purchase_value = purchase_value
+    group.current_value = parseFloat(group.current_value) || 0
+    group.unrealized_gain = unrealized_gain
+  })
+  
+  return Object.values(groupedHoldings)
+})
+
 const totalPages = computed(() => Math.ceil(marketData.value.length / pageSize))
 const pagedMarketData = computed(() => {
   const start = (currentPage.value - 1) * pageSize
   const result = marketData.value.slice(start, start + pageSize)
-  console.log('pagedMarketData computed:', {
-    marketDataLength: marketData.value.length,
-    currentPage: currentPage.value,
-    pageSize: pageSize,
-    start: start,
-    resultLength: result.length,
-    result: result
-  })
   return result
 })
 
@@ -387,6 +922,11 @@ const holdingsTotalPages = computed(() => Math.ceil(stockHoldings.value.length /
 const pagedStockHoldings = computed(() => {
   const start = (holdingsCurrentPage.value - 1) * holdingsPageSize
   return stockHoldings.value.slice(start, start + holdingsPageSize)
+})
+
+const pagedComputedStockHoldings = computed(() => {
+  const start = (holdingsCurrentPage.value - 1) * holdingsPageSize
+  return computedStockHoldings.value.slice(start, start + holdingsPageSize)
 })
 
 // Methods
@@ -452,20 +992,6 @@ const loadStockData = async () => {
       },
       {
         id: 5,
-        symbol: 'TSLA',
-        name: 'Tesla Inc.',
-        quantity: 15,
-        purchase_price: 180.00,
-        current_price: 325.59,
-        current_value: 4883.85,
-        purchase_value: 2700.00,
-        unrealized_gain: 2183.85,
-        gain_percent: 80.88,
-        sector: 'Automotive',
-        type: 'stock'
-      },
-      {
-        id: 6,
         symbol: 'AMZN',
         name: 'Amazon.com Inc.',
         quantity: 12,
@@ -479,7 +1005,7 @@ const loadStockData = async () => {
         type: 'stock'
       },
       {
-        id: 7,
+        id: 6,
         symbol: 'META',
         name: 'Meta Platforms Inc.',
         quantity: 20,
@@ -493,7 +1019,7 @@ const loadStockData = async () => {
         type: 'stock'
       },
       {
-        id: 8,
+        id: 7,
         symbol: 'NFLX',
         name: 'Netflix Inc.',
         quantity: 8,
@@ -507,7 +1033,7 @@ const loadStockData = async () => {
         type: 'stock'
       },
       {
-        id: 9,
+        id: 8,
         symbol: 'JPM',
         name: 'JPMorgan Chase & Co.',
         quantity: 25,
@@ -521,7 +1047,7 @@ const loadStockData = async () => {
         type: 'stock'
       },
       {
-        id: 10,
+        id: 9,
         symbol: 'JNJ',
         name: 'Johnson & Johnson',
         quantity: 30,
@@ -535,7 +1061,7 @@ const loadStockData = async () => {
         type: 'stock'
       },
       {
-        id: 11,
+        id: 10,
         symbol: 'PG',
         name: 'Procter & Gamble Co.',
         quantity: 18,
@@ -549,7 +1075,7 @@ const loadStockData = async () => {
         type: 'stock'
       },
       {
-        id: 12,
+        id: 11,
         symbol: 'V',
         name: 'Visa Inc.',
         quantity: 22,
@@ -565,6 +1091,8 @@ const loadStockData = async () => {
     ]
     // Reset pagination for mock data
     holdingsCurrentPage.value = 1
+    // Reset holdings data map for proper flash highlighting
+    prevHoldingsDataMap.value = {}
     return
   }
 
@@ -575,57 +1103,70 @@ const loadStockData = async () => {
       stockHoldings.value = allHoldings.filter(holding => holding.type === 'stock')
       // Reset pagination when new data is loaded
       holdingsCurrentPage.value = 1
+      // Reset holdings data map for proper flash highlighting
+      prevHoldingsDataMap.value = {}
+      // Fetch real-time metrics after loading holdings
+      await fetchRealTimeMetrics()
     }
   } catch (error) {
     console.error('Error loading stock data:', error)
     stockHoldings.value = []
     holdingsCurrentPage.value = 1
+    prevHoldingsDataMap.value = {}
   }
 }
 
 const fetchMarketData = async () => {
   marketDataLoading.value = true
   try {
-    const res = await marketAPI.getPublicQuotes()
-    console.log('marketAPI.getPublicQuotes() response:', res)
-    
+    let res
+    if (marketType.value === 'us') {
+      res = await marketAPI.getUsStockQuotes()
+    } else {
+      res = await marketAPI.getCnStockQuotes()
+    }
+
     if (res.data && res.data.success && res.data.data) {
       const newData = res.data.data
-      console.log('newData length:', newData.length)
-      console.log('newData[0]:', newData[0])
-      
+
       // 检查数据格式并确保所有必要字段都存在
       const validData = newData.filter(item => {
-        return item && 
-               item.symbol && 
-               item.name && 
-               typeof item.currentPrice === 'number' &&
-               typeof item.change === 'number' &&
-               typeof item.changePercent === 'number'
+        return item &&
+          item.symbol &&
+          item.name &&
+          typeof item.currentPrice === 'number' &&
+          typeof item.change === 'number' &&
+          typeof item.changePercent === 'number'
       })
-      
-      console.log('validData length:', validData.length)
-      
+
       // 高亮逻辑
       const newFlash = {}
+      const currentDataMap = marketType.value === 'us' ? prevUsDataMap.value : prevCnDataMap.value
       validData.forEach(item => {
-        const prev = prevDataMap.value[item.symbol]
+        const prev = currentDataMap[item.symbol]
         if (prev !== undefined && prev !== item.currentPrice) {
-          if (item.currentPrice > prev) newFlash[item.symbol] = 'up'
-          else if (item.currentPrice < prev) newFlash[item.symbol] = 'down'
+          if (item.currentPrice > prev) {
+            newFlash[item.symbol] = 'up'
+          } else if (item.currentPrice < prev) {
+            newFlash[item.symbol] = 'down'
+          }
         }
       })
       rowFlash.value = newFlash
       if (Object.keys(newFlash).length > 0) {
         setTimeout(() => { rowFlash.value = {} }, 1000)
       }
-      prevDataMap.value = Object.fromEntries(validData.map(i => [i.symbol, i.currentPrice]))
+      
+      // 更新对应的数据映射
+      if (marketType.value === 'us') {
+        prevUsDataMap.value = Object.fromEntries(validData.map(i => [i.symbol, i.currentPrice]))
+      } else {
+        prevCnDataMap.value = Object.fromEntries(validData.map(i => [i.symbol, i.currentPrice]))
+      }
+      
       // Force Vue reactivity by creating a new array
       marketData.value = [...validData]
-      console.log('marketData.value set to:', marketData.value)
-      console.log('marketData.value length:', marketData.value.length)
     } else {
-      console.log('API response not successful:', res)
       marketData.value = []
     }
   } catch (e) {
@@ -635,6 +1176,48 @@ const fetchMarketData = async () => {
     marketDataLoading.value = false
   }
 }
+
+const fetchHistoricalData = async () => {
+  // Only fetch from backend if user is logged in
+  if (!props.isLoggedIn) {
+    return
+  }
+  
+  try {
+    const res = await http.get('/holdings/historical')
+    if (res.data && res.data.data && res.data.data.length > 1) {
+      historicalData.value = res.data.data.sort((a, b) => new Date(a.date) - new Date(b.date))
+    }
+  } catch (e) {
+    historicalData.value = []
+    console.log('Error fetching historical data:', e)
+  }
+}
+
+watch(marketType, () => {
+  currentPage.value = 1
+  // 清除当前的高亮效果
+  rowFlash.value = {}
+  holdingsRowFlash.value = {}
+  fetchMarketData()
+})
+
+watch(showCreateDialog, (val) => {
+  if (!val) {
+    resetCreateForm()
+  }
+})
+
+// Update details dialog when real-time prices change
+watch(holdingsRealtimePrices, () => {
+  if (showDetailsDialog.value && selectedHolding.value) {
+    // Recalculate the selected holding with new prices
+    const holding = computedStockHoldings.value.find(h => h.symbol === selectedHolding.value.symbol)
+    if (holding) {
+      showHoldingDetails(holding)
+    }
+  }
+})
 
 const updatePrices = async () => {
   try {
@@ -665,6 +1248,12 @@ const formatNumber = (num) => {
   }).format(num)
 }
 
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toISOString().slice(0, 10) // YYYY-MM-DD
+}
+
 const goToDashboard = () => {
   emit('goToDashboard')
 }
@@ -685,22 +1274,385 @@ const holdingsNextPage = () => {
   if (holdingsCurrentPage.value < holdingsTotalPages.value) holdingsCurrentPage.value++
 }
 
-// Lifecycle
 onMounted(() => {
   loadStockData()
   fetchMarketData()
-  // Update data every 10 seconds for real-time feel
+  fetchHistoricalData()
+  fetchHoldingsRealtimePrices()
+  fetchRealTimeMetrics()
+  updatePortfolioHistory()
+  // Update market data every REFRESH_INTERVAL_MS for real-time feel
   timer.value = setInterval(() => {
     fetchMarketData()
-  }, 10000)
+    fetchHoldingsRealtimePrices()
+    fetchRealTimeMetrics()
+  }, REFRESH_INTERVAL_MS)
 })
 
 onUnmounted(() => {
   if (timer.value) clearInterval(timer.value)
+  if (holdingsPriceTimer) clearInterval(holdingsPriceTimer)
+  // 清理数据映射
+  prevHoldingsDataMap.value = {}
+  prevUsDataMap.value = {}
+  prevCnDataMap.value = {}
 })
+
+const sharpeChart = ref(null)
+const drawdownChart = ref(null)
+let sharpeChartInstance = null
+let drawdownChartInstance = null
+
+const onSharpeDialogClose = () => {
+  if (sharpeChartInstance) {
+    sharpeChartInstance.destroy()
+    sharpeChartInstance = null
+  }
+}
+const onDrawdownDialogClose = () => {
+  if (drawdownChartInstance) {
+    drawdownChartInstance.destroy()
+    drawdownChartInstance = null
+  }
+}
+
+watch(showSharpeDialog, async (val) => {
+  if (val) {
+    await nextTick()
+    if (sharpeChartInstance) sharpeChartInstance.destroy()
+    if (!sharpeChart.value) return
+    const ctx = sharpeChart.value.getContext('2d')
+    const returns = dailyReturns.value.map(x => (x * 100).toFixed(2))
+    const bins = Array(21).fill(0)
+    const min = -10, max = 10, step = 1
+    for (let r of returns) {
+      const idx = Math.max(0, Math.min(bins.length - 1, Math.floor((r - min) / step)))
+      bins[idx]++
+    }
+    sharpeChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: Array.from({length: bins.length}, (_, i) => `${min + i * step}%`),
+        datasets: [{
+          label: 'Frequency',
+          data: bins,
+          backgroundColor: '#667eea',
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { title: { display: true, text: 'Daily Return (%)' } },
+          y: { title: { display: true, text: 'Frequency' }, beginAtZero: true }
+        }
+      }
+    })
+  } else {
+    onSharpeDialogClose()
+  }
+})
+
+watch(showDrawdownDialog, async (val) => {
+  if (val) {
+    await nextTick()
+    if (drawdownChartInstance) drawdownChartInstance.destroy()
+    if (!drawdownChart.value) return
+    const ctx = drawdownChart.value.getContext('2d')
+    const chartData = drawdownChartData.value
+    drawdownChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: chartData.labels,
+        datasets: [
+          {
+            label: 'Net Value',
+            data: chartData.data,
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102,126,234,0.08)',
+            borderWidth: 3,
+            fill: true,
+            pointRadius: 0,
+            segment: {
+              backgroundColor: ctx => {
+                const i = ctx.p0DataIndex
+                if (i >= chartData.drawdownArea[0] && i <= chartData.drawdownArea[1]) return 'rgba(245,87,108,0.2)'
+                return undefined
+              }
+            }
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: {
+            title: { display: true, text: 'Date' },
+            ticks: {
+              callback: function(value, index, ticks) {
+                const label = chartData.labels[index]
+                if (!label) return ''
+                // Format as YYYY-MM-DD
+                return label.slice(0, 10)
+              }
+            }
+          },
+          y: { title: { display: true, text: 'Net Value' }, beginAtZero: false }
+        }
+      }
+    })
+  } else {
+    onDrawdownDialogClose()
+  }
+})
+
+const createHolding = async () => {
+  if (!createFormRef.value) return
+  
+  try {
+    await createFormRef.value.validate()
+  } catch (error) {
+    console.log('Form validation failed:', error)
+    return
+  }
+  
+  creating.value = true
+  try {
+    const formData = {
+      ...createForm.value,
+      type: 'stock'
+    }
+    await portfolioAPI.createHolding(formData)
+    await loadStockData()
+    showCreateDialog.value = false
+    resetCreateForm()
+    ElMessage.success('Holding created successfully!')
+  } catch (error) {
+    console.error('Error creating holding:', error)
+    ElMessage.error('Failed to create holding.')
+  } finally {
+    creating.value = false
+  }
+}
+
+const fetchStockInfo = async () => {
+  const symbol = createForm.value.symbol.trim().toUpperCase()
+  if (!symbol) {
+    createForm.value.name = ''
+    createForm.value.purchase_price = 0
+    return
+  }
+  
+  try {
+    // Determine if it's A股 or US stock
+    const isAStock = /^S[HZ]/.test(symbol)
+    
+    if (isAStock) {
+      // Fetch A股 data
+      const response = await marketAPI.getCnMultipleQuotes([symbol])
+      if (response.data && response.data.success && response.data.data.length > 0) {
+        const stockData = response.data.data[0]
+        createForm.value.name = stockData.name || symbol
+        createForm.value.purchase_price = stockData.currentPrice || 0
+      } else {
+        createForm.value.name = symbol
+        createForm.value.purchase_price = 0
+      }
+    } else {
+      // Fetch US stock data
+      const response = await marketAPI.getUsMultipleQuotes([symbol])
+      if (response.data && response.data.success && response.data.data.length > 0) {
+        const stockData = response.data.data[0]
+        createForm.value.name = stockData.name || symbol
+        createForm.value.purchase_price = stockData.currentPrice || 0
+      } else {
+        createForm.value.name = symbol
+        createForm.value.purchase_price = 0
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching stock info:', error)
+    // Keep the symbol but set default values
+    createForm.value.name = symbol
+    createForm.value.purchase_price = 0
+  }
+}
+
+const resetCreateForm = () => {
+  createForm.value = {
+    symbol: '',
+    name: '',
+    quantity: 1,
+    purchase_price: 0,
+    purchase_date: '',
+    sector: '',
+    notes: ''
+  }
+  // Reset form validation
+  if (createFormRef.value) {
+    createFormRef.value.resetFields()
+  }
+}
+
+const showHoldingDetails = (holding) => {
+  // Get real-time price for this symbol
+  const realPrice = holdingsRealtimePrices.value[holding.symbol]
+  const current_price = (realPrice !== undefined && realPrice !== null) ? realPrice : holding.current_price
+  
+  // Process individual holdings to ensure proper calculations
+  const processedIndividualHoldings = holding.individual_holdings.map(h => {
+    const quantity = parseFloat(h.quantity) || 0
+    const purchase_price = parseFloat(h.purchase_price) || 0
+    const purchase_value = purchase_price * quantity
+    const current_value = current_price * quantity
+    const unrealized_gain = current_value - purchase_value
+    const gain_percent = purchase_value > 0 ? (unrealized_gain / purchase_value) * 100 : 0
+    
+    return {
+      ...h,
+      quantity,
+      purchase_price,
+      purchase_value,
+      current_price,
+      current_value,
+      unrealized_gain,
+      gain_percent: gain_percent.toFixed(2)
+    }
+  })
+  
+  // Calculate summary values
+  const totalQuantity = processedIndividualHoldings.reduce((sum, h) => sum + h.quantity, 0)
+  const totalPurchaseValue = processedIndividualHoldings.reduce((sum, h) => sum + h.purchase_value, 0)
+  const totalCurrentValue = processedIndividualHoldings.reduce((sum, h) => sum + h.current_value, 0)
+  const totalUnrealizedGain = totalCurrentValue - totalPurchaseValue
+  const avgPurchasePrice = totalQuantity > 0 ? totalPurchaseValue / totalQuantity : 0
+  const gainPercent = totalPurchaseValue > 0 ? (totalUnrealizedGain / totalPurchaseValue) * 100 : 0
+  
+  selectedHolding.value = {
+    ...holding,
+    current_price,
+    quantity: totalQuantity,
+    purchase_value: totalPurchaseValue,
+    current_value: totalCurrentValue,
+    unrealized_gain: totalUnrealizedGain,
+    avg_purchase_price: avgPurchasePrice,
+    gain_percent: gainPercent.toFixed(2),
+    individual_holdings: processedIndividualHoldings
+  }
+  showDetailsDialog.value = true
+}
+
+const sellHolding = async (holding) => {
+  const symbol = holding.symbol
+  const quantityToSell = holding.quantity
+  const currentPrice = holdingsRealtimePrices.value[symbol] || holding.current_price
+
+  if (quantityToSell <= 0) {
+    ElMessage.warning('Please select a positive quantity to sell.')
+    return
+  }
+
+  if (currentPrice <= 0) {
+    ElMessage.error('Cannot sell at a price of 0 or less.')
+    return
+  }
+
+  const confirm = await ElMessageBox.confirm(
+    `Are you sure you want to sell ${quantityToSell} shares of ${symbol} at $${currentPrice.toFixed(2)}?`,
+    'Confirm Sale',
+    {
+      confirmButtonText: 'Sell',
+      cancelButtonText: 'Cancel',
+      type: 'warning',
+    }
+  ).catch(() => false)
+
+  if (confirm) {
+    try {
+      // For single holdings, we need to find the actual holding ID
+      const actualHolding = holding.individual_holdings ? holding.individual_holdings[0] : holding
+      await portfolioAPI.deleteHolding(actualHolding.id)
+      
+      await loadStockData()
+      ElMessage.success(`Sold ${quantityToSell} shares of ${symbol} for $${(quantityToSell * currentPrice).toFixed(2)}`)
+    } catch (error) {
+      console.error('Error selling holding:', error)
+      ElMessage.error('Failed to sell holding.')
+    }
+  }
+}
+
+const sellIndividualHolding = async (holding) => {
+  const symbol = holding.symbol
+  const quantityToSell = holding.quantity
+  const currentPrice = holdingsRealtimePrices.value[symbol] || holding.current_price
+
+  if (quantityToSell <= 0) {
+    ElMessage.warning('Please select a positive quantity to sell.')
+    return
+  }
+
+  if (currentPrice <= 0) {
+    ElMessage.error('Cannot sell at a price of 0 or less.')
+    return
+  }
+
+  const confirm = await ElMessageBox.confirm(
+    `Are you sure you want to sell ${quantityToSell} shares of ${symbol} at $${currentPrice.toFixed(2)}?`,
+    'Confirm Sale',
+    {
+      confirmButtonText: 'Sell',
+      cancelButtonText: 'Cancel',
+      type: 'warning',
+    }
+  ).catch(() => false)
+
+  if (confirm) {
+    try {
+      await portfolioAPI.deleteHolding(holding.id)
+      await loadStockData()
+      ElMessage.success(`Sold ${quantityToSell} shares of ${symbol} for $${(quantityToSell * currentPrice).toFixed(2)}`)
+    } catch (error) {
+      console.error('Error selling individual holding:', error)
+      ElMessage.error('Failed to sell individual holding.')
+    }
+  }
+}
 </script>
 
 <style scoped>
+.market-type-toggle {
+  display: flex;
+  gap: 8px;
+  margin-right: 16px;
+}
+
+.market-type-btn {
+  background: #f8f9fa;
+  border: 1px solid #d1d5db;
+  color: #2c3e50;
+  font-weight: 600;
+  padding: 6px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  outline: none;
+}
+
+.market-type-btn.active {
+  background: #667eea;
+  color: #fff;
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08);
+}
+
+.market-type-btn:hover:not(.active) {
+  background: #e0e7ff;
+  color: #2c3e50;
+  border-color: #a5b4fc;
+}
+
 .stock-section {
   max-width: 1200px;
   margin: 0 auto;
@@ -852,31 +1804,31 @@ onUnmounted(() => {
   .stock-categories {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .section-header h1 {
     font-size: 2rem;
   }
-  
+
   .performance-cards {
     grid-template-columns: 1fr;
   }
-  
+
   .market-table-wrapper {
     overflow-x: auto;
   }
-  
+
   .market-table {
     min-width: 600px;
   }
-  
+
   .allocation-item {
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
   }
-  
+
   .allocation-value {
     text-align: left;
   }
 }
-</style> 
+</style>

@@ -11,9 +11,13 @@ const marketAPI = {
     return http.get(`/market/quote/${symbol}`)
   },
 
-  // Get quotes for multiple symbols
-  getMultipleQuotes(symbols) {
-    return http.post('/market/quotes', { symbols })
+  // Get quotes for multiple US stock symbols
+  getUsMultipleQuotes(symbols) {
+    return http.post('/market/quotes/us', { symbols })
+  },
+  // Get quotes for multiple CN stock symbols
+  getCnMultipleQuotes(symbols) {
+    return http.post('/market/quotes/cn', { symbols })
   },
 
   // Get historical data
@@ -26,9 +30,13 @@ const marketAPI = {
     return http.get('/market/trending')
   },
 
-  // Get public quotes
-  getPublicQuotes() {
-    return http.get('/market/public-quotes')
+  // Get US stock quotes
+  getUsStockQuotes() {
+    return http.get('/market/us-stock-quotes')
+  },
+  // Get CN (A股) stock quotes
+  getCnStockQuotes() {
+    return http.get('/market/cn-stock-quotes')
   },
 
   // Recommendations

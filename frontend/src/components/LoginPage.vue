@@ -160,10 +160,10 @@ const handleSubmit = async () => {
 const handleSignUp = async () => {
   // Simulate sign up process
   await new Promise(resolve => setTimeout(resolve, 1000))
-  
   // For demo purposes, treat sign up as successful
   console.log('Sign up:', formData.value)
-  
+  // Store user email in localStorage
+  localStorage.setItem('userName', formData.value.email)
   // Emit login success to go to dashboard
   emit('loginSuccess')
 }
@@ -171,10 +171,10 @@ const handleSignUp = async () => {
 const handleSignIn = async () => {
   // Simulate sign in process
   await new Promise(resolve => setTimeout(resolve, 1000))
-  
   // For demo purposes, treat sign in as successful
   console.log('Sign in:', formData.value)
-  
+  // Store user email in localStorage
+  localStorage.setItem('userName', formData.value.email)
   // Emit login success to go to dashboard
   emit('loginSuccess')
 }
