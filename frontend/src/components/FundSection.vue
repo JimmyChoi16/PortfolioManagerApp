@@ -1,5 +1,11 @@
 <template>
   <div class="fund-section">
+    <!-- Login Warning -->
+    <div v-if="!isLoggedIn" class="login-warning">
+      <el-alert :title="t('stock.loginWarning')" type="warning"
+        :closable="false" show-icon />
+    </div>
+
     <!-- Loading Overlay -->
     <div v-if="loading" class="loading-overlay">
       <el-icon class="is-loading"><Loading /></el-icon>
@@ -10,9 +16,9 @@
     <div class="section-header">
       <h1>📊 Fund Management</h1>
       <p>Track and manage your investment funds with real-time data and insights</p>
-      <div class="login-notice">
+      <!-- <div class="login-notice" v-if="!isLoggedIn">
         <p>⚠️ You are not logged in. All data shown is for demonstration purposes only.</p>
-      </div>
+      </div> -->
     </div>
 
     <!-- Fund Types Overview -->
@@ -52,10 +58,10 @@
       <div class="holdings-header">
         <h2>Current Fund Holdings</h2>
         <div class="holdings-actions">
-          <el-button type="primary" @click="showAddFundModal">
+          <el-button v-if="isLoggedIn" type="primary" @click="showAddFundModal">
             Add Fund Holdings
           </el-button>
-          <el-button @click="exportData">
+          <el-button v-if="isLoggedIn" @click="exportData">
             <el-icon><Download /></el-icon>
             Export Data
           </el-button>
@@ -264,7 +270,7 @@
             </div>
             <div class="fund-actions">
               <el-button 
-                v-if="selectedFund.quantity > 0" 
+                v-if="selectedFund.quantity > 0 && isLoggedIn" 
                 type="danger" 
                 @click="showTradeModal(selectedFund, 'sell')"
               >
@@ -273,6 +279,7 @@
               <el-button 
                 type="success" 
                 @click="showTradeModal(selectedFund, 'buy')"
+                v-if="isLoggedIn"
               >
                 Buy
               </el-button>
@@ -507,6 +514,9 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Loading, Download, View, Plus, Minus } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import portfolioAPI from '../api/portfolio.js'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 // 响应式数据
 const loading = ref(true)
@@ -1207,7 +1217,7 @@ onMounted(async () => {
   padding: 20px;
   max-width: 1400px;
   margin: 0 auto;
-  background: #f5f7fa;
+  /* background: #f5f7fa; */
   min-height: 100vh;
 }
 
