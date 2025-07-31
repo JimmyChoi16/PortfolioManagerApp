@@ -99,6 +99,7 @@ export default {
     totalGainLoss: '总盈亏',
     totalQuantity: '总数量',
     averagePurchasePrice: '平均购买价格',
+    addNewStockHolding: "新增股票持仓",
     cagr: '年化收益率',
     cagrDesc: '年化回报',
     sharpeRatio: '夏普比率',
@@ -465,6 +466,9 @@ export default {
     cannotSellAtPriceZeroOrLess: '不能以零或负数价格卖出',
     holdingCreatedSuccessfully: '持仓创建成功',
     failedToCreateHolding: '创建持仓失败',
+    stocks: '股',
+    value: '价值',
+    variousIndustries: '各种行业',
     // Additional translations
     fundAllocationChart: '基金配置图表',
     portfolioSummary: '投资组合摘要',

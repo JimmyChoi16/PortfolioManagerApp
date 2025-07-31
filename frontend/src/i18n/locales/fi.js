@@ -464,6 +464,9 @@ export default {
     cannotSellAtPriceZeroOrLess: 'Ei voi myydä nollalla tai negatiivisella hinnalla',
     holdingCreatedSuccessfully: 'Omistus luotu onnistuneesti',
     failedToCreateHolding: 'Omistuksen luonti epäonnistui',
+    stocks: 'osaketta',
+    value: 'Arvo',
+    variousIndustries: 'Eri toimialat',
     // Additional translations
     fundAllocationChart: 'Rahastojen allokaatio',
     portfolioSummary: 'Salkun yhteenveto',
