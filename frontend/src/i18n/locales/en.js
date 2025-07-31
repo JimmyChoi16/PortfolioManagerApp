@@ -51,10 +51,10 @@ export default {
   // Home Page
   home: {
     title: 'Welcome to WealthU!',
-    subtitle: 'Monitor stocks, bonds, cash and more—all in one place.',
+    subtitle: 'Monitor stocks, bonds and more—all in one place.',
     description: 'The smart, simple way to track and manage your investments. Gain insights into your portfolio\'s performance, make data-driven decisions, and achieve your financial goals with ease.',
     aboutTitle: 'What is WealthU?',
-    aboutDesc: 'WealthU is an intuitive platform designed to help investors like you manage, track, and analyze your financial portfolio in real time. Whether you hold stocks, bonds, funds, or cash, WealthU centralizes your assets, so you always have a clear view of your investment performance.',
+    aboutDesc: 'WealthU is an intuitive platform designed to help investors like you manage, track, and analyze your financial portfolio in real time. Whether you hold stocks, bonds or funds, WealthU centralizes your assets, so you always have a clear view of your investment performance.',
     features: {
       title: 'Key Features',
       realTime: 'Real-time Market Data',
@@ -66,7 +66,30 @@ export default {
       privacy: 'Simple, Secure & Private'
     },
     getStarted: 'Get Started',
-    learnMore: 'Learn More'
+    learnMore: 'Learn More',
+    // Feature cards
+    featureCards: {
+      dashboard: {
+        title: 'Unified Dashboard',
+        brief: 'Effortlessly manage all your investments in a single, organized dashboard.',
+        content: 'Effortlessly manage all your investments—stocks, bonds, funds, cash, and more—in a single, organized dashboard. Portfolio Manager brings clarity to your financial life by consolidating your holdings and showing you the big picture at a glance.'
+      },
+      realtime: {
+        title: 'Real-Time Data',
+        brief: 'Get up-to-the-minute market prices and portfolio updates.',
+        content: 'Get up-to-the-minute market prices and portfolio updates. Portfolio Manager fetches live data for your assets, ensuring you always know the current value of your investments. Make timely decisions based on accurate, real-world information.'
+      },
+      insights: {
+        title: 'Performance Insights',
+        brief: 'Visualize your portfolio\'s growth with interactive charts and clear summaries.',
+        content: 'Visualize your portfolio\'s growth with interactive charts and clear summaries. Instantly see your gains, losses, and asset performance over time, helping you spot trends and optimize your investment strategy.'
+      },
+      privacy: {
+        title: 'Simple, Secure & Private',
+        brief: 'Quick sign-up, no complexity.',
+        content: 'Quick sign-up, no complexity. Portfolio Manager is designed for seamless, single-user access—making it easy to get started while keeping your financial data private, secure, and fully under your control.'
+      }
+    }
   },
 
   // Dashboard
@@ -83,7 +106,81 @@ export default {
     sharpeRatio: 'Sharpe Ratio',
     maxDrawdown: 'Max Drawdown',
     recentActivity: 'Recent Activity',
-    marketTrends: 'Market Trends'
+    marketTrends: 'Market Trends',
+    // New Dashboard specific translations
+    portfolioDashboard: 'Portfolio Dashboard',
+    financialOverview: 'Your financial overview at a glance',
+    netWorth: 'NET WORTH',
+    totalReturn: 'Total Return',
+    riskLevel: 'Risk Level',
+    portfolioAge: 'Portfolio Age',
+    cashRatio: 'Cash Ratio',
+    quickActions: 'Quick Actions',
+    addHolding: 'Add Holding',
+    updatePrices: 'Update Prices',
+    netWorthTrend: 'Net Worth Trend',
+    last30Days: 'LAST 30 DAYS',
+    todaysChange: 'TODAY\'S CHANGE',
+    assetAllocation: 'Asset Allocation',
+    totalHoldingsLabel: 'TOTAL HOLDINGS',
+    portfolioHealth: 'Portfolio Health',
+    marketOverview: 'Market Overview',
+    quickInsights: 'Quick Insights',
+    topPerformers: 'Top Performers',
+    suggestedActions: 'Suggested Actions',
+    strongPerformance: 'Strong performance! Your portfolio is up {percent}%',
+    lowCashRatio: 'Low cash ratio ({percent}%). Consider adding liquidity.',
+    highCashRatio: 'High cash ratio ({percent}%). Consider investing excess cash.',
+    heavyConcentration: 'Heavy concentration in {type} ({percent}%). Consider diversification.',
+    portfolioAgeInsight: 'Portfolio age: {age}. Long-term perspective is key.',
+    addMoreCash: 'Add more cash for liquidity',
+    investExcessCash: 'Consider investing excess cash',
+    diversifyPortfolio: 'Diversify your portfolio',
+    reviewHoldings: 'Review your holdings monthly',
+    noDataAvailable: 'No data available',
+    loadingHistoricalData: 'Loading historical data...',
+    loadingAllocationData: 'Loading allocation data...',
+    netWorthTrendChart: 'Net Worth Trend Chart',
+    assetAllocationChart: 'Asset Allocation Chart',
+    excellent: 'Excellent',
+    good: 'Good',
+    fair: 'Fair',
+    needsAttention: 'Needs Attention',
+    diversification: 'Diversification',
+    riskBalance: 'Risk Balance',
+    performance: 'Performance',
+    editHolding: 'Edit Holding',
+    addNewHolding: 'Add New Holding',
+    symbol: 'Symbol',
+    symbolPlaceholder: 'e.g., AAPL',
+    name: 'Name',
+    namePlaceholder: 'e.g., Apple Inc.',
+    type: 'Type',
+    selectType: 'Select type',
+    stock: 'Stock',
+    bond: 'Bond',
+    fund: 'Fund',
+    cash: 'Cash',
+    crypto: 'Crypto',
+    quantity: 'Quantity',
+    purchasePrice: 'Purchase Price',
+    purchaseDate: 'Purchase Date',
+    selectDate: 'Select date',
+    sector: 'Sector',
+    sectorPlaceholder: 'e.g., Technology',
+    notes: 'Notes',
+    notesPlaceholder: 'Additional notes...',
+    cancel: 'Cancel',
+    update: 'Update',
+    add: 'Add',
+    createNewPortfolio: 'Create New Portfolio',
+    pricesUpdatedSuccessfully: 'Prices updated successfully',
+    failedToUpdatePrices: 'Failed to update prices',
+    holdingUpdatedSuccessfully: 'Holding updated successfully',
+    holdingAddedSuccessfully: 'Holding added successfully',
+    failedToSaveHolding: 'Failed to save holding',
+    portfolioCreatedSuccessfully: 'Portfolio created successfully!',
+    failedToLoadPortfolioData: 'Failed to load portfolio data'
   },
 
   // Stock Section

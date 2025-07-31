@@ -65,9 +65,9 @@ app.use('/api/portfolio', portfolioRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
-      res.json({
+  res.json({
       message: 'WealthU API',
-      version: '1.0.0',
+    version: '1.0.0',
     endpoints: {
       holdings: '/api/holdings',
       market: '/api/market',

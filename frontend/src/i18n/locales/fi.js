@@ -66,7 +66,30 @@ export default {
       privacy: 'Yksinkertainen, turvallinen ja yksityinen'
     },
     getStarted: 'Aloita',
-    learnMore: 'Lue lisää'
+    learnMore: 'Lue lisää',
+    // Feature cards
+    featureCards: {
+      dashboard: {
+        title: 'Yhdistetty hallintapaneeli',
+        brief: 'Hallitse kaikki sijoituksesi helposti yhdessä järjestellyssä hallintapaneelissa.',
+        content: 'Hallitse kaikki sijoituksesi helposti yhdessä järjestellyssä hallintapaneelissa - osakkeet, joukkovelkakirjat, rahastot, käteinen ja muut. Salkunhallinta tuo selkeyttä taloudelliseen elämääsi konsolidoimalla omistuksesi ja näyttämällä sinulle kokonaiskuvan yhdellä silmäyksellä.'
+      },
+      realtime: {
+        title: 'Reaaliaikaiset tiedot',
+        brief: 'Saa ajantasaiset markkinahinnat ja salkun päivitykset.',
+        content: 'Saa ajantasaiset markkinahinnat ja salkun päivitykset. Salkunhallinta hakee live-tietoja varoistasi, varmistaen että tiedät aina sijoituksesi nykyarvon. Tee ajallisia päätöksiä tarkan, todellisen maailman tiedon perusteella.'
+      },
+      insights: {
+        title: 'Suorituskyvyn analyysi',
+        brief: 'Visualisoi salkkusi kasvua interaktiivisilla kaavioilla ja selkeillä yhteenvedoilla.',
+        content: 'Visualisoi salkkusi kasvua interaktiivisilla kaavioilla ja selkeillä yhteenvedoilla. Näe heti voittosi, tappiosi ja omaisuuden suorituskyvyn ajan myötä, auttaen sinua havaitsemaan trendejä ja optimoimaan sijoitusstrategiasi.'
+      },
+      privacy: {
+        title: 'Yksinkertainen, turvallinen ja yksityinen',
+        brief: 'Nopea rekisteröityminen, ei monimutkaisuutta.',
+        content: 'Nopea rekisteröityminen, ei monimutkaisuutta. Salkunhallinta on suunniteltu saumattomaan yksittäiskäyttäjän pääsyyn - tekee aloittamisesta helppoa samalla kun pitää taloudelliset tietosi yksityisinä, turvallisina ja täysin hallinnassasi.'
+      }
+    }
   },
 
   // Dashboard
@@ -83,7 +106,81 @@ export default {
     sharpeRatio: 'Sharpen suhde',
     maxDrawdown: 'Maksimivetäytyminen',
     recentActivity: 'Viimeaikainen toiminta',
-    marketTrends: 'Markkinatrendit'
+    marketTrends: 'Markkinatrendit',
+    // New Dashboard specific translations
+    portfolioDashboard: 'Salkun hallintapaneeli',
+    financialOverview: 'Yleiskatsaus taloudellisesta tilanteestasi',
+    netWorth: 'NETTOVARALLISUUS',
+    totalReturn: 'Kokonaistuotto',
+    riskLevel: 'Riskitaso',
+    portfolioAge: 'Salkun ikä',
+    cashRatio: 'Kassasuhde',
+    quickActions: 'Pikatoiminnot',
+    addHolding: 'Lisää omistus',
+    updatePrices: 'Päivitä hinnat',
+    netWorthTrend: 'Nettoarvo trendi',
+    last30Days: 'VIIMEISET 30 PÄIVÄÄ',
+    todaysChange: 'TÄMÄNPÄIVÄN MUUTOS',
+    assetAllocation: 'Omaisuudenjako',
+    totalHoldingsLabel: 'KOKONAISOMISTUKSET',
+    portfolioHealth: 'Salkun terveys',
+    marketOverview: 'Markkinayleiskatsaus',
+    quickInsights: 'Pika-analyysi',
+    topPerformers: 'Parhaat suorittajat',
+    suggestedActions: 'Ehdotetut toimenpiteet',
+    strongPerformance: 'Vahva suoritus! Salkkusi on noussut {percent}%',
+    lowCashRatio: 'Matala kassasuhde ({percent}%). Harkitse likviditeetin lisäämistä.',
+    highCashRatio: 'Korkea kassasuhde ({percent}%). Harkitse ylimääräisen käteisen sijoittamista.',
+    heavyConcentration: 'Raskas keskittyminen {type} ({percent}%). Harkitse hajauttamista.',
+    portfolioAgeInsight: 'Salkun ikä: {age}. Pitkän aikavälin näkökulma on avain.',
+    addMoreCash: 'Lisää enemmän käteistä likviditeettiä varten',
+    investExcessCash: 'Harkitse ylimääräisen käteisen sijoittamista',
+    diversifyPortfolio: 'Hajauta salkkusi',
+    reviewHoldings: 'Tarkista omistuksesi kuukausittain',
+    noDataAvailable: 'Ei tietoja saatavilla',
+    loadingHistoricalData: 'Ladataan historiallisia tietoja...',
+    loadingAllocationData: 'Ladataan allokointitietoja...',
+    netWorthTrendChart: 'Nettoarvo trendi kaavio',
+    assetAllocationChart: 'Omaisuudenjako kaavio',
+    excellent: 'Erinomainen',
+    good: 'Hyvä',
+    fair: 'Kohtalainen',
+    needsAttention: 'Tarvitsee huomiota',
+    diversification: 'Hajauttaminen',
+    riskBalance: 'Riskitasapaino',
+    performance: 'Suorituskyky',
+    editHolding: 'Muokkaa omistusta',
+    addNewHolding: 'Lisää uusi omistus',
+    symbol: 'Symboli',
+    symbolPlaceholder: 'esim. AAPL',
+    name: 'Nimi',
+    namePlaceholder: 'esim. Apple Inc.',
+    type: 'Tyyppi',
+    selectType: 'Valitse tyyppi',
+    stock: 'Osake',
+    bond: 'Laina',
+    fund: 'Rahasto',
+    cash: 'Käteinen',
+    crypto: 'Kryptovaluutta',
+    quantity: 'Määrä',
+    purchasePrice: 'Ostohinta',
+    purchaseDate: 'Ostopäivä',
+    selectDate: 'Valitse päivä',
+    sector: 'Sektori',
+    sectorPlaceholder: 'esim. Teknologia',
+    notes: 'Muistiinpanot',
+    notesPlaceholder: 'Lisämuistiinpanot...',
+    cancel: 'Peruuta',
+    update: 'Päivitä',
+    add: 'Lisää',
+    createNewPortfolio: 'Luo uusi salkku',
+    pricesUpdatedSuccessfully: 'Hinnat päivitetty onnistuneesti',
+    failedToUpdatePrices: 'Hintojen päivitys epäonnistui',
+    holdingUpdatedSuccessfully: 'Omistus päivitetty onnistuneesti',
+    holdingAddedSuccessfully: 'Omistus lisätty onnistuneesti',
+    failedToSaveHolding: 'Omistuksen tallentaminen epäonnistui',
+    portfolioCreatedSuccessfully: 'Salkku luotu onnistuneesti!',
+    failedToLoadPortfolioData: 'Salkun tietojen lataaminen epäonnistui'
   },
 
   // Stock Section
@@ -464,6 +561,9 @@ export default {
     cannotSellAtPriceZeroOrLess: 'Ei voi myydä nollalla tai negatiivisella hinnalla',
     holdingCreatedSuccessfully: 'Omistus luotu onnistuneesti',
     failedToCreateHolding: 'Omistuksen luonti epäonnistui',
+    stocks: 'osaketta',
+    value: 'Arvo',
+    variousIndustries: 'Eri toimialat',
     // Additional translations
     fundAllocationChart: 'Rahastojen allokaatio',
     portfolioSummary: 'Salkun yhteenveto',

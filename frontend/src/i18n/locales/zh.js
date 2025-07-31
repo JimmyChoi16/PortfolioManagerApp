@@ -51,10 +51,10 @@ export default {
   // Home Page
   home: {
     title: '欢迎使用沃富！',
-    subtitle: '监控股票、债券、现金等多种资产——一站式管理。',
+    subtitle: '监控股票、债券等多种资产——一站式管理。',
     description: '智能、简单的方式来跟踪和管理您的投资。深入了解您的投资组合表现，做出数据驱动的决策，轻松实现您的财务目标。',
     aboutTitle: '什么是沃富？',
-    aboutDesc: '沃富是一个直观的平台，旨在帮助像您这样的投资者实时管理、跟踪和分析您的财务投资组合。无论您持有股票、债券、基金还是现金，沃富都会集中管理您的资产，让您始终清楚地了解您的投资表现。',
+    aboutDesc: '沃富是一个直观的平台，旨在帮助像您这样的投资者实时管理、跟踪和分析您的财务投资组合。无论您持有股票、债券还是基金，沃富都会集中管理您的资产，让您始终清楚地了解您的投资表现。',
     features: {
       title: '主要功能',
       realTime: '实时市场数据',
@@ -66,7 +66,30 @@ export default {
       privacy: '简单、安全且私密'
     },
     getStarted: '开始使用',
-    learnMore: '了解更多'
+    learnMore: '了解更多',
+    // Feature cards
+    featureCards: {
+      dashboard: {
+        title: '统一仪表板',
+        brief: '在单一、有序的仪表板中轻松管理所有投资。',
+        content: '在单一、有序的仪表板中轻松管理所有投资——股票、债券、基金、现金等。投资组合管理器通过整合您的持仓并让您一目了然地看到整体情况，为您的财务生活带来清晰度。'
+      },
+      realtime: {
+        title: '实时数据',
+        brief: '获取最新的市场价格和投资组合更新。',
+        content: '获取最新的市场价格和投资组合更新。投资组合管理器为您的资产获取实时数据，确保您始终了解投资的当前价值。基于准确、真实的信息做出及时决策。'
+      },
+      insights: {
+        title: '表现洞察',
+        brief: '通过交互式图表和清晰的摘要可视化您的投资组合增长。',
+        content: '通过交互式图表和清晰的摘要可视化您的投资组合增长。立即查看您的收益、损失和资产表现随时间的变化，帮助您发现趋势并优化投资策略。'
+      },
+      privacy: {
+        title: '简单、安全且私密',
+        brief: '快速注册，无复杂性。',
+        content: '快速注册，无复杂性。投资组合管理器专为无缝的单用户访问而设计——让您轻松开始，同时保持财务数据的私密性、安全性和完全控制。'
+      }
+    }
   },
 
   // Dashboard
@@ -83,7 +106,81 @@ export default {
     sharpeRatio: '夏普比率',
     maxDrawdown: '最大回撤',
     recentActivity: '最近活动',
-    marketTrends: '市场趋势'
+    marketTrends: '市场趋势',
+    // New Dashboard specific translations
+    portfolioDashboard: '投资组合仪表板',
+    financialOverview: '您的财务概览一览',
+    netWorth: '净资产',
+    totalReturn: '总回报',
+    riskLevel: '风险等级',
+    portfolioAge: '投资组合年龄',
+    cashRatio: '现金比例',
+    quickActions: '快速操作',
+    addHolding: '添加持仓',
+    updatePrices: '更新价格',
+    netWorthTrend: '净资产趋势',
+    last30Days: '过去30天',
+    todaysChange: '今日变化',
+    assetAllocation: '资产配置',
+    totalHoldingsLabel: '总持仓',
+    portfolioHealth: '投资组合健康度',
+    marketOverview: '市场概览',
+    quickInsights: '快速洞察',
+    topPerformers: '表现最佳',
+    suggestedActions: '建议操作',
+    strongPerformance: '强劲表现！您的投资组合上涨了 {percent}%',
+    lowCashRatio: '现金比例较低 ({percent}%)。考虑增加流动性。',
+    highCashRatio: '现金比例较高 ({percent}%)。考虑投资多余现金。',
+    heavyConcentration: '{type} 集中度过高 ({percent}%)。考虑分散投资。',
+    portfolioAgeInsight: '投资组合年龄：{age}。长期视角是关键。',
+    addMoreCash: '增加更多现金以提高流动性',
+    investExcessCash: '考虑投资多余现金',
+    diversifyPortfolio: '分散您的投资组合',
+    reviewHoldings: '每月审查您的持仓',
+    noDataAvailable: '暂无数据',
+    loadingHistoricalData: '正在加载历史数据...',
+    loadingAllocationData: '正在加载配置数据...',
+    netWorthTrendChart: '净资产趋势图',
+    assetAllocationChart: '资产配置图',
+    excellent: '优秀',
+    good: '良好',
+    fair: '一般',
+    needsAttention: '需要关注',
+    diversification: '分散化',
+    riskBalance: '风险平衡',
+    performance: '表现',
+    editHolding: '编辑持仓',
+    addNewHolding: '添加新持仓',
+    symbol: '代码',
+    symbolPlaceholder: '例如：AAPL',
+    name: '名称',
+    namePlaceholder: '例如：苹果公司',
+    type: '类型',
+    selectType: '选择类型',
+    stock: '股票',
+    bond: '债券',
+    fund: '基金',
+    cash: '现金',
+    crypto: '加密货币',
+    quantity: '数量',
+    purchasePrice: '购买价格',
+    purchaseDate: '购买日期',
+    selectDate: '选择日期',
+    sector: '行业',
+    sectorPlaceholder: '例如：科技',
+    notes: '备注',
+    notesPlaceholder: '附加备注...',
+    cancel: '取消',
+    update: '更新',
+    add: '添加',
+    createNewPortfolio: '创建新投资组合',
+    pricesUpdatedSuccessfully: '价格更新成功',
+    failedToUpdatePrices: '更新价格失败',
+    holdingUpdatedSuccessfully: '持仓更新成功',
+    holdingAddedSuccessfully: '持仓添加成功',
+    failedToSaveHolding: '保存持仓失败',
+    portfolioCreatedSuccessfully: '投资组合创建成功！',
+    failedToLoadPortfolioData: '加载投资组合数据失败'
   },
 
   // Stock Section
@@ -99,6 +196,7 @@ export default {
     totalGainLoss: '总盈亏',
     totalQuantity: '总数量',
     averagePurchasePrice: '平均购买价格',
+    addNewStockHolding: "新增股票持仓",
     cagr: '年化收益率',
     cagrDesc: '年化回报',
     sharpeRatio: '夏普比率',
@@ -465,6 +563,9 @@ export default {
     cannotSellAtPriceZeroOrLess: '不能以零或负数价格卖出',
     holdingCreatedSuccessfully: '持仓创建成功',
     failedToCreateHolding: '创建持仓失败',
+    stocks: '股',
+    value: '价值',
+    variousIndustries: '各种行业',
     // Additional translations
     fundAllocationChart: '基金配置图表',
     portfolioSummary: '投资组合摘要',

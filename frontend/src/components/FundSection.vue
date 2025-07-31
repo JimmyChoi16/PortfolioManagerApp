@@ -185,7 +185,7 @@
           <div class="summary-stats">
             <div class="summary-item">
               <span class="label">{{ $t('fund.totalValue') }}:</span>
-              <span class="value">${{ parseFloat(totalValue || 0).toFixed(2) }}</span>
+                              <span class="value">${{ parseFloat(totalValue || 0).toFixed(2) }}</span>
             </div>
             <div class="summary-item">
               <span class="label">{{ $t('fund.fundCount') }}:</span>
@@ -197,9 +197,9 @@
             </div>
             <div class="summary-item">
               <span class="label">{{ $t('fund.ytdReturn') }}:</span>
-              <span class="value" :class="totalYTD >= 0 ? 'positive' : 'negative'">
-                {{ totalYTD >= 0 ? '+' : '' }}{{ parseFloat(totalYTD || 0).toFixed(2) }}%
-              </span>
+                              <span class="value" :class="totalYTD >= 0 ? 'positive' : 'negative'">
+                  {{ totalYTD >= 0 ? '+' : '' }}{{ parseFloat(totalYTD || 0).toFixed(2) }}%
+                </span>
             </div>
           </div>
           <div class="portfolio-analysis">

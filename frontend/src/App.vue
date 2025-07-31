@@ -32,10 +32,10 @@
                 <img :src="cardIcon" alt="Bond" class="nav-icon-img" />
                 <span>{{ $t('nav.bonds') }}</span>
               </el-dropdown-item>
-              <el-dropdown-item @click="setActivePage('cash')">
-                <img :src="cashIcon" alt="Cash" class="nav-icon-img" />
+              <!-- <el-dropdown-item @click="setActivePage('cash')">
+                💵
                 <span>{{ $t('nav.cash') }}</span>
-              </el-dropdown-item>
+              </el-dropdown-item> -->
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -211,37 +211,37 @@ const currentPageDisplay = computed(() => {
     'home': t('nav.home'),
     'stock': t('nav.stock'),
     'fund': t('nav.fund'),
-    'bond': t('nav.bonds'),
-    'cash': t('nav.cash')
+    'bond': t('nav.bonds')
+    // 'cash': t('nav.cash')
   }
   return pageMap[activePage.value] || 'Asset Categories'
 })
 
 // Features data
-const features = ref([
+const features = computed(() => [
   {
     key: 'dashboard',
-    title: 'Unified Dashboard',
-    brief: 'Effortlessly manage all your investments in a single, organized dashboard.',
-    content: 'Effortlessly manage all your investments—stocks, bonds, funds, cash, and more—in a single, organized dashboard. Portfolio Manager brings clarity to your financial life by consolidating your holdings and showing you the big picture at a glance.'
+    title: t('home.featureCards.dashboard.title'),
+    brief: t('home.featureCards.dashboard.brief'),
+    content: t('home.featureCards.dashboard.content')
   },
   {
     key: 'realtime',
-    title: 'Real-Time Data',
-    brief: 'Get up-to-the-minute market prices and portfolio updates.',
-    content: 'Get up-to-the-minute market prices and portfolio updates. Portfolio Manager fetches live data for your assets, ensuring you always know the current value of your investments. Make timely decisions based on accurate, real-world information.'
+    title: t('home.featureCards.realtime.title'),
+    brief: t('home.featureCards.realtime.brief'),
+    content: t('home.featureCards.realtime.content')
   },
   {
     key: 'insights',
-    title: 'Performance Insights',
-    brief: 'Visualize your portfolio\'s growth with interactive charts and clear summaries.',
-    content: 'Visualize your portfolio\'s growth with interactive charts and clear summaries. Instantly see your gains, losses, and asset performance over time, helping you spot trends and optimize your investment strategy.'
+    title: t('home.featureCards.insights.title'),
+    brief: t('home.featureCards.insights.brief'),
+    content: t('home.featureCards.insights.content')
   },
   {
     key: 'privacy',
-    title: 'Simple, Secure & Private',
-    brief: 'Quick sign-up, no complexity.',
-    content: 'Quick sign-up, no complexity. Portfolio Manager is designed for seamless, single-user access—making it easy to get started while keeping your financial data private, secure, and fully under your control.'
+    title: t('home.featureCards.privacy.title'),
+    brief: t('home.featureCards.privacy.brief'),
+    content: t('home.featureCards.privacy.content')
   }
 ])
 

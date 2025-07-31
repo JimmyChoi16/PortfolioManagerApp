@@ -23,10 +23,10 @@
         <div class="category-metrics">
           <div class="metric">
                       <span class="label">{{ t('stock.holdings') }}</span>
-          <span class="value">{{ category.count }} stocks</span>
+            <span class="value">{{ category.count }} {{ t('stock.stocks') }}</span>
           </div>
           <div class="metric">
-            <span class="label">Value</span>
+            <span class="label">{{ t('stock.value') }}</span>
             <span class="value">${{ formatNumber(category.total_value) }}</span>
           </div>
         </div>
@@ -536,7 +536,7 @@ const marketType = ref('us') // 'us' or 'cn'
 
 // Lifecycle
 let holdingsPriceTimer = null
-const REFRESH_INTERVAL_MS = 50000 // Global refresh interval in milliseconds
+const REFRESH_INTERVAL_MS = 10000 // Global refresh interval in milliseconds
 
 const historicalData = ref([])
 // Real-time performance metrics
@@ -1267,7 +1267,7 @@ const getSectorDescription = (sector) => {
     'Industrial': t('stock.sectors.industrial'),
     'Other': t('stock.sectors.other')
   }
-  return descriptions[sector] || 'Various industries'
+  return descriptions[sector] || t('stock.variousIndustries')
 }
 
 const formatNumber = (num) => {
