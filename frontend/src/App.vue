@@ -180,6 +180,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import StockSection from './components/StockSection.vue'
 import FundSection from './components/FundSection.vue'
 import BondSection from './components/BondSection.vue'
