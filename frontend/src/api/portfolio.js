@@ -107,6 +107,11 @@ const portfolioAPI = {
     return http.post('/holdings/update-history')
   },
 
+  // Manual update portfolio history
+  updatePortfolioHistoryManual() {
+    return http.post('/holdings/update-portfolio-history')
+  },
+
   // New Portfolio Management endpoints
   createPortfolio(data) {
     return http.post('/portfolio', data);

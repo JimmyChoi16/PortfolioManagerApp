@@ -2,7 +2,7 @@
   <el-container class="app-container">
     <!-- 导航栏 -->
     <el-header height="70px" class="app-navbar">
-      <div class="logo" @click="goHome" style="cursor: pointer;">PortfolioManager</div>
+      <div class="logo" @click="goHome" style="cursor: pointer;">WealthU</div>
       <div class="nav-actions">
         <!-- Asset dropdown - always visible -->
         <el-dropdown trigger="click" class="asset-dropdown">

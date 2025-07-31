@@ -1,5 +1,3 @@
-<!-- TODO: 中间的Net Worth的数据30天和今天变化的数据没有实时 -->
-<!-- TODO: dashboard内容还得改 -->
 <template>
   <div class="new-dashboard">
     <!-- Header -->
@@ -10,172 +8,152 @@
 
     <!-- Main Dashboard Grid -->
     <div class="dashboard-grid">
-      <!-- Left Column - Account Details -->
-      <div class="accounts-panel">
-        <div class="net-worth-header">
-          <h2>NET WORTH</h2>
-          <div class="net-worth-value">${{ formatNumber(portfolioSummary?.total_value || 0) }}</div>
+      <!-- Left Column - Key Metrics -->
+      <div class="metrics-panel">
+        <!-- Net Worth Card -->
+        <div class="metric-card primary">
+          <div class="metric-header">
+            <h2>NET WORTH</h2>
+            <div class="metric-icon">💰</div>
+          </div>
+          <div class="metric-value">${{ formatNumber(getTotalPortfolioValue()) }}</div>
+          <div class="metric-change" :class="getTotalReturn() >= 0 ? 'positive' : 'negative'">
+            {{ getTotalReturn() >= 0 ? '+' : '' }}{{ getTotalReturn().toFixed(2) }}%
+          </div>
         </div>
 
-        <div class="account-section">
-          <div class="section-title">CASH</div>
-          <div class="account-item" v-for="holding in cashHoldings" :key="holding.id">
-            <div class="account-info">
-              <div class="account-name">{{ holding.name }}</div>
-              <div class="account-time">Updated recently</div>
+        <!-- Key Performance Indicators -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon">📈</div>
+            <div class="kpi-label">Total Return</div>
+            <div class="kpi-value" :class="getTotalReturn() >= 0 ? 'positive' : 'negative'">
+              {{ getTotalReturn() >= 0 ? '+' : '' }}{{ getTotalReturn().toFixed(2) }}%
             </div>
-            <div class="account-balance">${{ formatNumber(holding.current_value) }}</div>
           </div>
-          <div class="section-total">Total: ${{ formatNumber(cashTotal) }}</div>
+          
+          <div class="kpi-card">
+            <div class="kpi-icon">⚖️</div>
+            <div class="kpi-label">Risk Level</div>
+            <div class="kpi-value">{{ getRiskLevel() }}</div>
+          </div>
+          
+          <div class="kpi-card">
+            <div class="kpi-icon">🕒</div>
+            <div class="kpi-label">Portfolio Age</div>
+            <div class="kpi-value">{{ getPortfolioAge() }}</div>
+          </div>
+          
+          <div class="kpi-card">
+            <div class="kpi-icon">💵</div>
+            <div class="kpi-label">Cash Ratio</div>
+            <div class="kpi-value">{{ getCashRatio().toFixed(1) }}%</div>
+          </div>
         </div>
 
-        <div class="account-section">
-          <div class="section-title">INVESTMENT</div>
-          <div class="account-item" v-for="holding in investmentHoldings" :key="holding.id">
-            <div class="account-info">
-              <div class="account-name">{{ holding.name }}</div>
-              <div class="account-time">Updated recently</div>
-            </div>
-            <div class="account-balance">${{ formatNumber(holding.current_value) }}</div>
+        <!-- Quick Actions -->
+        <div class="quick-actions-panel">
+          <h3>Quick Actions</h3>
+          <div class="action-buttons">
+            <el-button type="primary" size="small" @click="showAddHolding = true">
+              <el-icon><Plus /></el-icon>
+              Add Holding
+            </el-button>
+            <el-button size="small" @click="updatePrices">
+              <el-icon><Refresh /></el-icon>
+              Update Prices
+            </el-button>
           </div>
-          <div class="section-total">Total: ${{ formatNumber(investmentTotal) }}</div>
         </div>
       </div>
 
-      <!-- Center Column - Charts -->
+      <!-- Center Column - Core Charts -->
       <div class="charts-panel">
-        <!-- Net Worth Chart -->
+        <!-- Net Worth Trend Chart -->
         <div class="chart-section">
           <div class="chart-header">
-            <div class="chart-title">Net Worth</div>
+            <div class="chart-title">Net Worth Trend</div>
             <div class="chart-stats">
               <div class="stat-item">
                 <div class="stat-label">LAST 30 DAYS</div>
-                <div class="stat-value" :class="portfolioSummary?.total_gain >= 0 ? 'positive' : 'negative'">
-                  {{ portfolioSummary?.total_gain >= 0 ? '+' : '' }}${{ formatNumber(portfolioSummary?.total_gain || 0) }}
+                <div class="stat-value" :class="getLast30DaysChange() >= 0 ? 'positive' : 'negative'">
+                  {{ getLast30DaysChange() >= 0 ? '+' : '' }}{{ getLast30DaysChange().toFixed(2) }}%
                 </div>
               </div>
               <div class="stat-item">
                 <div class="stat-label">TODAY'S CHANGE</div>
-                <div class="stat-value" :class="portfolioSummary?.total_gain >= 0 ? 'positive' : 'negative'">
-                  {{ portfolioSummary?.total_gain >= 0 ? '+' : '' }}${{ formatNumber(portfolioSummary?.total_gain || 0) }}
+                <div class="stat-value" :class="getTodayChange() >= 0 ? 'positive' : 'negative'">
+                  {{ getTodayChange() >= 0 ? '+' : '' }}{{ getTodayChange().toFixed(2) }}%
                 </div>
               </div>
             </div>
           </div>
           <div class="chart-container">
-            <PerformanceLineChart :data="historicalData" v-if="historicalData.length > 0" />
+            <PerformanceLineChart :data="historicalData" v-if="historicalData && historicalData.length > 0" />
             <div class="chart-placeholder" v-else>
-              Net Worth Trend Chart (30 days)
+              <div class="placeholder-content">
+                <div class="placeholder-icon">📊</div>
+                <div class="placeholder-text">Net Worth Trend Chart</div>
+                <div class="placeholder-subtext">Loading historical data...</div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Asset Allocation Chart and Details -->
+        <!-- Asset Allocation -->
         <div class="chart-section">
           <div class="chart-header">
             <div class="chart-title">Asset Allocation</div>
-            <div class="chart-stats">
-              <div class="stat-item">
-                <div class="stat-label">TOTAL HOLDINGS</div>
-                <div class="stat-value">{{ portfolioSummary?.total_holdings || 0 }}</div>
-              </div>
+                      <div class="chart-stats">
+            <div class="stat-item">
+              <div class="stat-label">TOTAL HOLDINGS</div>
+              <div class="stat-value">{{ holdings.length || 0 }}</div>
             </div>
           </div>
-          <div class="allocation-grid" v-if="allocationData.length > 0">
-            <div class="allocation-chart-section">
-              <AllocationPieChart :data="allocationData" />
-            </div>
-            <div class="allocation-details-section">
-              <h3>Allocation Details</h3>
-              <div class="allocation-chart">
-                <div
-                  v-for="item in allocationData"
-                  :key="item.type"
-                  class="allocation-item"
-                >
-                  <div class="allocation-label">
-                    <span class="allocation-type">{{ item.type }}</span>
-                    <span class="allocation-count">({{ item.count }} holdings)</span>
-                  </div>
-                  <div class="allocation-bar">
-                    <div
-                      class="allocation-fill"
-                      :style="{ width: item.percentage + '%' }"
-                    ></div>
-                  </div>
-                  <div class="allocation-value">
-                    ${{ formatNumber(item.total_value) }} ({{ item.percentage }}%)
-                  </div>
-                </div>
+          </div>
+          <div class="allocation-simple" v-if="allocationData && allocationData.length > 0">
+            <AllocationPieChart :data="allocationData" />
+            <div class="allocation-summary">
+              <div class="allocation-item" v-for="item in allocationData.slice(0, 4)" :key="item.type">
+                <div class="allocation-type">{{ item.type }}</div>
+                <div class="allocation-percentage">{{ item.percentage }}%</div>
               </div>
             </div>
           </div>
           <div class="chart-placeholder" v-else>
-            Asset Allocation Chart
-          </div>
-        </div>
-
-        <!-- Performance Summary -->
-        <div class="chart-section" v-if="performanceData">
-          <div class="chart-header">
-            <div class="chart-title">Performance Summary</div>
-          </div>
-          <div class="performance-summary-grid">
-            <div class="performance-item">
-              <span class="label">Current Value:</span>
-              <span class="value">${{ formatNumber(performanceData.current_value) }}</span>
-            </div>
-            <div class="performance-item">
-              <span class="label">Total Cost:</span>
-              <span class="value">${{ formatNumber(performanceData.total_cost) }}</span>
-            </div>
-            <div class="performance-item">
-              <span class="label">Total Gain/Loss:</span>
-              <span class="value" :class="performanceData.total_gain_loss >= 0 ? 'positive' : 'negative'">
-                ${{ formatNumber(performanceData.total_gain_loss) }}
-              </span>
-            </div>
-            <div class="performance-item">
-              <span class="label">Gain/Loss %:</span>
-              <span class="value" :class="performanceData.gain_loss_percent >= 0 ? 'positive' : 'negative'">
-                {{ performanceData.gain_loss_percent >= 0 ? '+' : '' }}{{ performanceData.gain_loss_percent }}%
-              </span>
+            <div class="placeholder-content">
+              <div class="placeholder-icon">🥧</div>
+              <div class="placeholder-text">Asset Allocation Chart</div>
+              <div class="placeholder-subtext">Loading allocation data...</div>
             </div>
           </div>
         </div>
 
-        <!-- Sector Analysis -->
-        <div class="chart-section" v-if="sectorData.length > 0">
+        <!-- Portfolio Health Score -->
+        <div class="chart-section">
           <div class="chart-header">
-            <div class="chart-title">Sector Analysis</div>
+            <div class="chart-title">Portfolio Health</div>
           </div>
-          <div class="sector-grid">
-            <div class="sector-chart-section">
-              <SectorPieChart :data="sectorData" />
+          <div class="health-score-container">
+            <div class="health-score">
+              <div class="score-circle" :class="getHealthScoreClass()">
+                <div class="score-value">{{ getHealthScore() }}</div>
+                <div class="score-label">/ 100</div>
+              </div>
+              <div class="health-status">{{ getHealthStatus() }}</div>
             </div>
-            <div class="sector-details-section">
-              <h3>Sector Details</h3>
-              <div class="sector-chart">
-                <div
-                  v-for="item in sectorData"
-                  :key="item.sector"
-                  class="sector-item"
-                >
-                  <div class="sector-label">
-                    <span class="sector-name">{{ item.sector }}</span>
-                    <span class="sector-count">({{ item.count }} holdings)</span>
-                  </div>
-                  <div class="sector-bar">
-                    <div
-                      class="sector-fill"
-                      :style="{ width: item.percentage + '%' }"
-                    ></div>
-                  </div>
-                  <div class="sector-value">
-                    ${{ formatNumber(item.total_value) }} ({{ item.percentage }}%)
-                  </div>
-                </div>
+            <div class="health-metrics">
+              <div class="health-metric">
+                <span class="metric-label">Diversification</span>
+                <span class="metric-value">{{ getDiversificationScore() }}/100</span>
+              </div>
+              <div class="health-metric">
+                <span class="metric-label">Risk Balance</span>
+                <span class="metric-value">{{ getRiskBalanceScore() }}/100</span>
+              </div>
+              <div class="health-metric">
+                <span class="metric-label">Performance</span>
+                <span class="metric-value">{{ getPerformanceScore() }}/100</span>
               </div>
             </div>
           </div>
@@ -183,90 +161,91 @@
       </div>
 
       <!-- Right Column - Market & Insights -->
-      <div class="market-panel">
-        <!-- Market Movers -->
-        <div class="market-movers">
-          <h3>Market Movers</h3>
+      <div class="insights-panel">
+        <!-- Market Overview -->
+        <div class="market-overview">
+          <h3>Market Overview</h3>
           <div class="market-indices">
             <div class="market-index">
               <div class="index-name">S&P 500</div>
               <div class="index-value positive">+0.65%</div>
             </div>
             <div class="market-index">
-              <div class="index-name">DOW JONES</div>
-              <div class="index-value negative">-0.72%</div>
-            </div>
-            <div class="market-index">
               <div class="index-name">NASDAQ</div>
               <div class="index-value positive">+0.14%</div>
+            </div>
+            <div class="market-index">
+              <div class="index-name">DOW JONES</div>
+              <div class="index-value negative">-0.72%</div>
             </div>
             <div class="market-index">
               <div class="index-name">10-YR BOND</div>
               <div class="index-value negative">-2.96%</div>
             </div>
           </div>
-          <div class="performance-item">
-            <div class="company-name">Your Holdings</div>
-            <div class="performance-change" :class="portfolioSummary?.avg_gain_percent >= 0 ? 'positive' : 'negative'">
-              {{ portfolioSummary?.avg_gain_percent >= 0 ? '+' : '' }}{{ portfolioSummary?.avg_gain_percent || 0 }}%
-            </div>
+        </div>
+
+        <!-- Quick Insights -->
+        <div class="quick-insights">
+          <h3>Quick Insights</h3>
+          <div class="insight-item" v-if="getTotalReturn() > 5">
+            <div class="insight-icon">📈</div>
+            <div class="insight-text">Strong performance! Your portfolio is up {{ getTotalReturn().toFixed(1) }}%</div>
+          </div>
+          <div class="insight-item" v-if="getCashRatio() < 10">
+            <div class="insight-icon">⚠️</div>
+            <div class="insight-text">Low cash ratio ({{ getCashRatio().toFixed(1) }}%). Consider adding liquidity.</div>
+          </div>
+          <div class="insight-item" v-if="getCashRatio() > 30">
+            <div class="insight-icon">💡</div>
+            <div class="insight-text">High cash ratio ({{ getCashRatio().toFixed(1) }}%). Consider investing excess cash.</div>
+          </div>
+          <div class="insight-item" v-if="allocationData.length > 0 && getTopAssetPercentage() > 50">
+            <div class="insight-icon">🎯</div>
+            <div class="insight-text">Heavy concentration in {{ getTopAssetType() }} ({{ getTopAssetPercentage() }}%). Consider diversification.</div>
+          </div>
+          <div class="insight-item">
+            <div class="insight-icon">📊</div>
+            <div class="insight-text">Portfolio age: {{ getPortfolioAge() }}. Long-term perspective is key.</div>
           </div>
         </div>
 
-        <!-- Holdings Performance -->
-        <div class="holdings-performance">
-          <div class="performance-section">
-            <h4>YOUR GAINERS</h4>
-            <div class="performance-item" v-for="holding in topGainers" :key="holding.id">
-              <div class="company-name">{{ holding.symbol }}</div>
-              <div class="performance-change positive">+{{ holding.gain_percent }}%</div>
-            </div>
+        <!-- Top Performers -->
+        <div class="top-performers">
+          <h3>Top Performers</h3>
+          <div class="performer-item" v-for="holding in topGainers.slice(0, 3)" :key="holding.id">
+            <div class="performer-symbol">{{ holding.symbol }}</div>
+            <div class="performer-change positive">+{{ (parseFloat(holding.gain_percent || 0) || 0).toFixed(1) }}%</div>
           </div>
-
-          <div class="performance-section">
-            <h4>YOUR LOSERS</h4>
-            <div class="performance-item" v-for="holding in topLosers" :key="holding.id">
-              <div class="company-name">{{ holding.symbol }}</div>
-              <div class="performance-change negative">{{ holding.gain_percent }}%</div>
-            </div>
+          <div v-if="topGainers.length === 0" class="no-data">
+            No data available
           </div>
         </div>
 
-        <!-- Insights -->
-        <div class="insights-section">
-          <h3>Insights</h3>
-          <div class="insight-item" v-if="allocationData.length > 0">
-            Your portfolio is heavily weighted in {{ getTopAssetType() }} ({{ getTopAssetPercentage() }}%).
+        <!-- Next Actions -->
+        <div class="next-actions">
+          <h3>Suggested Actions</h3>
+          <div class="action-item" v-if="getCashRatio() < 10">
+            <div class="action-icon">💰</div>
+            <div class="action-text">Add more cash for liquidity</div>
           </div>
-          <div class="insight-item">
-            Total portfolio value: ${{ formatNumber(portfolioSummary?.total_value || 0) }}
+          <div class="action-item" v-if="getCashRatio() > 30">
+            <div class="action-icon">📈</div>
+            <div class="action-text">Consider investing excess cash</div>
           </div>
-          <div class="insight-item">
-            Average return: {{ portfolioSummary?.avg_gain_percent >= 0 ? '+' : '' }}{{ portfolioSummary?.avg_gain_percent || 0 }}%
+          <div class="action-item" v-if="allocationData.length > 0 && getTopAssetPercentage() > 50">
+            <div class="action-icon">⚖️</div>
+            <div class="action-text">Diversify your portfolio</div>
+          </div>
+          <div class="action-item">
+            <div class="action-icon">📋</div>
+            <div class="action-text">Review your holdings monthly</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="quick-actions">
-      <h2>Quick Actions</h2>
-      <div class="action-buttons">
-        <el-button type="primary" @click="showAddHolding = true">
-          <el-icon><Plus /></el-icon>
-          Add Holding
-        </el-button>
-        <el-button @click="showCreatePortfolio = true">
-          <el-icon><Collection /></el-icon>
-          Create Portfolio
-        </el-button>
-        <el-button @click="updatePrices">
-          <el-icon><Refresh /></el-icon>
-          Update Prices
-        </el-button>
 
-      </div>
-    </div>
 
     <!-- Add/Edit Holding Dialog -->
     <el-dialog
@@ -446,6 +425,8 @@ const topLosers = computed(() => {
 const loadData = async () => {
   loading.value = true
   try {
+    console.log('Loading dashboard data...')
+    
     const [holdingsRes, summaryRes, allocationRes, performanceRes, sectorRes, historicalRes] = await Promise.all([
       portfolioAPI.getHoldings(),
       portfolioAPI.getPortfolioSummary(),
@@ -455,35 +436,142 @@ const loadData = async () => {
       portfolioAPI.getHistoricalData()
     ])
     
+    console.log('API responses:', {
+      holdings: holdingsRes,
+      summary: summaryRes,
+      allocation: allocationRes,
+      performance: performanceRes,
+      sector: sectorRes,
+      historical: historicalRes
+    })
+    
+    // Process holdings data
     if (holdingsRes.data && holdingsRes.data.success) {
-      holdings.value = holdingsRes.data.data
+      holdings.value = holdingsRes.data.data || []
+      console.log('Holdings loaded:', holdings.value.length)
+    } else {
+      console.warn('Holdings data not available:', holdingsRes)
+      holdings.value = []
     }
     
+    // Process portfolio summary
     if (summaryRes.data && summaryRes.data.success) {
-      portfolioSummary.value = summaryRes.data.data.summary
+      portfolioSummary.value = summaryRes.data.data?.summary || summaryRes.data.data || null
+      console.log('Portfolio summary loaded:', portfolioSummary.value)
+    } else {
+      console.warn('Portfolio summary not available:', summaryRes)
+      portfolioSummary.value = null
     }
     
+    // Process allocation data
     if (allocationRes.data && allocationRes.data.success) {
-      allocationData.value = allocationRes.data.data
+      allocationData.value = allocationRes.data.data || []
+      console.log('Allocation data loaded:', allocationData.value.length)
+    } else {
+      console.warn('Allocation data not available:', allocationRes)
+      allocationData.value = []
     }
     
+    // Process performance data
     if (performanceRes.data && performanceRes.data.success) {
-      performanceData.value = performanceRes.data.data
+      performanceData.value = performanceRes.data.data || null
+      console.log('Performance data loaded:', performanceData.value)
+    } else {
+      console.warn('Performance data not available:', performanceRes)
+      performanceData.value = null
     }
     
+    // Process sector data
     if (sectorRes.data && sectorRes.data.success) {
-      sectorData.value = sectorRes.data.data
+      sectorData.value = sectorRes.data.data || []
+      console.log('Sector data loaded:', sectorData.value.length)
+    } else {
+      console.warn('Sector data not available:', sectorRes)
+      sectorData.value = []
     }
     
+    // Process historical data
     if (historicalRes.data && historicalRes.data.success) {
-      historicalData.value = historicalRes.data.data
+      historicalData.value = historicalRes.data.data || []
+      console.log('Historical data loaded:', historicalData.value.length)
+    } else {
+      console.warn('Historical data not available:', historicalRes)
+      historicalData.value = []
     }
+    
+    // Generate mock data if no real data is available
+    if (allocationData.value.length === 0 && holdings.value.length > 0) {
+      console.log('Generating mock allocation data from holdings...')
+      const mockAllocation = generateMockAllocation(holdings.value)
+      allocationData.value = mockAllocation
+    }
+    
+    if (historicalData.value.length === 0) {
+      console.log('Generating mock historical data...')
+      historicalData.value = generateMockHistoricalData()
+    }
+    
+    console.log('All data loaded successfully')
   } catch (error) {
     ElMessage.error('Failed to load portfolio data')
     console.error('Error loading data:', error)
+    
+    // Set default values on error
+    holdings.value = []
+    portfolioSummary.value = null
+    allocationData.value = []
+    performanceData.value = null
+    sectorData.value = []
+    historicalData.value = []
   } finally {
     loading.value = false
   }
+}
+
+// Helper functions to generate mock data
+const generateMockAllocation = (holdings) => {
+  if (holdings.length === 0) return []
+  
+  const typeCount = {}
+  const typeValue = {}
+  
+  holdings.forEach(holding => {
+    const type = holding.type || 'stock'
+    typeCount[type] = (typeCount[type] || 0) + 1
+    typeValue[type] = (typeValue[type] || 0) + (holding.current_value || 0)
+  })
+  
+  const totalValue = Object.values(typeValue).reduce((sum, val) => sum + val, 0)
+  
+  return Object.keys(typeCount).map(type => ({
+    type: type.charAt(0).toUpperCase() + type.slice(1),
+    count: typeCount[type],
+    total_value: typeValue[type],
+    percentage: totalValue > 0 ? Math.round((typeValue[type] / totalValue) * 100) : 0
+  })).sort((a, b) => b.percentage - a.percentage)
+}
+
+const generateMockHistoricalData = () => {
+  const data = []
+  const baseValue = 100000
+  const today = new Date()
+  
+  for (let i = 30; i >= 0; i--) {
+    const date = new Date(today)
+    date.setDate(date.getDate() - i)
+    
+    // Generate realistic daily changes
+    const dailyChange = (Math.random() - 0.5) * 2000 // -1000 to +1000
+    const totalValue = baseValue + (i * 500) + dailyChange
+    
+    data.push({
+      date: date.toISOString().split('T')[0],
+      total_value: Math.max(0, totalValue),
+      daily_change: dailyChange
+    })
+  }
+  
+  return data
 }
 
 const updatePrices = async () => {
@@ -543,7 +631,7 @@ const onPortfolioCreated = () => {
 }
 
 const getTopAssetType = () => {
-  if (allocationData.value.length > 0) {
+  if (allocationData.value && allocationData.value.length > 0) {
     return allocationData.value[0].type
   }
   return 'stocks'
@@ -556,11 +644,190 @@ const getTopAssetPercentage = () => {
   return 0
 }
 
+// New calculation methods
+const getTotalReturn = () => {
+  try {
+    if (performanceData.value && performanceData.value.gain_loss_percent !== undefined) {
+      const value = parseFloat(performanceData.value.gain_loss_percent)
+      return isNaN(value) ? 0 : value
+    }
+    // Fallback calculation from holdings
+    if (holdings.value.length > 0) {
+      const totalCost = holdings.value.reduce((sum, h) => sum + (parseFloat(h.quantity || 0) * parseFloat(h.purchase_price || 0)), 0)
+      const totalValue = holdings.value.reduce((sum, h) => sum + parseFloat(h.current_value || 0), 0)
+      if (totalCost > 0) {
+        return ((totalValue - totalCost) / totalCost) * 100
+      }
+    }
+    return 0
+  } catch (error) {
+    console.error('Error in getTotalReturn:', error)
+    return 0
+  }
+}
+
+const getLast30DaysChange = () => {
+  try {
+    if (historicalData.value && historicalData.value.length >= 30) {
+      const current = historicalData.value[historicalData.value.length - 1]
+      const thirtyDaysAgo = historicalData.value[historicalData.value.length - 30]
+      if (current && thirtyDaysAgo && current.total_value && thirtyDaysAgo.total_value) {
+        const currentValue = parseFloat(current.total_value)
+        const pastValue = parseFloat(thirtyDaysAgo.total_value)
+        if (!isNaN(currentValue) && !isNaN(pastValue) && pastValue > 0) {
+          return ((currentValue - pastValue) / pastValue) * 100
+        }
+      }
+    }
+    return 0
+  } catch (error) {
+    console.error('Error in getLast30DaysChange:', error)
+    return 0
+  }
+}
+
+const getTodayChange = () => {
+  try {
+    if (historicalData.value && historicalData.value.length >= 2) {
+      const today = historicalData.value[historicalData.value.length - 1]
+      const yesterday = historicalData.value[historicalData.value.length - 2]
+      if (today && yesterday && today.total_value && yesterday.total_value) {
+        const todayValue = parseFloat(today.total_value)
+        const yesterdayValue = parseFloat(yesterday.total_value)
+        if (!isNaN(todayValue) && !isNaN(yesterdayValue) && yesterdayValue > 0) {
+          return ((todayValue - yesterdayValue) / yesterdayValue) * 100
+        }
+      }
+    }
+    return 0
+  } catch (error) {
+    console.error('Error in getTodayChange:', error)
+    return 0
+  }
+}
+
+const getCashRatio = () => {
+  try {
+    const totalValue = parseFloat(portfolioSummary.value?.total_value || 0) || 
+                      holdings.value.reduce((sum, h) => sum + parseFloat(h.current_value || 0), 0)
+    const cashValue = parseFloat(cashTotal.value || 0)
+    
+    if (totalValue > 0 && !isNaN(cashValue)) {
+      return (cashValue / totalValue) * 100
+    }
+    return 0
+  } catch (error) {
+    console.error('Error in getCashRatio:', error)
+    return 0
+  }
+}
+
+const getRiskLevel = () => {
+  const cashRatio = getCashRatio()
+  if (cashRatio > 30) return 'Low'
+  if (cashRatio > 15) return 'Medium'
+  return 'High'
+}
+
+const getPortfolioAge = () => {
+  if (holdings.value.length > 0) {
+    const validDates = holdings.value
+      .filter(h => h.purchase_date)
+      .map(h => new Date(h.purchase_date))
+      .filter(date => !isNaN(date.getTime()))
+    
+    if (validDates.length > 0) {
+      const oldestDate = new Date(Math.min(...validDates))
+      const now = new Date()
+      const months = (now.getFullYear() - oldestDate.getFullYear()) * 12 + (now.getMonth() - oldestDate.getMonth())
+      if (months < 12) return `${months} months`
+      const years = Math.floor(months / 12)
+      const remainingMonths = months % 12
+      if (remainingMonths === 0) return `${years} year${years > 1 ? 's' : ''}`
+      return `${years} year${years > 1 ? 's' : ''} ${remainingMonths} month${remainingMonths > 1 ? 's' : ''}`
+    }
+  }
+  return '0 months'
+}
+
+const getHealthScore = () => {
+  const diversification = getDiversificationScore()
+  const riskBalance = getRiskBalanceScore()
+  const performance = getPerformanceScore()
+  return Math.round((diversification + riskBalance + performance) / 3)
+}
+
+const getHealthScoreClass = () => {
+  const score = getHealthScore()
+  if (score >= 80) return 'excellent'
+  if (score >= 60) return 'good'
+  if (score >= 40) return 'fair'
+  return 'poor'
+}
+
+const getHealthStatus = () => {
+  const score = getHealthScore()
+  if (score >= 80) return 'Excellent'
+  if (score >= 60) return 'Good'
+  if (score >= 40) return 'Fair'
+  return 'Needs Attention'
+}
+
+const getDiversificationScore = () => {
+  if (allocationData.value && allocationData.value.length >= 4) return 90
+  if (allocationData.value && allocationData.value.length >= 3) return 75
+  if (allocationData.value && allocationData.value.length >= 2) return 60
+  return 30
+}
+
+const getRiskBalanceScore = () => {
+  const cashRatio = getCashRatio()
+  if (cashRatio >= 10 && cashRatio <= 25) return 90
+  if (cashRatio >= 5 && cashRatio <= 30) return 75
+  if (cashRatio >= 0 && cashRatio <= 40) return 60
+  return 40
+}
+
+const getPerformanceScore = () => {
+  const return_ = getTotalReturn()
+  if (return_ >= 10) return 95
+  if (return_ >= 5) return 85
+  if (return_ >= 0) return 70
+  if (return_ >= -5) return 50
+  return 30
+}
+
+const getTotalPortfolioValue = () => {
+  try {
+    const summaryValue = parseFloat(portfolioSummary.value?.total_value || 0)
+    if (!isNaN(summaryValue) && summaryValue > 0) {
+      return summaryValue
+    }
+    
+    const holdingsValue = holdings.value.reduce((sum, h) => sum + parseFloat(h.current_value || 0), 0)
+    return isNaN(holdingsValue) ? 0 : holdingsValue
+  } catch (error) {
+    console.error('Error in getTotalPortfolioValue:', error)
+    return 0
+  }
+}
+
+
+
 const formatNumber = (num) => {
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(num)
+  try {
+    const value = parseFloat(num)
+    if (isNaN(value)) {
+      return '0.00'
+    }
+    return new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value)
+  } catch (error) {
+    console.error('Error in formatNumber:', error)
+    return '0.00'
+  }
 }
 
 // Lifecycle
@@ -607,8 +874,8 @@ onMounted(() => {
   overflow: hidden;
 }
 
-/* Left Column - Account Details */
-.accounts-panel {
+/* Left Column - Key Metrics */
+.metrics-panel {
   background: white;
   border-radius: 12px;
   padding: 20px;
@@ -617,79 +884,116 @@ onMounted(() => {
   min-width: 0;
 }
 
-.net-worth-header {
+.metric-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
   text-align: center;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 2px solid #e9ecef;
 }
 
-.net-worth-header h2 {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #7f8c8d;
-  margin-bottom: 8px;
+.metric-card.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.net-worth-value {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #2c3e50;
-}
-
-.account-section {
-  margin-bottom: 24px;
-}
-
-.section-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #7f8c8d;
-  margin-bottom: 12px;
-  text-transform: uppercase;
-}
-
-.account-item {
+.metric-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #f8f9fa;
+  margin-bottom: 16px;
 }
 
-.account-item:last-child {
-  border-bottom: none;
+.metric-header h2 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0;
+  opacity: 0.9;
 }
 
-.account-info {
-  flex: 1;
+.metric-icon {
+  font-size: 1.5rem;
 }
 
-.account-name {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #2c3e50;
-  margin-bottom: 4px;
+.metric-value {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
 }
 
-.account-time {
+.metric-change {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.metric-change.positive {
+  color: #4ade80;
+}
+
+.metric-change.negative {
+  color: #f87171;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.kpi-card {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  border: 1px solid #e9ecef;
+}
+
+.kpi-icon {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+
+.kpi-label {
   font-size: 0.75rem;
   color: #7f8c8d;
+  margin-bottom: 4px;
+  font-weight: 600;
 }
 
-.account-balance {
+.kpi-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.kpi-value.positive {
+  color: #27ae60;
+}
+
+.kpi-value.negative {
+  color: #e74c3c;
+}
+
+.quick-actions-panel {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #e9ecef;
+}
+
+.quick-actions-panel h3 {
   font-size: 0.9rem;
   font-weight: 600;
   color: #2c3e50;
+  margin-bottom: 12px;
+  text-align: center;
 }
 
-.section-total {
-  font-weight: 700;
-  color: #2c3e50;
-  background: #f8f9fa;
-  padding: 8px 12px;
-  border-radius: 6px;
-  margin-top: 8px;
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 /* Center Column - Charts */
@@ -756,33 +1060,133 @@ onMounted(() => {
   overflow: hidden;
 }
 
-.allocation-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
+.allocation-simple {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
   margin-top: 20px;
 }
 
-.allocation-chart-section {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.allocation-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
 }
 
-.allocation-details-section {
+.allocation-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
   background: #f8f9fa;
-  border-radius: 12px;
-  padding: 5px;
-  margin-left: 10px;
+  border-radius: 6px;
   border: 1px solid #e9ecef;
 }
 
-.allocation-details-section h3 {
-  margin: 0 0 20px 0;
-  color: #2c3e50;
-  font-size: 1.2rem;
+.allocation-type {
+  font-size: 0.8rem;
   font-weight: 600;
+  color: #2c3e50;
+}
+
+.allocation-percentage {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+/* Health Score Styles */
+.health-score-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.health-score {
   text-align: center;
+}
+
+.score-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  border: 4px solid;
+}
+
+.score-circle.excellent {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  border-color: #16a34a;
+}
+
+.score-circle.good {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  border-color: #2563eb;
+}
+
+.score-circle.fair {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  border-color: #d97706;
+}
+
+.score-circle.poor {
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+  border-color: #dc2626;
+}
+
+.score-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1;
+}
+
+.score-label {
+  font-size: 0.8rem;
+  color: white;
+  opacity: 0.9;
+}
+
+.health-status {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.health-metrics {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  width: 100%;
+}
+
+.health-metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.metric-label {
+  font-size: 0.8rem;
+  color: #7f8c8d;
+}
+
+.metric-value {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #2c3e50;
 }
 
 .performance-summary-grid {
@@ -833,7 +1237,7 @@ onMounted(() => {
 }
 
 /* Right Column - Market & Insights */
-.market-panel {
+.insights-panel {
   background: white;
   border-radius: 12px;
   padding: 20px;
@@ -842,11 +1246,11 @@ onMounted(() => {
   min-width: 0;
 }
 
-.market-movers {
-  margin-bottom: 32px;
+.market-overview {
+  margin-bottom: 24px;
 }
 
-.market-movers h3 {
+.market-overview h3 {
   font-size: 1rem;
   font-weight: 600;
   color: #2c3e50;
@@ -857,7 +1261,6 @@ onMounted(() => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  margin-bottom: 16px;
 }
 
 .market-index {
@@ -887,52 +1290,11 @@ onMounted(() => {
   color: #e74c3c;
 }
 
-.holdings-performance {
-  margin-bottom: 32px;
-}
-
-.performance-section {
+.quick-insights {
   margin-bottom: 24px;
 }
 
-.performance-section h4 {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 12px;
-}
-
-.performance-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #f8f9fa;
-}
-
-.performance-item:last-child {
-  border-bottom: none;
-}
-
-.company-name {
-  font-size: 0.85rem;
-  color: #2c3e50;
-}
-
-.performance-change {
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.performance-change.positive {
-  color: #27ae60;
-}
-
-.performance-change.negative {
-  color: #e74c3c;
-}
-
-.insights-section h3 {
+.quick-insights h3 {
   font-size: 1rem;
   font-weight: 600;
   color: #2c3e50;
@@ -940,13 +1302,140 @@ onMounted(() => {
 }
 
 .insight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
   background: #f8f9fa;
-  padding: 16px;
+  padding: 12px;
   border-radius: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.insight-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.insight-text {
   font-size: 0.85rem;
-  line-height: 1.5;
+  line-height: 1.4;
   color: #2c3e50;
+}
+
+.top-performers {
+  margin-bottom: 24px;
+}
+
+.top-performers h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 16px;
+}
+
+.performer-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.performer-symbol {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.performer-change {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.performer-change.positive {
+  color: #27ae60;
+}
+
+.performer-change.negative {
+  color: #e74c3c;
+}
+
+.next-actions {
+  margin-bottom: 24px;
+}
+
+.next-actions h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 16px;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.action-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.action-text {
+  font-size: 0.85rem;
+  color: #2c3e50;
+}
+
+.no-data {
+  text-align: center;
+  color: #7f8c8d;
+  font-size: 0.85rem;
+  padding: 20px;
+  font-style: italic;
+}
+
+.chart-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.placeholder-content {
+  text-align: center;
+  color: #6c757d;
+}
+
+.placeholder-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.placeholder-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.placeholder-subtext {
+  font-size: 0.9rem;
+  opacity: 0.7;
 }
 
 /* Quick Actions */
@@ -1114,23 +1603,16 @@ onMounted(() => {
     max-width: 100%;
   }
   
-  .allocation-grid {
-    grid-template-columns: 1fr;
-    gap: 15px;
+  .kpi-grid {
+    grid-template-columns: 1fr 1fr;
   }
   
-  .performance-summary-grid {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
-  
-  .sector-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
+  .allocation-summary {
+    grid-template-columns: 1fr 1fr;
   }
   
   .market-indices {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 }
 

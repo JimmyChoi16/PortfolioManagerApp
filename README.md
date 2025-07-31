@@ -1,4 +1,4 @@
-# Portfolio Manager
+# WealthU (沃富)
 
 A comprehensive portfolio management application that allows users to track, analyze, and manage their investment portfolios with real-time market data and advanced analytics.
 
@@ -97,7 +97,7 @@ GET    /api/market/recommendations - Investment recommendations
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd PortfolioManagerApp
+   cd WealthU
    ```
 
 2. **Install dependencies**
