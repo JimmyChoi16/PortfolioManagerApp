@@ -2,15 +2,15 @@
   <div class="stock-section">
     <!-- Login Warning -->
     <div v-if="!isLoggedIn" class="login-warning">
-      <el-alert title="⚠️ You are not logged in. All data shown is for demonstration purposes only." type="warning"
+      <el-alert :title="t('stock.loginWarning')" type="warning"
         :closable="false" show-icon />
     </div>
 
-    <!-- Header -->
-    <div class="section-header">
-      <h1>Stock Portfolio</h1>
-      <p>Track and analyze your stock investments with real-time market data</p>
-    </div>
+          <!-- Header -->
+      <div class="section-header">
+        <h1>{{ t('stock.title') }}</h1>
+        <p>{{ t('stock.subtitle') }}</p>
+      </div>
 
     <!-- Stock Categories Overview -->
     <div class="stock-categories" v-if="stockAllocation.length > 0">
@@ -20,8 +20,8 @@
         <p>{{ getSectorDescription(category.sector) }}</p>
         <div class="category-metrics">
           <div class="metric">
-            <span class="label">Holdings</span>
-            <span class="value">{{ category.count }} stocks</span>
+                      <span class="label">{{ t('stock.holdings') }}</span>
+          <span class="value">{{ category.count }} stocks</span>
           </div>
           <div class="metric">
             <span class="label">Value</span>
@@ -32,76 +32,76 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else class="empty-state">
-      <div class="empty-icon">📈</div>
-      <h3>No Stock Holdings</h3>
-      <p>You don't have any stock holdings yet. Add some stocks to get started!</p>
+          <div v-else class="empty-state">
+        <div class="empty-icon">📈</div>
+        <h3>{{ t('stock.noHoldings') }}</h3>
+        <p>{{ t('stock.noHoldingsDesc') }}</p>
       <el-button type="primary" @click="goToDashboard">
         <el-icon>
           <Plus />
         </el-icon>
-        Add Stock Holding
+        {{ t('stock.addStockHolding') }}
       </el-button>
     </div>
 
     <!-- Performance Metrics Title and Cards -->
-    <h2 style="margin-bottom: 12px;">Performance Metrics</h2>
+    <h2 style="margin-bottom: 12px;">{{ t('stock.performanceMetrics') }}</h2>
     <div class="performance-cards" style="margin-bottom: 32px;">
       <div class="performance-card" @click="showCagrDialog = true" style="cursor:pointer;">
         <div class="card-icon">📈</div>
         <div class="card-content">
-          <h4>CAGR</h4>
+          <h4>{{ t('stock.cagr') }}</h4>
           <p class="card-value">{{ (cagr * 100).toFixed(2) }}%</p>
-          <span class="card-subtitle">Annualized Return</span>
+          <span class="card-subtitle">{{ t('stock.cagrDesc') }}</span>
         </div>
       </div>
       <div class="performance-card" @click="showSharpeDialog = true" style="cursor:pointer;">
         <div class="card-icon">📊</div>
         <div class="card-content">
-          <h4>Sharpe Ratio</h4>
+          <h4>{{ t('stock.sharpeRatio') }}</h4>
           <p class="card-value">{{ sharpe.toFixed(2) }}</p>
-          <span class="card-subtitle">Risk-adjusted</span>
+          <span class="card-subtitle">{{ t('stock.sharpeDesc') }}</span>
         </div>
       </div>
       <div class="performance-card" @click="showDrawdownDialog = true" style="cursor:pointer;">
         <div class="card-icon">📉</div>
         <div class="card-content">
-          <h4>Max Drawdown</h4>
+          <h4>{{ t('stock.maxDrawdown') }}</h4>
           <p class="card-value">{{ (maxDrawdown * 100).toFixed(2) }}%</p>
-          <span class="card-subtitle">Worst Loss</span>
+          <span class="card-subtitle">{{ t('stock.drawdownDesc') }}</span>
         </div>
       </div>
     </div>
     <!-- CAGR Dialog -->
-    <el-dialog v-model="showCagrDialog" title="CAGR - Historical Net Value" width="700px">
+    <el-dialog v-model="showCagrDialog" :title="t('stock.cagrHistoricalNetValue')" width="700px">
       <PerformanceLineChart :data="effectiveHistoricalData" />
     </el-dialog>
     <!-- Sharpe Ratio Dialog -->
-    <el-dialog v-model="showSharpeDialog" title="Sharpe Ratio - Daily Returns Distribution" width="700px" @close="onSharpeDialogClose">
+    <el-dialog v-model="showSharpeDialog" :title="t('stock.sharpeRatioDailyReturnsDistribution')" width="700px" @close="onSharpeDialogClose">
       <div style="height:350px;width:100%;">
         <canvas v-if="showSharpeDialog" ref="sharpeChart"></canvas>
-        <div v-else-if="!dailyReturns.length" style="text-align:center;color:#aaa;">No data available</div>
+        <div v-else-if="!dailyReturns.length" style="text-align:center;color:#aaa;">{{ t('stock.noDataAvailable') }}</div>
       </div>
     </el-dialog>
     <!-- Max Drawdown Dialog -->
-    <el-dialog v-model="showDrawdownDialog" title="Max Drawdown - Net Value Curve" width="700px" @close="onDrawdownDialogClose">
+    <el-dialog v-model="showDrawdownDialog" :title="t('stock.maxDrawdownNetValueCurve')" width="700px" @close="onDrawdownDialogClose">
       <div style="height:350px;width:100%;">
         <canvas v-if="showDrawdownDialog" ref="drawdownChart"></canvas>
-        <div v-else-if="!drawdownChartData.data.length" style="text-align:center;color:#aaa;">No data available</div>
+        <div v-else-if="!drawdownChartData.data.length" style="text-align:center;color:#aaa;">{{ t('stock.noDataAvailable') }}</div>
       </div>
     </el-dialog>
     <!-- Stock Portfolio Performance (move below metrics) -->
     <div class="portfolio-performance" v-if="stockPerformance">
-      <h2>Stock Portfolio Performance</h2>
+             <h2>{{ t('stock.portfolioPerformance') }}</h2>
       <div class="performance-cards">
         <div class="performance-card">
           <div class="card-icon">📊</div>
           <div class="card-content">
-            <h4>Total Value</h4>
+            <h4>{{ t('stock.totalValue') }}</h4>
             <p class="card-value">${{ formatNumber(stockPerformance.total_value) }}</p>
             <span class="card-change" :class="stockPerformance.total_gain >= 0 ? 'positive' : 'negative'">
               {{ stockPerformance.total_gain >= 0 ? '+' : '' }}${{ formatNumber(stockPerformance.total_gain) }}
-              ({{ stockPerformance.avg_gain_percent >= 0 ? '+' : '' }}{{ stockPerformance.avg_gain_percent }}%)
+              ({{ stockPerformance.avg_gain_percent >= 0 ? '+' : '' }}{{ Number(stockPerformance.avg_gain_percent).toFixed(2) }}%)
             </span>
           </div>
         </div>
@@ -109,19 +109,19 @@
         <div class="performance-card">
           <div class="card-icon">📈</div>
           <div class="card-content">
-            <h4>Total Holdings</h4>
+            <h4>{{ t('stock.totalHoldings') }}</h4>
             <p class="card-value">{{ stockPerformance.total_holdings }}</p>
-            <span class="card-subtitle">Stock positions</span>
+            <span class="card-subtitle">{{ t('stock.stockPositions') }}</span>
           </div>
         </div>
 
         <div class="performance-card">
           <div class="card-icon">🎯</div>
           <div class="card-content">
-            <h4>Best Performer</h4>
+            <h4>{{ t('stock.bestPerformer') }}</h4>
             <p class="card-value">{{ bestPerformer?.symbol || 'N/A' }}</p>
             <span class="card-change positive" v-if="bestPerformer">
-              +{{ bestPerformer.gain_percent }}%
+              +{{ Number(bestPerformer.gain_percent).toFixed(2) }}%
             </span>
           </div>
         </div>
@@ -129,10 +129,10 @@
         <div class="performance-card">
           <div class="card-icon">📉</div>
           <div class="card-content">
-            <h4>Worst Performer</h4>
+            <h4>{{ t('stock.worstPerformer') }}</h4>
             <p class="card-value">{{ worstPerformer?.symbol || 'N/A' }}</p>
             <span class="card-change negative" v-if="worstPerformer">
-              {{ worstPerformer.gain_percent }}%
+              {{ Number(worstPerformer.gain_percent).toFixed(2) }}%
             </span>
           </div>
         </div>
@@ -141,12 +141,12 @@
     <!-- Your Real-time Stock Holdings -->
     <div class="holdings-data" v-if="isLoggedIn">
       <div class="holdings-header">
-        <h2>Your Real-time Stock Holdings</h2>
+                 <h2>{{ t('stock.realtimeHoldings') }}</h2>
         <el-button type="primary" @click="showCreateDialog = true" size="small">
           <el-icon>
             <Plus />
           </el-icon>
-          Add Holding
+          {{ t('stock.addHolding') }}
         </el-button>
       </div>
       
@@ -154,15 +154,15 @@
         <table class="market-table">
           <thead>
             <tr>
-              <th>Symbol</th>
-              <th>Name</th>
-              <th>Quantity</th>
-              <th>Avg Purchase Price</th>
-              <th>Current Price</th>
-              <th>Current Value</th>
-              <th>Gain/Loss</th>
-              <th>Gain/Loss %</th>
-              <th v-if="isLoggedIn">Actions</th>
+              <th>{{ t('stock.tableHeaders.symbol') }}</th>
+              <th>{{ t('stock.tableHeaders.name') }}</th>
+              <th>{{ t('stock.tableHeaders.quantity') }}</th>
+              <th>{{ t('stock.tableHeaders.avgPurchasePrice') }}</th>
+              <th>{{ t('stock.tableHeaders.currentPrice') }}</th>
+              <th>{{ t('stock.tableHeaders.currentValue') }}</th>
+              <th>{{ t('stock.tableHeaders.gainLoss') }}</th>
+              <th>{{ t('stock.tableHeaders.gainLossPercent') }}</th>
+              <th v-if="isLoggedIn">{{ t('stock.tableHeaders.actions') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -182,7 +182,7 @@
                 {{ item.unrealized_gain > 0 ? '+' : '' }}${{ formatNumber(item.unrealized_gain) }}
               </td>
               <td :class="{ up: item.gain_percent > 0, down: item.gain_percent < 0 }">
-                {{ item.gain_percent > 0 ? '+' : '' }}{{ item.gain_percent }}%
+                {{ item.gain_percent > 0 ? '+' : '' }}{{ Number(item.gain_percent).toFixed(2) }}%
               </td>
               <td v-if="isLoggedIn" class="actions-cell">
                 <div class="action-buttons">
@@ -214,42 +214,42 @@
       <!-- Empty state when no holdings -->
       <div v-else class="empty-state">
         <div class="empty-icon">📈</div>
-        <h3>No Holdings Yet</h3>
-        <p>Start building your portfolio by adding your first stock holding.</p>
+        <h3>{{ t('stock.noHoldingsYet') }}</h3>
+                 <p>{{ t('stock.noHoldingsYetDesc') }}</p>
       </div>
 
       <!-- Holdings Pagination -->
       <div class="pagination" v-if="holdingsTotalPages > 1">
         <el-button @click="holdingsPrevPage" :disabled="holdingsCurrentPage === 1" size="small">
-          Previous
+          {{ t('stock.previous') }}
         </el-button>
-        <span>Page {{ holdingsCurrentPage }} of {{ holdingsTotalPages }}</span>
+        <span>{{ t('stock.page') }} {{ holdingsCurrentPage }} {{ t('stock.of') }} {{ holdingsTotalPages }}</span>
         <el-button @click="holdingsNextPage" :disabled="holdingsCurrentPage === holdingsTotalPages" size="small">
-          Next
+          {{ t('stock.next') }}
         </el-button>
       </div>
     </div>
 
     <!-- Create Holding Dialog -->
-    <el-dialog v-model="showCreateDialog" title="Add New Stock Holding" width="500px">
+    <el-dialog v-model="showCreateDialog" :title="t('stock.addNewStockHolding')" width="500px">
       <el-form
         ref="createFormRef"
         :model="createForm"
         :rules="createRules"
         label-width="120px"
       >
-        <el-form-item label="Symbol" prop="symbol">
+        <el-form-item :label="t('stock.symbol')" prop="symbol">
           <el-input 
             v-model="createForm.symbol" 
-            placeholder="e.g., AAPL, SH600519"
+                         :placeholder="t('stock.symbolPlaceholder')"
             @blur="fetchStockInfo"
             clearable
           />
         </el-form-item>
-        <el-form-item label="Name" prop="name">
-          <el-input v-model="createForm.name" disabled />
+        <el-form-item :label="t('stock.name')" prop="name">
+          <el-input v-model="createForm.name" :disabled="true" />
         </el-form-item>
-        <el-form-item label="Quantity" prop="quantity">
+        <el-form-item :label="t('stock.quantity')" prop="quantity">
           <el-input-number 
             v-model="createForm.quantity" 
             :min="0.000001" 
@@ -259,7 +259,7 @@
             style="width: 100%" 
           />
         </el-form-item>
-        <el-form-item label="Purchase Price" prop="purchase_price">
+        <el-form-item :label="t('stock.purchasePrice')" prop="purchase_price">
           <el-input-number 
             v-model="createForm.purchase_price" 
             :min="0.01" 
@@ -269,75 +269,75 @@
             style="width: 100%" 
           />
         </el-form-item>
-        <el-form-item label="Purchase Date" prop="purchase_date">
+        <el-form-item :label="t('stock.purchaseDate')" prop="purchase_date">
           <el-date-picker
             v-model="createForm.purchase_date"
             type="date"
-            placeholder="Select purchase date"
+            :placeholder="t('stock.selectPurchaseDate')"
             style="width: 100%"
             format="YYYY-MM-DD"
             value-format="YYYY-MM-DD"
             clearable
           />
         </el-form-item>
-        <el-form-item label="Sector" prop="sector">
-          <el-select v-model="createForm.sector" placeholder="Select sector" style="width: 100%" clearable>
-            <el-option label="Technology" value="Technology" />
-            <el-option label="Healthcare" value="Healthcare" />
-            <el-option label="Financial" value="Financial" />
-            <el-option label="Consumer" value="Consumer" />
-            <el-option label="Energy" value="Energy" />
-            <el-option label="Industrial" value="Industrial" />
-            <el-option label="Other" value="Other" />
+        <el-form-item :label="t('stock.sector')" prop="sector">
+          <el-select v-model="createForm.sector" :placeholder="t('stock.selectSector')" style="width: 100%" clearable>
+                         <el-option :label="t('stock.sectors.technology')" value="Technology" />
+             <el-option :label="t('stock.sectors.healthcare')" value="Healthcare" />
+             <el-option :label="t('stock.sectors.financial')" value="Financial" />
+             <el-option :label="t('stock.sectors.consumer')" value="Consumer" />
+             <el-option :label="t('stock.sectors.energy')" value="Energy" />
+             <el-option :label="t('stock.sectors.industrial')" value="Industrial" />
+             <el-option :label="t('stock.sectors.other')" value="Other" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Notes" prop="notes">
+        <el-form-item :label="t('stock.notes')" prop="notes">
           <el-input
             v-model="createForm.notes"
             type="textarea"
             :rows="3"
-            placeholder="Additional notes..."
+                         :placeholder="t('stock.notesPlaceholder')"
             maxlength="1000"
             show-word-limit
           />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showCreateDialog = false">Cancel</el-button>
-        <el-button type="primary" @click="createHolding" :loading="creating">Create</el-button>
+        <el-button @click="showCreateDialog = false">{{ t('stock.cancel') }}</el-button>
+        <el-button type="primary" @click="createHolding" :loading="creating">{{ t('stock.create') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- Holding Details Dialog -->
-    <el-dialog v-model="showDetailsDialog" :title="`${selectedHolding?.symbol} - Holding Details`" width="800px">
+    <el-dialog v-model="showDetailsDialog" :title="`${selectedHolding?.symbol} - ${t('stock.holdingDetails')}`" width="800px">
       <div v-if="selectedHolding">
         <div class="holding-summary">
-          <h4>Summary</h4>
+          <h4>{{ t('stock.summary') }}</h4>
           <div class="summary-grid">
             <div class="summary-item">
-              <span class="label">Total Quantity:</span>
+              <span class="label">{{ t('stock.totalQuantity') }}:</span>
               <span class="value">{{ formatNumber(selectedHolding.quantity) }}</span>
             </div>
             <div class="summary-item">
-              <span class="label">Average Purchase Price:</span>
+              <span class="label">{{ t('stock.averagePurchasePrice') }}:</span>
               <span class="value">${{ formatNumber(selectedHolding.avg_purchase_price) }}</span>
             </div>
             <div class="summary-item">
-              <span class="label">Current Price:</span>
+              <span class="label">{{ t('stock.currentPrice') }}:</span>
               <span class="value">${{ formatNumber(selectedHolding.current_price) }}</span>
             </div>
             <div class="summary-item">
-              <span class="label">Total Value:</span>
+              <span class="label">{{ t('stock.totalValue') }}:</span>
               <span class="value">${{ formatNumber(selectedHolding.current_value) }}</span>
             </div>
             <div class="summary-item">
-              <span class="label">Total Gain/Loss:</span>
+              <span class="label">{{ t('stock.totalGainLoss') }}:</span>
               <span class="value" :class="{ up: selectedHolding.unrealized_gain > 0, down: selectedHolding.unrealized_gain < 0 }">
                 {{ selectedHolding.unrealized_gain > 0 ? '+' : '' }}${{ formatNumber(selectedHolding.unrealized_gain) }}
               </span>
             </div>
             <div class="summary-item">
-              <span class="label">Gain/Loss %:</span>
+              <span class="label">{{ t('stock.gainLossPercent') }}:</span>
               <span class="value" :class="{ up: selectedHolding.gain_percent > 0, down: selectedHolding.gain_percent < 0 }">
                 {{ selectedHolding.gain_percent > 0 ? '+' : '' }}{{ selectedHolding.gain_percent }}%
               </span>
@@ -346,17 +346,17 @@
         </div>
         
         <div class="individual-holdings">
-          <h4>Individual Holdings ({{ selectedHolding.holdings_count }})</h4>
+          <h4>{{ t('stock.individualHoldings') }} ({{ selectedHolding.holdings_count }})</h4>
           <table class="details-table">
             <thead>
               <tr>
-                <th>Purchase Date</th>
-                <th>Quantity</th>
-                <th>Purchase Price</th>
-                <th>Current Value</th>
-                <th>Gain/Loss</th>
-                <th>Gain/Loss %</th>
-                <th>Actions</th>
+                <th>{{ t('stock.purchaseDate') }}</th>
+                <th>{{ t('stock.quantity') }}</th>
+                <th>{{ t('stock.purchasePrice') }}</th>
+                <th>{{ t('stock.currentValue') }}</th>
+                <th>{{ t('stock.gainLoss') }}</th>
+                <th>{{ t('stock.gainLossPercent') }}</th>
+                <th>{{ t('stock.actions') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -387,7 +387,7 @@
         </div>
       </div>
       <template #footer>
-        <el-button @click="showDetailsDialog = false">Close</el-button>
+        <el-button @click="showDetailsDialog = false">{{ t('stock.close') }}</el-button>
       </template>
     </el-dialog>
 
@@ -395,31 +395,31 @@
     <div class="market-data" v-if="!isLoggedIn">
       <div class="market-data">
         <div class="market-header">
-          <h2>Real-time Market Data</h2>
+          <h2>{{ t('stock.realTimeMarketData') }}</h2>
           <div class="market-type-toggle">
             <button :class="['market-type-btn', marketType === 'us' ? 'active' : '']" @click="marketType = 'us'">
-              US Stocks/ETF
+              {{ t('stock.usStocksEtf') }}
             </button>
             <button :class="['market-type-btn', marketType === 'cn' ? 'active' : '']" @click="marketType = 'cn'">
-              China A-Shares
+              {{ t('stock.chinaAShares') }}
             </button>
           </div>
           <el-button @click="fetchMarketData" :loading="marketDataLoading" size="small">
             <el-icon>
               <Refresh />
             </el-icon>
-            Refresh
+            {{ t('stock.refresh') }}
           </el-button>
         </div>
         <div class="market-table-wrapper">
           <table class="market-table">
             <thead>
               <tr>
-                <th>Symbol</th>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Change</th>
-                <th>Change %</th>
+                <th>{{ t('stock.symbol') }}</th>
+                <th>{{ t('stock.name') }}</th>
+                <th>{{ t('stock.price') }}</th>
+                <th>{{ t('stock.change') }}</th>
+                <th>{{ t('stock.changePercent') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -428,13 +428,13 @@
                   <el-icon class="is-loading">
                     <Loading />
                   </el-icon>
-                  <span style="margin-left: 8px;">Loading market data...</span>
+                  <span style="margin-left: 8px;">{{ t('stock.loadingMarketData') }}</span>
                 </td>
               </tr>
               <tr v-else-if="!marketDataLoading && pagedMarketData.length === 0">
                 <td colspan="5" style="text-align: center; padding: 40px; color: #7f8c8d;">
-                  <div>No market data available</div>
-                  <div style="font-size: 0.9rem; margin-top: 8px;">Try refreshing the data</div>
+                  <div>{{ t('stock.noMarketDataAvailable') }}</div>
+                  <div style="font-size: 0.9rem; margin-top: 8px;">{{ t('stock.tryRefreshingData') }}</div>
                 </td>
               </tr>
               <tr v-for="item in pagedMarketData" :key="item.symbol" @mouseover="hoveredRow = item.symbol"
@@ -458,9 +458,9 @@
 
           <!-- Pagination -->
           <div class="pagination">
-            <button @click="prevPage" :disabled="currentPage === 1">Previous</button>
-            <span>Page {{ currentPage }} of {{ totalPages }}</span>
-            <button @click="nextPage" :disabled="currentPage === totalPages">Next</button>
+            <button @click="prevPage" :disabled="currentPage === 1">{{ t('stock.previous') }}</button>
+            <span>{{ t('stock.page') }} {{ currentPage }} {{ t('stock.of') }} {{ totalPages }}</span>
+            <button @click="nextPage" :disabled="currentPage === totalPages">{{ t('stock.next') }}</button>
           </div>
         </div>
       </div>
@@ -469,15 +469,18 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
-import { Plus, Refresh, Loading, Edit, View, Delete } from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { ElMessage, ElMessageBox, ElDialog, ElForm, ElFormItem, ElInput, ElInputNumber, ElDatePicker, ElSelect, ElOption, ElButton, ElIcon, ElPagination, ElAlert } from 'element-plus'
+import { Plus, Delete, View, Refresh, Loading } from '@element-plus/icons-vue'
 import portfolioAPI from '../api/portfolio.js'
 import marketAPI from '../api/market.js'
 import http from '../api/http.js'
 import PerformanceLineChart from './charts/PerformanceLineChart.vue'
 import { Chart, registerables } from 'chart.js'
 Chart.register(...registerables)
+
+const { t } = useI18n()
 
 const props = defineProps({
   isLoggedIn: {
@@ -507,7 +510,7 @@ const marketType = ref('us') // 'us' or 'cn'
 
 // Lifecycle
 let holdingsPriceTimer = null
-const REFRESH_INTERVAL_MS = 10000 // Global refresh interval in milliseconds
+const REFRESH_INTERVAL_MS = 50000 // Global refresh interval in milliseconds
 
 const historicalData = ref([])
 // Real-time performance metrics
@@ -658,26 +661,26 @@ const createForm = ref({
 })
 
 // Create form validation rules
-const createRules = {
+const createRules = computed(() => ({
   symbol: [
-    { required: true, message: 'Symbol is required', trigger: 'blur' },
-    { min: 1, max: 10, message: 'Symbol must be between 1 and 10 characters', trigger: 'blur' }
+    { required: true, message: t('stock.symbolRequired'), trigger: 'blur' },
+    { min: 1, max: 10, message: t('stock.symbolLength'), trigger: 'blur' }
   ],
   name: [
-    { required: true, message: 'Name is required', trigger: 'blur' }
+    { required: true, message: t('stock.nameRequired'), trigger: 'blur' }
   ],
   quantity: [
-    { required: true, message: 'Quantity is required', trigger: 'blur' },
-    { type: 'number', min: 0.000001, message: 'Quantity must be positive', trigger: 'blur' }
+    { required: true, message: t('stock.quantityRequired'), trigger: 'blur' },
+    { type: 'number', min: 0.000001, message: t('stock.quantityPositive'), trigger: 'blur' }
   ],
   purchase_price: [
-    { required: true, message: 'Purchase price is required', trigger: 'blur' },
-    { type: 'number', min: 0.01, message: 'Purchase price must be positive', trigger: 'blur' }
+    { required: true, message: t('stock.purchasePriceRequired'), trigger: 'blur' },
+    { type: 'number', min: 0.01, message: t('stock.purchasePricePositive'), trigger: 'blur' }
   ],
   purchase_date: [
-    { required: true, message: 'Purchase date is required', trigger: 'blur' }
+    { required: true, message: t('stock.purchaseDateRequired'), trigger: 'blur' }
   ]
-}
+}))
 
 // Computed properties
 const stockPerformance = computed(() => {
@@ -1230,13 +1233,13 @@ const updatePrices = async () => {
 
 const getSectorDescription = (sector) => {
   const descriptions = {
-    'Technology': 'Tech companies and software',
-    'Healthcare': 'Medical and pharmaceutical',
-    'Financial': 'Banks and financial services',
-    'Consumer': 'Consumer goods and retail',
-    'Energy': 'Oil, gas, and utilities',
-    'Industrial': 'Manufacturing and industrial',
-    'Other': 'Other sectors'
+    'Technology': t('stock.sectors.technology'),
+    'Healthcare': t('stock.sectors.healthcare'),
+    'Financial': t('stock.sectors.financial'),
+    'Consumer': t('stock.sectors.consumer'),
+    'Energy': t('stock.sectors.energy'),
+    'Industrial': t('stock.sectors.industrial'),
+    'Other': t('stock.sectors.other')
   }
   return descriptions[sector] || 'Various industries'
 }
@@ -1334,7 +1337,7 @@ watch(showSharpeDialog, async (val) => {
       data: {
         labels: Array.from({length: bins.length}, (_, i) => `${min + i * step}%`),
         datasets: [{
-          label: 'Frequency',
+          label: t('stock.frequency'),
           data: bins,
           backgroundColor: '#667eea',
         }]
@@ -1343,8 +1346,8 @@ watch(showSharpeDialog, async (val) => {
         responsive: true,
         plugins: { legend: { display: false } },
         scales: {
-          x: { title: { display: true, text: 'Daily Return (%)' } },
-          y: { title: { display: true, text: 'Frequency' }, beginAtZero: true }
+          x: { title: { display: true, text: t('stock.dailyReturn') } },
+          y: { title: { display: true, text: t('stock.frequency') }, beginAtZero: true }
         }
       }
     })
@@ -1366,7 +1369,7 @@ watch(showDrawdownDialog, async (val) => {
         labels: chartData.labels,
         datasets: [
           {
-            label: 'Net Value',
+            label: t('stock.netValue'),
             data: chartData.data,
             borderColor: '#667eea',
             backgroundColor: 'rgba(102,126,234,0.08)',
@@ -1388,7 +1391,7 @@ watch(showDrawdownDialog, async (val) => {
         plugins: { legend: { display: false } },
         scales: {
           x: {
-            title: { display: true, text: 'Date' },
+            title: { display: true, text: t('stock.date') },
             ticks: {
               callback: function(value, index, ticks) {
                 const label = chartData.labels[index]
@@ -1398,7 +1401,7 @@ watch(showDrawdownDialog, async (val) => {
               }
             }
           },
-          y: { title: { display: true, text: 'Net Value' }, beginAtZero: false }
+          y: { title: { display: true, text: t('stock.netValue') }, beginAtZero: false }
         }
       }
     })
@@ -1427,10 +1430,10 @@ const createHolding = async () => {
     await loadStockData()
     showCreateDialog.value = false
     resetCreateForm()
-    ElMessage.success('Holding created successfully!')
+    ElMessage.success(t('stock.holdingCreatedSuccessfully'))
   } catch (error) {
     console.error('Error creating holding:', error)
-    ElMessage.error('Failed to create holding.')
+    ElMessage.error(t('stock.failedToCreateHolding'))
   } finally {
     creating.value = false
   }
@@ -1549,21 +1552,21 @@ const sellHolding = async (holding) => {
   const currentPrice = holdingsRealtimePrices.value[symbol] || holding.current_price
 
   if (quantityToSell <= 0) {
-    ElMessage.warning('Please select a positive quantity to sell.')
+    ElMessage.warning(t('stock.selectPositiveQuantityToSell'))
     return
   }
 
   if (currentPrice <= 0) {
-    ElMessage.error('Cannot sell at a price of 0 or less.')
+    ElMessage.error(t('stock.cannotSellAtPriceZeroOrLess'))
     return
   }
 
   const confirm = await ElMessageBox.confirm(
-    `Are you sure you want to sell ${quantityToSell} shares of ${symbol} at $${currentPrice.toFixed(2)}?`,
-    'Confirm Sale',
+    t('stock.confirmSell', { quantity: quantityToSell, symbol: symbol, price: currentPrice.toFixed(2) }),
+    t('stock.confirmSale'),
     {
-      confirmButtonText: 'Sell',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: t('stock.sell'),
+      cancelButtonText: t('stock.cancel'),
       type: 'warning',
     }
   ).catch(() => false)
@@ -1575,10 +1578,10 @@ const sellHolding = async (holding) => {
       await portfolioAPI.deleteHolding(actualHolding.id)
       
       await loadStockData()
-      ElMessage.success(`Sold ${quantityToSell} shares of ${symbol} for $${(quantityToSell * currentPrice).toFixed(2)}`)
+      ElMessage.success(t('stock.soldShares', { quantity: quantityToSell, symbol: symbol, price: (quantityToSell * currentPrice).toFixed(2) }))
     } catch (error) {
       console.error('Error selling holding:', error)
-      ElMessage.error('Failed to sell holding.')
+      ElMessage.error(t('stock.failedToSellHolding'))
     }
   }
 }
@@ -1589,21 +1592,21 @@ const sellIndividualHolding = async (holding) => {
   const currentPrice = holdingsRealtimePrices.value[symbol] || holding.current_price
 
   if (quantityToSell <= 0) {
-    ElMessage.warning('Please select a positive quantity to sell.')
+    ElMessage.warning(t('stock.selectPositiveQuantityToSell'))
     return
   }
 
   if (currentPrice <= 0) {
-    ElMessage.error('Cannot sell at a price of 0 or less.')
+    ElMessage.error(t('stock.cannotSellAtPriceZeroOrLess'))
     return
   }
 
   const confirm = await ElMessageBox.confirm(
-    `Are you sure you want to sell ${quantityToSell} shares of ${symbol} at $${currentPrice.toFixed(2)}?`,
-    'Confirm Sale',
+    t('stock.confirmSellIndividual', { quantity: quantityToSell, symbol: symbol, price: currentPrice.toFixed(2) }),
+    t('stock.confirmSale'),
     {
-      confirmButtonText: 'Sell',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: t('stock.sell'),
+      cancelButtonText: t('stock.cancel'),
       type: 'warning',
     }
   ).catch(() => false)
@@ -1612,10 +1615,10 @@ const sellIndividualHolding = async (holding) => {
     try {
       await portfolioAPI.deleteHolding(holding.id)
       await loadStockData()
-      ElMessage.success(`Sold ${quantityToSell} shares of ${symbol} for $${(quantityToSell * currentPrice).toFixed(2)}`)
+      ElMessage.success(t('stock.soldSharesIndividual', { quantity: quantityToSell, symbol: symbol, price: (quantityToSell * currentPrice).toFixed(2) }))
     } catch (error) {
       console.error('Error selling individual holding:', error)
-      ElMessage.error('Failed to sell individual holding.')
+      ElMessage.error(t('stock.failedToSellIndividualHolding'))
     }
   }
 }

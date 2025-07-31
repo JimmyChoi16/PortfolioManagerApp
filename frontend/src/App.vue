@@ -13,32 +13,34 @@
           <template #dropdown>
             <el-dropdown-menu class="asset-menu">
               <el-dropdown-item @click="setActivePage('dashboard')" v-if="isLoggedIn">
-    
-                <span>Dashboard</span>
+                📊
+                <span>{{ $t('nav.dashboard') }}</span>
               </el-dropdown-item>
               <el-dropdown-item @click="setActivePage('home')" v-if="!isLoggedIn">
-                
-                <span>Home</span>
+                🏠
+                <span>{{ $t('nav.home') }}</span>
               </el-dropdown-item>
               <el-dropdown-item @click="setActivePage('stock')">
-                
-                <span>Stock</span>
+                📈
+                <span>{{ $t('nav.stock') }}</span>
               </el-dropdown-item>
               <el-dropdown-item @click="setActivePage('fund')">
-                
-                <span>Fund</span>
+                💰
+                <span>{{ $t('nav.fund') }}</span>
               </el-dropdown-item>
               <el-dropdown-item @click="setActivePage('bond')">
-                
-                <span>Bond</span>
+                💳
+                <span>{{ $t('nav.bonds') }}</span>
               </el-dropdown-item>
               <el-dropdown-item @click="setActivePage('cash')">
-                
-                <span>Cash</span>
+                💵
+                <span>{{ $t('nav.cash') }}</span>
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
+        
+        <LanguageSwitcher />
         
         <!-- Show login/logout button based on auth status -->
         <el-button 
@@ -47,14 +49,14 @@
           class="login-btn" 
           @click="goLogin"
         >
-          Login
+          {{ $t('nav.login') }}
         </el-button>
         <el-button 
           v-else 
           @click="logout" 
           class="logout-btn"
         >
-          Logout
+          {{ $t('nav.logout') }}
         </el-button>
       </div>
     </el-header>
@@ -62,8 +64,12 @@
     <el-main class="app-main">
       <!-- Dashboard (logged in only) -->
       <template v-if="isLoggedIn && activePage === 'dashboard'">
-        <Dashboard @logout="handleLogout" />
+        <NewDashboard @logout="handleLogout" />
       </template>
+
+      <!-- <template v-if="isLoggedIn && activePage === 'dashboard'">
+        <Dashboard @logout="handleLogout" />
+      </template> -->
       
       <!-- Asset Pages (both logged in and not logged in) -->
       <template v-else-if="activePage === 'stock'">
@@ -89,11 +95,11 @@
           <div class="section-content">
             <transition name="fade-slide">
               <div class="banner-content" v-if="showBanner">
-                <h1 class="banner-title">Welcome to Portfolio Manager!</h1>
+                <h1 class="banner-title">{{ $t('home.title') }}</h1>
                 <div class="banner-desc">
-                  <p>The smart, simple way to track and manage your investments.</p>
-                  <p>Monitor stocks, funds, bonds, cash and more—all in one place.</p>
-                  <p>Gain insights into your portfolio's performance, make data-driven decisions, and achieve your financial goals with ease.</p>
+                  <p>{{ $t('home.description') }}</p>
+                  <p>{{ $t('home.subtitle') }}</p>
+                  <p>{{ $t('home.description') }}</p>
                 </div>
               </div>
             </transition>
@@ -106,17 +112,17 @@
             <transition name="fade-slide" appear>
               <div class="about-split">
                 <div class="about-left">
-                  <h2 class="about-title">What is Portfolio Manager?</h2>
-                  <p class="about-description">Portfolio Manager is an intuitive platform designed to help investors like you manage, track, and analyze your financial portfolio in real time. Whether you hold stocks, bonds, funds, or cash, Portfolio Manager centralizes your assets, so you always have a clear view of your investment performance.</p>
+                  <h2 class="about-title">{{ $t('home.aboutTitle') }}</h2>
+                  <p class="about-description">{{ $t('home.aboutDesc') }}</p>
                 </div>
                 <div class="about-divider"></div>
                 <div class="about-right">
-                  <h3 class="features-title">Key Features</h3>
+                  <h3 class="features-title">{{ $t('home.features.title') }}</h3>
                   <ul class="features-list">
-                    <li><strong>Browse & Edit Your Portfolio</strong> </li>
-                    <li><strong>Real-Time Performance Tracking</strong> </li>
-                    <li><strong>Actionable Insights</strong> </li>
-                    <li><strong>Simple and Intuitive</strong> </li>
+                    <li><strong>{{ $t('home.features.portfolio') }}</strong> </li>
+                    <li><strong>{{ $t('home.features.realTime') }}</strong> </li>
+                    <li><strong>{{ $t('home.features.analytics') }}</strong> </li>
+                    <li><strong>{{ $t('home.features.privacy') }}</strong> </li>
                   </ul>
                 </div>
               </div>
@@ -180,8 +186,11 @@ import BondSection from './components/BondSection.vue'
 import CashSection from './components/CashSection.vue'
 import LoginPage from './components/LoginPage.vue'
 import Dashboard from './components/Dashboard.vue'
+import NewDashboard from './components/NewDashboard.vue'
+import LanguageSwitcher from './components/LanguageSwitcher.vue'
 
 const router = useRouter()
+const { locale, t } = useI18n()
 const activePage = ref('home')
 const showBanner = ref(false)
 const hoveredFeature = ref(null)
@@ -192,12 +201,12 @@ const isLoggedIn = ref(false)
 // Computed properties
 const currentPageDisplay = computed(() => {
   const pageMap = {
-    'dashboard': 'Dashboard',
-    'home': 'Home',
-    'stock': 'Stock',
-    'fund': 'Fund',
-    'bond': 'Bond',
-    'cash': 'Cash'
+    'dashboard': t('nav.dashboard'),
+    'home': t('nav.home'),
+    'stock': t('nav.stock'),
+    'fund': t('nav.fund'),
+    'bond': t('nav.bonds'),
+    'cash': t('nav.cash')
   }
   return pageMap[activePage.value] || 'Asset Categories'
 })

@@ -19,6 +19,7 @@
         </nav>
       </div>
       <div class="nav-right">
+        <LanguageSwitcher />
         <el-button
           type="primary"
           :icon="Refresh"
@@ -57,6 +58,7 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usePortfolioStore } from '@/stores/portfolio'
+import LanguageSwitcher from './LanguageSwitcher.vue'
 import { 
   TrendCharts, 
   House, 
@@ -168,7 +170,7 @@ const refreshData = async () => {
 .nav-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .main-content {
