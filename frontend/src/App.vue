@@ -66,6 +66,10 @@
       <template v-if="isLoggedIn && activePage === 'dashboard'">
         <NewDashboard @logout="handleLogout" />
       </template>
+
+      <!-- <template v-if="isLoggedIn && activePage === 'dashboard'">
+        <Dashboard @logout="handleLogout" />
+      </template> -->
       
       <!-- Asset Pages (both logged in and not logged in) -->
       <template v-else-if="activePage === 'stock'">

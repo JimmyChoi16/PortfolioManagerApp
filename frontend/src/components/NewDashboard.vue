@@ -1,5 +1,4 @@
 <!-- TODO: 中间的Net Worth的数据30天和今天变化的数据没有实时 -->
-<!-- TODO: 样式不太对，右边那列突出去了 -->
 <!-- TODO: dashboard内容还得改 -->
 <template>
   <div class="new-dashboard">
@@ -575,6 +574,7 @@ onMounted(() => {
   max-width: 1400px;
   margin: 0 auto;
   padding: 20px;
+  overflow-x: hidden;
 }
 
 .dashboard-header {
@@ -600,18 +600,21 @@ onMounted(() => {
 /* Main Layout */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 300px 1fr 350px;
-  gap: 24px;
+  grid-template-columns: 280px 1fr 320px;
+  gap: 20px;
   margin-bottom: 30px;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 /* Left Column - Account Details */
 .accounts-panel {
   background: white;
   border-radius: 12px;
-  padding: 24px;
+  padding: 20px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   height: fit-content;
+  min-width: 0;
 }
 
 .net-worth-header {
@@ -693,8 +696,9 @@ onMounted(() => {
 .charts-panel {
   background: white;
   border-radius: 12px;
-  padding: 24px;
+  padding: 20px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  min-width: 0;
 }
 
 .chart-section {
@@ -768,7 +772,8 @@ onMounted(() => {
 .allocation-details-section {
   background: #f8f9fa;
   border-radius: 12px;
-  padding: 20px;
+  padding: 5px;
+  margin-left: 10px;
   border: 1px solid #e9ecef;
 }
 
@@ -831,9 +836,10 @@ onMounted(() => {
 .market-panel {
   background: white;
   border-radius: 12px;
-  padding: 24px;
+  padding: 20px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   height: fit-content;
+  min-width: 0;
 }
 
 .market-movers {
@@ -850,15 +856,16 @@ onMounted(() => {
 .market-indices {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 8px;
   margin-bottom: 16px;
 }
 
 .market-index {
   background: #f8f9fa;
-  padding: 12px;
+  padding: 8px;
   border-radius: 8px;
   text-align: center;
+  min-width: 0;
 }
 
 .index-name {
@@ -1104,11 +1111,12 @@ onMounted(() => {
   .dashboard-grid {
     grid-template-columns: 1fr;
     gap: 20px;
+    max-width: 100%;
   }
   
   .allocation-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 15px;
   }
   
   .performance-summary-grid {
