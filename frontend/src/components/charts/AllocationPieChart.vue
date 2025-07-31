@@ -32,12 +32,16 @@ const createChart = () => {
     datasets: [{
       data: props.data.map(item => item.total_value),
       backgroundColor: [
+        '#11998e',
+        '#38ef7d',
         '#6A95CC',
-        '#53A7D8', 
+        '#53A7D8',
         '#f093fb',
         '#f5576c',
         '#4facfe',
-        '#00f2fe'
+        '#00f2fe',
+        '#43e97b',
+        '#38f9d7'
       ],
       borderWidth: 2,
       borderColor: '#fff'
@@ -45,19 +49,19 @@ const createChart = () => {
   }
 
   chart = new Chart(ctx, {
-    type: 'pie',
+    type: 'doughnut',
     data: chartData,
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: {
-          position: 'bottom',
+          position: 'right',
           labels: {
-            padding: 20,
+            padding: 15,
             usePointStyle: true,
             font: {
-              size: 12
+              size: 11
             }
           }
         },
@@ -93,7 +97,8 @@ watch(() => props.data, (newData) => {
 <style scoped>
 .chart-container {
   position: relative;
-  height: 400px;
+  height: 350px;
   width: 100%;
+  cursor: pointer;
 }
 </style> 

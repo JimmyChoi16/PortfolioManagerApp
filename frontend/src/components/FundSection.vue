@@ -1508,6 +1508,10 @@ onMounted(async () => {
   color: #2c3e50;
 }
 
+:deep(.el-table tbody tr:hover) {
+  cursor: pointer;
+}
+
 :deep(.held-fund) {
   background: #f0f9ff;
 }

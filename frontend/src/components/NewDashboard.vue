@@ -155,15 +155,15 @@
                           <div class="health-metrics">
                 <div class="health-metric">
                   <span class="metric-label">{{ t('dashboard.diversification') }}</span>
-                  <span class="metric-value">{{ getDiversificationScore() }}/100</span>
+                  <span class="metric-value" :style="{ color: getDiversificationColor() }">{{ getDiversificationScore() }}/100</span>
                 </div>
                 <div class="health-metric">
                   <span class="metric-label">{{ t('dashboard.riskBalance') }}</span>
-                  <span class="metric-value">{{ getRiskBalanceScore() }}/100</span>
+                  <span class="metric-value" :style="{ color: getRiskBalanceColor() }">{{ getRiskBalanceScore() }}/100</span>
                 </div>
                 <div class="health-metric">
                   <span class="metric-label">{{ t('dashboard.performance') }}</span>
-                  <span class="metric-value">{{ getPerformanceScore() }}/100</span>
+                  <span class="metric-value" :style="{ color: getPerformanceColor() }">{{ getPerformanceScore() }}/100</span>
                 </div>
               </div>
           </div>
@@ -358,6 +358,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh, Plus, DataAnalysis, Collection } from '@element-plus/icons-vue'
+
+const { t } = useI18n()
 import portfolioAPI from '../api/portfolio.js'
 import AllocationPieChart from './charts/AllocationPieChart.vue'
 import SectorPieChart from './charts/SectorPieChart.vue'
@@ -549,8 +551,9 @@ const loadData = async () => {
       allocationData.value = mockAllocation
     }
     
-    if (historicalData.value.length === 0) {
-      console.log('Generating mock historical data...')
+    // Generate mock historical data if no real data or insufficient data
+    if (historicalData.value.length === 0 || historicalData.value.length < 30) {
+      console.log('Generating mock historical data due to insufficient real data...')
       historicalData.value = generateMockHistoricalData()
     }
     
@@ -602,22 +605,53 @@ const generateMockAllocation = (holdings) => {
 
 const generateMockHistoricalData = () => {
   const data = []
-  const baseValue = 100000
   const today = new Date()
   
-  for (let i = 30; i >= 0; i--) {
+  // Get current portfolio value to use as base
+  const currentValue = getTotalPortfolioValue()
+  const baseValue = currentValue > 0 ? currentValue : 6500000 // Default to 6.5M if no current value
+  
+  // Calculate portfolio age to determine historical data range
+  let portfolioAgeMonths = 0
+  if (holdings.value.length > 0) {
+    const validDates = holdings.value
+      .filter(h => h.purchase_date)
+      .map(h => new Date(h.purchase_date))
+      .filter(date => !isNaN(date.getTime()))
+    
+    if (validDates.length > 0) {
+      const oldestDate = new Date(Math.min(...validDates))
+      portfolioAgeMonths = (today.getFullYear() - oldestDate.getFullYear()) * 12 + (today.getMonth() - oldestDate.getMonth())
+    }
+  }
+  
+  // Use portfolio age or default to 12 months (365 days)
+  const daysToGenerate = Math.max(30, Math.min(365, portfolioAgeMonths * 30))
+  
+  // Generate smooth trend data
+  let runningValue = baseValue * 0.9 // Start at 90% of current value
+  const targetValue = baseValue
+  const dailyGrowth = (targetValue - runningValue) / daysToGenerate
+  
+  for (let i = daysToGenerate; i >= 0; i--) {
     const date = new Date(today)
     date.setDate(date.getDate() - i)
     
-    // Generate realistic daily changes
-    const dailyChange = (Math.random() - 0.5) * 2000 // -1000 to +1000
-    const totalValue = baseValue + (i * 500) + dailyChange
+    // Add small daily volatility (±0.5%)
+    const volatility = 1 + (Math.random() - 0.5) * 0.01
+    const dailyValue = runningValue * volatility
+    
+    // Calculate daily change
+    const dailyChange = dailyValue - (runningValue / volatility)
     
     data.push({
       date: date.toISOString().split('T')[0],
-      total_value: Math.max(0, totalValue),
+      total_value: Math.max(0, dailyValue),
       daily_change: dailyChange
     })
+    
+    // Increment for next day
+    runningValue += dailyGrowth
   }
   
   return data
@@ -715,12 +749,15 @@ const getTotalReturn = () => {
 
 const getLast30DaysChange = () => {
   try {
-    if (historicalData.value && historicalData.value.length >= 30) {
+    if (historicalData.value && historicalData.value.length >= 2) {
       const current = historicalData.value[historicalData.value.length - 1]
-      const thirtyDaysAgo = historicalData.value[historicalData.value.length - 30]
-      if (current && thirtyDaysAgo && current.total_value && thirtyDaysAgo.total_value) {
+      // 如果有30天数据就用30天，否则用最早的数据
+      const daysToLookBack = Math.min(30, historicalData.value.length - 1)
+      const pastData = historicalData.value[historicalData.value.length - daysToLookBack]
+      
+      if (current && pastData && current.total_value && pastData.total_value) {
         const currentValue = parseFloat(current.total_value)
-        const pastValue = parseFloat(thirtyDaysAgo.total_value)
+        const pastValue = parseFloat(pastData.total_value)
         if (!isNaN(currentValue) && !isNaN(pastValue) && pastValue > 0) {
           return ((currentValue - pastValue) / pastValue) * 100
         }
@@ -842,6 +879,26 @@ const getPerformanceScore = () => {
   if (return_ >= 0) return 70
   if (return_ >= -5) return 50
   return 30
+}
+
+// Color functions for health metrics
+const getScoreColor = (score) => {
+  if (score >= 80) return '#27ae60' // 优秀 - 绿色
+  if (score >= 60) return '#f39c12' // 良好 - 橙色
+  if (score >= 40) return '#e67e22' // 一般 - 深橙色
+  return '#e74c3c' // 需要改进 - 红色
+}
+
+const getDiversificationColor = () => {
+  return getScoreColor(getDiversificationScore())
+}
+
+const getRiskBalanceColor = () => {
+  return getScoreColor(getRiskBalanceScore())
+}
+
+const getPerformanceColor = () => {
+  return getScoreColor(getPerformanceScore())
 }
 
 const getTotalPortfolioValue = () => {
@@ -1249,14 +1306,15 @@ onMounted(() => {
 }
 
 .metric-label {
-  font-size: 0.8rem;
-  color: #7f8c8d;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #34495e;
 }
 
 .metric-value {
   font-size: 1.8rem;
-  font-weight: 600;
-  color: #d1d6dc  ;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .performance-summary-grid {

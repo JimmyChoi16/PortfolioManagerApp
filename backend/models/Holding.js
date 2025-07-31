@@ -135,7 +135,7 @@ class Holding {
       SELECT date, total_value, daily_change 
       FROM portfolio_history 
       ORDER BY date DESC 
-      LIMIT 7
+      LIMIT 365
     `);
     return rows.reverse();
   }

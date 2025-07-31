@@ -35,16 +35,16 @@ const createChart = () => {
     datasets: [{
       label: 'Portfolio Value',
       data: props.data.map(item => item.total_value),
-              borderColor: '#6A95CC',
+      borderColor: '#6A95CC',
       backgroundColor: 'rgba(102, 126, 234, 0.1)',
-      borderWidth: 3,
+      borderWidth: 2,
       fill: true,
-      tension: 0.4,
-              pointBackgroundColor: '#6A95CC',
+      tension: 0.1,
+      pointBackgroundColor: '#6A95CC',
       pointBorderColor: '#fff',
-      pointBorderWidth: 2,
-      pointRadius: 5,
-      pointHoverRadius: 7
+      pointBorderWidth: 1,
+      pointRadius: 2,
+      pointHoverRadius: 4
     }]
   }
 

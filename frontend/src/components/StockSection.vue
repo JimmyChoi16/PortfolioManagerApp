@@ -808,55 +808,94 @@ const worstPerformer = computed(() => {
 })
 
 const holdingsRealtimePrices = ref({})
+const isFetchingPrices = ref(false)
 
 const fetchHoldingsRealtimePrices = async () => {
   if (!stockHoldings.value.length) return
-  const usSymbols = stockHoldings.value.filter(h => !/^S[HZ]/i.test(h.symbol)).map(h => h.symbol)
-  const cnSymbols = stockHoldings.value.filter(h => /^S[HZ]/i.test(h.symbol)).map(h => h.symbol)
-  let usPrices = {}, cnPrices = {}
-  if (usSymbols.length) {
-    const resUs = await marketAPI.getUsMultipleQuotes(usSymbols)
-    if (resUs.data && resUs.data.data) {
-      for (const item of resUs.data.data) {
-        usPrices[item.symbol] = item.currentPrice
-      }
+  
+  // 防止重复请求
+  if (isFetchingPrices.value) return
+  isFetchingPrices.value = true
+  
+  try {
+    const usSymbols = stockHoldings.value.filter(h => !/^S[HZ]/i.test(h.symbol)).map(h => h.symbol)
+    const cnSymbols = stockHoldings.value.filter(h => /^S[HZ]/i.test(h.symbol)).map(h => h.symbol)
+    let usPrices = {}, cnPrices = {}
+    
+    // 并行请求，但添加超时和错误处理
+    const requests = []
+    
+    if (usSymbols.length) {
+      requests.push(
+        marketAPI.getUsMultipleQuotes(usSymbols)
+          .then(res => {
+            if (res.data && res.data.data) {
+              for (const item of res.data.data) {
+                usPrices[item.symbol] = item.currentPrice
+              }
+            }
+          })
+          .catch(error => {
+            console.warn('Failed to fetch US prices:', error)
+          })
+      )
     }
-  }
-  if (cnSymbols.length) {
-    const resCn = await marketAPI.getCnMultipleQuotes(cnSymbols)
-    if (resCn.data && resCn.data.data) {
-      for (const item of resCn.data.data) {
-        cnPrices[item.symbol] = item.currentPrice
-      }
+    
+    if (cnSymbols.length) {
+      requests.push(
+        marketAPI.getCnMultipleQuotes(cnSymbols)
+          .then(res => {
+            if (res.data && res.data.data) {
+              for (const item of res.data.data) {
+                cnPrices[item.symbol] = item.currentPrice
+              }
+            }
+          })
+          .catch(error => {
+            console.warn('Failed to fetch CN prices:', error)
+          })
+      )
     }
-  }
-  
-  // 合并价格数据
-  const newPrices = { ...usPrices, ...cnPrices }
-  
-  // 高亮逻辑 - 检查价格变化
-  const newHoldingsFlash = {}
-  Object.keys(newPrices).forEach(symbol => {
-    const prevPrice = prevHoldingsDataMap.value[symbol]
-    const currentPrice = newPrices[symbol]
-    if (prevPrice !== undefined && prevPrice !== currentPrice) {
-      if (currentPrice > prevPrice) {
-        newHoldingsFlash[symbol] = 'up'
-      } else if (currentPrice < prevPrice) {
-        newHoldingsFlash[symbol] = 'down'
+    
+    // 等待所有请求完成，设置超时
+    await Promise.race([
+      Promise.all(requests),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 15000))
+    ])
+    
+    // 合并价格数据
+    const newPrices = { ...usPrices, ...cnPrices }
+    
+    // 高亮逻辑 - 检查价格变化
+    const newHoldingsFlash = {}
+    Object.keys(newPrices).forEach(symbol => {
+      const prevPrice = prevHoldingsDataMap.value[symbol]
+      const currentPrice = newPrices[symbol]
+      if (prevPrice !== undefined && prevPrice !== currentPrice) {
+        if (currentPrice > prevPrice) {
+          newHoldingsFlash[symbol] = 'up'
+        } else if (currentPrice < prevPrice) {
+          newHoldingsFlash[symbol] = 'down'
+        }
       }
+    })
+    
+    // 设置高亮效果
+    holdingsRowFlash.value = newHoldingsFlash
+    if (Object.keys(newHoldingsFlash).length > 0) {
+      setTimeout(() => { holdingsRowFlash.value = {} }, 1000)
     }
-  })
-  
-  // 设置高亮效果
-  holdingsRowFlash.value = newHoldingsFlash
-  if (Object.keys(newHoldingsFlash).length > 0) {
-    setTimeout(() => { holdingsRowFlash.value = {} }, 1000)
+    
+    // 更新价格映射
+    prevHoldingsDataMap.value = { ...newPrices }
+    holdingsRealtimePrices.value = newPrices
+    
+  } catch (error) {
+    console.error('Error fetching real-time prices:', error)
+    // 不更新价格，保持上次的有效数据
+  } finally {
+    isFetchingPrices.value = false
   }
-  
-  // 更新价格映射
-  prevHoldingsDataMap.value = { ...newPrices }
-  holdingsRealtimePrices.value = newPrices
 }
 
 watch(stockHoldings, () => {
