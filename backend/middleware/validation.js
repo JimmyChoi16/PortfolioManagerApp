@@ -48,7 +48,12 @@ const validationRules = {
     body('notes')
       .optional()
       .isLength({ max: 1000 })
-      .withMessage('Notes must be 1000 characters or less')
+      .withMessage('Notes must be 1000 characters or less'),
+    
+    body('current_price')
+      .optional()
+      .isFloat({ min: 0.01 })
+      .withMessage('Current price must be a positive number if provided')
   ],
 
   updateHolding: [

@@ -63,30 +63,32 @@ const holdingController = {
         });
       }
 
-      const { symbol, name, type, quantity, purchase_price, purchase_date, sector, notes } = req.body;
+      const { symbol, name, type, quantity, purchase_price, purchase_date, sector, notes, current_price: providedCurrentPrice } = req.body;
       
-      // Get current price from appropriate market service
-      let current_price = purchase_price;
+      // Get current price from appropriate market service or use provided price
+      let current_price = providedCurrentPrice || purchase_price;
       try {
-        const isAStock = /^S[HZ]/.test(symbol.toUpperCase());
-        let quote = null;
-        
-        if (isAStock) {
-          // Get A股 current price
-          const quotes = await TencentFinanceService.getTencentQuotes([symbol.toUpperCase()]);
-          if (quotes && quotes.length > 0) {
-            quote = quotes[0];
+        if (!providedCurrentPrice) {
+          const isAStock = /^S[HZ]/.test(symbol.toUpperCase());
+          let quote = null;
+          
+          if (isAStock) {
+            // Get A股 current price
+            const quotes = await TencentFinanceService.getTencentQuotes([symbol.toUpperCase()]);
+            if (quotes && quotes.length > 0) {
+              quote = quotes[0];
+            }
+          } else {
+            // Get US stock current price
+            const quotes = await SinaFinanceService.getSinaQuotes([symbol.toUpperCase()]);
+            if (quotes && quotes.length > 0) {
+              quote = quotes[0];
+            }
           }
-        } else {
-          // Get US stock current price
-          const quotes = await SinaFinanceService.getSinaQuotes([symbol.toUpperCase()]);
-          if (quotes && quotes.length > 0) {
-            quote = quotes[0];
+          
+          if (quote && quote.currentPrice) {
+            current_price = quote.currentPrice;
           }
-        }
-        
-        if (quote && quote.currentPrice) {
-          current_price = quote.currentPrice;
         }
       } catch (error) {
         console.warn('Could not fetch current price, using purchase price');
@@ -99,7 +101,7 @@ const holdingController = {
         quantity: parseFloat(quantity),
         purchase_price: parseFloat(purchase_price),
         purchase_date,
-        current_price,
+        current_price: parseFloat(current_price),
         sector,
         notes
       };

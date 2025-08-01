@@ -84,7 +84,9 @@
     </div>
     <!-- CAGR Dialog -->
     <el-dialog v-model="showCagrDialog" :title="t('stock.cagrHistoricalNetValue')" width="700px">
-      <PerformanceLineChart :data="effectiveHistoricalData" />
+      <div style="height:400px;">
+        <PerformanceLineChart :data="effectiveHistoricalData" />
+      </div>
     </el-dialog>
     <!-- Sharpe Ratio Dialog -->
     <el-dialog v-model="showSharpeDialog" :title="t('stock.sharpeRatioDailyReturnsDistribution')" width="700px" @close="onSharpeDialogClose">
@@ -1727,10 +1729,24 @@ const createHolding = async () => {
   
   creating.value = true
   try {
+    // Ensure all numeric values are properly formatted
     const formData = {
-      ...createForm.value,
-      type: 'stock'
+      symbol: createForm.value.symbol.trim().toUpperCase(),
+      name: createForm.value.name.trim(),
+      quantity: parseFloat(createForm.value.quantity) || 0,
+      purchase_price: parseFloat(createForm.value.purchase_price) || 0,
+      purchase_date: createForm.value.purchase_date,
+      sector: createForm.value.sector || '',
+      notes: createForm.value.notes || '',
+      type: 'stock',
+      current_price: parseFloat(createForm.value.purchase_price) || 0 // Set current_price to purchase_price for new holdings
     }
+    
+    // Validate required fields
+    if (!formData.symbol || !formData.name || formData.quantity <= 0 || formData.purchase_price <= 0 || !formData.purchase_date) {
+      throw new Error('Please fill in all required fields with valid values')
+    }
+    
     await portfolioAPI.createHolding(formData)
     await loadStockData()
     showCreateDialog.value = false
@@ -1762,7 +1778,7 @@ const fetchStockInfo = async () => {
       if (response.data && response.data.success && response.data.data.length > 0) {
         const stockData = response.data.data[0]
         createForm.value.name = stockData.name || symbol
-        createForm.value.purchase_price = stockData.currentPrice || 0
+        createForm.value.purchase_price = parseFloat(stockData.currentPrice) || 0
       } else {
         createForm.value.name = symbol
         createForm.value.purchase_price = 0
@@ -1773,7 +1789,7 @@ const fetchStockInfo = async () => {
       if (response.data && response.data.success && response.data.data.length > 0) {
         const stockData = response.data.data[0]
         createForm.value.name = stockData.name || symbol
-        createForm.value.purchase_price = stockData.currentPrice || 0
+        createForm.value.purchase_price = parseFloat(stockData.currentPrice) || 0
       } else {
         createForm.value.name = symbol
         createForm.value.purchase_price = 0
