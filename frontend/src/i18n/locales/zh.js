@@ -264,7 +264,33 @@ export default {
       energy: '能源',
       industrial: '工业',
       other: '其他'
-    }
+    },
+    // Edit/Sell functionality
+    editHolding: '编辑持仓',
+    sellPartial: '部分卖出',
+    sellQuantity: '卖出数量',
+    sellQuantityPlaceholder: '输入要卖出的数量',
+    currentMarketPrice: '当前市场价格',
+    useCurrentPrice: '使用当前价格',
+    customPrice: '自定义价格',
+    customPricePlaceholder: '输入自定义价格',
+    totalSellValue: '总卖出价值',
+    remainingQuantity: '剩余数量',
+    editHoldingDesc: '修改您的股票持仓数量和价格',
+    quantityToSell: '卖出数量',
+    quantityToSellRequired: '卖出数量是必需的',
+    quantityToSellPositive: '卖出数量必须为正数',
+    quantityToSellMax: '卖出数量不能超过当前数量',
+    customPriceRequired: '自定义价格是必需的',
+    customPricePositive: '自定义价格必须为正数',
+    confirmPartialSell: '您确定要以 ${price} 的价格卖出 {symbol} 的 {quantity} 股吗？',
+    partialSellSuccess: '成功卖出 {symbol} 的 {quantity} 股，获得 ${price}',
+    failedToSellPartial: '部分卖出持仓失败。',
+    getCurrentPrice: '获取当前价格',
+    priceUpdated: '价格更新成功',
+    holdingUpdatedSuccessfully: '持仓更新成功！',
+    failedToUpdateHolding: '更新持仓失败。',
+    failedToGetCurrentPrice: '获取当前价格失败。'
   },
 
   // Bond Section

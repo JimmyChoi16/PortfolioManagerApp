@@ -331,7 +331,33 @@ export default {
     // Dialog titles
     cagrHistoricalNetValue: 'CAGR - Historical Net Value',
     sharpeRatioDailyReturnsDistribution: 'Sharpe Ratio - Daily Returns Distribution',
-    maxDrawdownNetValueCurve: 'Max Drawdown - Net Value Curve'
+    maxDrawdownNetValueCurve: 'Max Drawdown - Net Value Curve',
+    // Edit/Sell functionality
+    editHolding: 'Edit Holding',
+    sellPartial: 'Sell Partial',
+    sellQuantity: 'Sell Quantity',
+    sellQuantityPlaceholder: 'Enter quantity to sell',
+    currentMarketPrice: 'Current Market Price',
+    useCurrentPrice: 'Use Current Price',
+    customPrice: 'Custom Price',
+    customPricePlaceholder: 'Enter custom price',
+    totalSellValue: 'Total Sell Value',
+    remainingQuantity: 'Remaining Quantity',
+    editHoldingDesc: 'Modify your stock holding quantity and price',
+    quantityToSell: 'Quantity to Sell',
+    quantityToSellRequired: 'Quantity to sell is required',
+    quantityToSellPositive: 'Quantity to sell must be positive',
+    quantityToSellMax: 'Quantity to sell cannot exceed current quantity',
+    customPriceRequired: 'Custom price is required',
+    customPricePositive: 'Custom price must be positive',
+    confirmPartialSell: 'Are you sure you want to sell {quantity} shares of {symbol} at ${price}?',
+    partialSellSuccess: 'Successfully sold {quantity} shares of {symbol} for ${price}',
+    failedToSellPartial: 'Failed to sell partial holding.',
+    getCurrentPrice: 'Get Current Price',
+    priceUpdated: 'Price updated successfully',
+    holdingUpdatedSuccessfully: 'Holding updated successfully!',
+    failedToUpdateHolding: 'Failed to update holding.',
+    failedToGetCurrentPrice: 'Failed to get current price.'
   },
 
   // Bond Section

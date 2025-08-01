@@ -262,7 +262,33 @@ export default {
       energy: 'Energia',
       industrial: 'Teollisuus',
       other: 'Muu'
-    }
+    },
+    // Edit/Sell functionality
+    editHolding: 'Muokkaa omistusta',
+    sellPartial: 'Myy osittain',
+    sellQuantity: 'Myyntimäärä',
+    sellQuantityPlaceholder: 'Syötä myytävä määrä',
+    currentMarketPrice: 'Nykyinen markkinahinta',
+    useCurrentPrice: 'Käytä nykyistä hintaa',
+    customPrice: 'Mukautettu hinta',
+    customPricePlaceholder: 'Syötä mukautettu hinta',
+    totalSellValue: 'Kokonaismyyntiarvo',
+    remainingQuantity: 'Jäljellä oleva määrä',
+    editHoldingDesc: 'Muokkaa osakeomistuksesi määrää ja hintaa',
+    quantityToSell: 'Myytävä määrä',
+    quantityToSellRequired: 'Myytävä määrä on pakollinen',
+    quantityToSellPositive: 'Myytävä määrä on oltava positiivinen',
+    quantityToSellMax: 'Myytävä määrä ei voi ylittää nykyistä määrää',
+    customPriceRequired: 'Mukautettu hinta on pakollinen',
+    customPricePositive: 'Mukautettu hinta on oltava positiivinen',
+    confirmPartialSell: 'Oletko varma, että haluat myydä {quantity} {symbol}-osaketta hintaan ${price}?',
+    partialSellSuccess: 'Myyty onnistuneesti {quantity} {symbol}-osaketta hintaan ${price}',
+    failedToSellPartial: 'Osittaisen omistuksen myynti epäonnistui.',
+    getCurrentPrice: 'Hae nykyinen hinta',
+    priceUpdated: 'Hinta päivitetty onnistuneesti',
+    holdingUpdatedSuccessfully: 'Omistus päivitetty onnistuneesti!',
+    failedToUpdateHolding: 'Omistuksen päivitys epäonnistui.',
+    failedToGetCurrentPrice: 'Nykyisen hinnan hakeminen epäonnistui.'
   },
 
   // Bond Section

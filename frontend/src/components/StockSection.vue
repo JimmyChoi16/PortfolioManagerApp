@@ -206,6 +206,15 @@
                 <div class="action-buttons">
                   <el-button 
                     v-if="item.holdings_count === 1" 
+                    type="primary" 
+                    size="small" 
+                    @click="editHolding(item)"
+                    :icon="Edit"
+                    circle
+                    title="Edit"
+                  />
+                  <el-button 
+                    v-if="item.holdings_count === 1" 
                     type="danger" 
                     size="small" 
                     @click="sellHolding(item)"
@@ -328,6 +337,146 @@
       </template>
     </el-dialog>
 
+    <!-- Edit Holding Dialog -->
+    <el-dialog v-model="showEditDialog" :title="`${t('stock.editHolding')} - ${selectedHolding?.symbol}`" width="500px">
+      <div v-if="selectedHolding">
+        <p class="edit-desc">{{ t('stock.editHoldingDesc') }}</p>
+        <el-form
+          ref="editFormRef"
+          :model="editForm"
+          :rules="editRules"
+          label-width="140px"
+        >
+          <el-form-item :label="t('stock.symbol')" prop="symbol">
+            <el-input v-model="editForm.symbol" disabled />
+          </el-form-item>
+          <el-form-item :label="t('stock.name')" prop="name">
+            <el-input v-model="editForm.name" disabled />
+          </el-form-item>
+          <el-form-item :label="t('stock.quantity')" prop="quantity">
+            <el-input-number 
+              v-model="editForm.quantity" 
+              :min="0.000001" 
+              :precision="6" 
+              :step="1"
+              :controls="true"
+              style="width: 100%" 
+            />
+          </el-form-item>
+          <el-form-item :label="t('stock.purchasePrice')" prop="purchase_price">
+            <el-input-number 
+              v-model="editForm.purchase_price" 
+              :min="0.01" 
+              :precision="2" 
+              :step="0.01"
+              :controls="true"
+              style="width: 100%" 
+            />
+          </el-form-item>
+          <el-form-item :label="t('stock.purchaseDate')" prop="purchase_date">
+            <el-date-picker
+              v-model="editForm.purchase_date"
+              type="date"
+              :placeholder="t('stock.selectPurchaseDate')"
+              style="width: 100%"
+              format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD"
+              clearable
+            />
+          </el-form-item>
+          <el-form-item :label="t('stock.sector')" prop="sector">
+            <el-select v-model="editForm.sector" :placeholder="t('stock.selectSector')" style="width: 100%" clearable>
+              <el-option :label="t('stock.sectors.technology')" value="Technology" />
+              <el-option :label="t('stock.sectors.healthcare')" value="Healthcare" />
+              <el-option :label="t('stock.sectors.financial')" value="Financial" />
+              <el-option :label="t('stock.sectors.consumer')" value="Consumer" />
+              <el-option :label="t('stock.sectors.energy')" value="Energy" />
+              <el-option :label="t('stock.sectors.industrial')" value="Industrial" />
+              <el-option :label="t('stock.sectors.other')" value="Other" />
+            </el-select>
+          </el-form-item>
+          <el-form-item :label="t('stock.notes')" prop="notes">
+            <el-input
+              v-model="editForm.notes"
+              type="textarea"
+              :rows="3"
+              :placeholder="t('stock.notesPlaceholder')"
+              maxlength="1000"
+              show-word-limit
+            />
+          </el-form-item>
+        </el-form>
+      </div>
+      <template #footer>
+        <el-button @click="showEditDialog = false">{{ t('stock.cancel') }}</el-button>
+        <el-button type="primary" @click="updateHolding" :loading="updating">{{ t('stock.save') }}</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- Partial Sell Dialog -->
+    <el-dialog v-model="showPartialSellDialog" :title="`${t('stock.sellPartial')} - ${selectedHolding?.symbol}`" width="500px">
+      <div v-if="selectedHolding">
+        <p class="edit-desc">{{ t('stock.sellPartial') }} {{ selectedHolding?.symbol }} - {{ t('stock.editHoldingDesc') }}</p>
+        <el-form
+          ref="partialSellFormRef"
+          :model="partialSellForm"
+          :rules="partialSellRules"
+          label-width="140px"
+        >
+          <el-form-item :label="t('stock.symbol')" prop="symbol">
+            <el-input v-model="partialSellForm.symbol" disabled />
+          </el-form-item>
+          <el-form-item :label="t('stock.name')" prop="name">
+            <el-input v-model="partialSellForm.name" disabled />
+          </el-form-item>
+          <el-form-item :label="t('stock.quantity')" prop="current_quantity">
+            <el-input v-model="partialSellForm.current_quantity" disabled />
+          </el-form-item>
+          <el-form-item :label="t('stock.sellQuantity')" prop="sell_quantity">
+            <el-input-number 
+              v-model="partialSellForm.sell_quantity" 
+              :min="0.000001" 
+              :max="partialSellForm.current_quantity"
+              :precision="6" 
+              :step="1"
+              :controls="true"
+              style="width: 100%" 
+            />
+          </el-form-item>
+          <el-form-item :label="t('stock.currentMarketPrice')" prop="current_price">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <el-input-number 
+                v-model="partialSellForm.current_price" 
+                :min="0.01" 
+                :precision="2" 
+                :step="0.01"
+                :controls="true"
+                style="flex: 1" 
+              />
+              <el-button 
+                type="primary" 
+                size="small" 
+                @click="getCurrentPrice"
+                :loading="fetchingPrice"
+              >
+                {{ t('stock.getCurrentPrice') }}
+              </el-button>
+            </div>
+          </el-form-item>
+          <el-form-item :label="t('stock.totalSellValue')" prop="total_value">
+            <el-input v-model="partialSellForm.total_value" disabled />
+          </el-form-item>
+          <el-form-item :label="t('stock.remainingQuantity')" prop="remaining_quantity">
+            <el-input v-model="partialSellForm.remaining_quantity" disabled />
+          </el-form-item>
+        </el-form>
+      </div>
+      <template #footer>
+        <el-button @click="showPartialSellDialog = false">{{ t('stock.cancel') }}</el-button>
+        <el-button type="primary" @click="executePartialSell" :loading="partialSelling">{{ t('stock.sell') }}</el-button>
+      </template>
+    </el-dialog>
+
     <!-- Holding Details Dialog -->
     <el-dialog v-model="showDetailsDialog" :title="`${selectedHolding?.symbol} - ${t('stock.holdingDetails')}`" width="800px">
       <div v-if="selectedHolding">
@@ -399,6 +548,14 @@
                     :icon="Delete"
                     circle
                     title="Sell"
+                  />
+                  <el-button 
+                    type="primary" 
+                    size="small" 
+                    @click="openPartialSellDialog(holding)"
+                    :icon="Edit"
+                    circle
+                    title="Partial Sell"
                   />
                 </td>
               </tr>
@@ -492,7 +649,7 @@
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox, ElDialog, ElForm, ElFormItem, ElInput, ElInputNumber, ElDatePicker, ElSelect, ElOption, ElButton, ElIcon, ElPagination, ElAlert } from 'element-plus'
-import { Plus, Delete, View, Refresh, Loading } from '@element-plus/icons-vue'
+import { Plus, Delete, View, Refresh, Loading, Edit } from '@element-plus/icons-vue'
 import portfolioAPI from '../api/portfolio.js'
 import marketAPI from '../api/market.js'
 import http from '../api/http.js'
@@ -670,16 +827,51 @@ const showSharpeDialog = ref(false)
 const showDrawdownDialog = ref(false)
 const showCreateDialog = ref(false)
 const showDetailsDialog = ref(false)
+const showEditDialog = ref(false)
+const showPartialSellDialog = ref(false)
 const saving = ref(false)
 const creating = ref(false)
+const updating = ref(false)
+const partialSelling = ref(false)
+const fetchingPrice = ref(false)
 const selectedHolding = ref(null)
 const createFormRef = ref(null)
+const editFormRef = ref(null)
+const partialSellFormRef = ref(null)
 
 // Create form data
 const createForm = ref({
   symbol: '',
   name: '',
   quantity: 1,
+  purchase_price: 0,
+  purchase_date: '',
+  sector: '',
+  notes: ''
+})
+
+// Edit form data
+const editForm = ref({
+  id: null,
+  symbol: '',
+  name: '',
+  quantity: 1,
+  purchase_price: 0,
+  purchase_date: '',
+  sector: '',
+  notes: ''
+})
+
+// Partial sell form data
+const partialSellForm = ref({
+  id: null,
+  symbol: '',
+  name: '',
+  current_quantity: 0,
+  sell_quantity: 0,
+  current_price: 0,
+  total_value: 0,
+  remaining_quantity: 0,
   purchase_price: 0,
   purchase_date: '',
   sector: '',
@@ -705,6 +897,43 @@ const createRules = computed(() => ({
   ],
   purchase_date: [
     { required: true, message: t('stock.purchaseDateRequired'), trigger: 'blur' }
+  ]
+}))
+
+// Edit form validation rules
+const editRules = computed(() => ({
+  quantity: [
+    { required: true, message: t('stock.quantityRequired'), trigger: 'blur' },
+    { type: 'number', min: 0.000001, message: t('stock.quantityPositive'), trigger: 'blur' }
+  ],
+  purchase_price: [
+    { required: true, message: t('stock.purchasePriceRequired'), trigger: 'blur' },
+    { type: 'number', min: 0.01, message: t('stock.purchasePricePositive'), trigger: 'blur' }
+  ],
+  purchase_date: [
+    { required: true, message: t('stock.purchaseDateRequired'), trigger: 'blur' }
+  ]
+}))
+
+// Partial sell form validation rules
+const partialSellRules = computed(() => ({
+  sell_quantity: [
+    { required: true, message: t('stock.quantityToSellRequired'), trigger: 'blur' },
+    { type: 'number', min: 0.000001, message: t('stock.quantityToSellPositive'), trigger: 'blur' },
+    { 
+      validator: (rule, value, callback) => {
+        if (value > partialSellForm.value.current_quantity) {
+          callback(new Error(t('stock.quantityToSellMax')))
+        } else {
+          callback()
+        }
+      }, 
+      trigger: 'blur' 
+    }
+  ],
+  current_price: [
+    { required: true, message: t('stock.customPriceRequired'), trigger: 'blur' },
+    { type: 'number', min: 0.01, message: t('stock.customPricePositive'), trigger: 'blur' }
   ]
 }))
 
@@ -996,6 +1225,17 @@ const pagedComputedStockHoldings = computed(() => {
   const start = (holdingsCurrentPage.value - 1) * holdingsPageSize
   return computedStockHoldings.value.slice(start, start + holdingsPageSize)
 })
+
+// Watch partial sell form changes
+watch(() => [partialSellForm.value.sell_quantity, partialSellForm.value.current_price], ([sellQty, price]) => {
+  if (sellQty && price) {
+    partialSellForm.value.total_value = (sellQty * price).toFixed(2)
+    partialSellForm.value.remaining_quantity = (partialSellForm.value.current_quantity - sellQty).toFixed(6)
+  } else {
+    partialSellForm.value.total_value = '0.00'
+    partialSellForm.value.remaining_quantity = partialSellForm.value.current_quantity.toFixed(6)
+  }
+}, { immediate: true })
 
 // Methods
 const loadStockData = async () => {
@@ -1687,6 +1927,180 @@ const sellIndividualHolding = async (holding) => {
     }
   }
 }
+
+const editHolding = (holding) => {
+  // Get the actual holding from individual holdings
+  const actualHolding = holding.individual_holdings ? holding.individual_holdings[0] : holding
+  
+  editForm.value = {
+    id: actualHolding.id,
+    symbol: actualHolding.symbol,
+    name: actualHolding.name,
+    quantity: actualHolding.quantity,
+    purchase_price: actualHolding.purchase_price,
+    purchase_date: actualHolding.purchase_date,
+    sector: actualHolding.sector,
+    notes: actualHolding.notes
+  }
+  
+  selectedHolding.value = holding
+  showEditDialog.value = true
+}
+
+const updateHolding = async () => {
+  if (!editFormRef.value) return
+  
+  try {
+    await editFormRef.value.validate()
+  } catch (error) {
+    console.log('Form validation failed:', error)
+    return
+  }
+  
+  updating.value = true
+  try {
+    const formData = {
+      ...editForm.value,
+      type: 'stock'
+    }
+    await portfolioAPI.updateHolding(editForm.value.id, formData)
+    await loadStockData()
+    showEditDialog.value = false
+    ElMessage.success(t('stock.holdingUpdatedSuccessfully'))
+  } catch (error) {
+    console.error('Error updating holding:', error)
+    ElMessage.error(t('stock.failedToUpdateHolding'))
+  } finally {
+    updating.value = false
+  }
+}
+
+const openPartialSellDialog = (holding) => {
+  // Get the actual holding from individual holdings
+  const actualHolding = holding.individual_holdings ? holding.individual_holdings[0] : holding
+  const currentPrice = holdingsRealtimePrices.value[holding.symbol] || holding.current_price
+  
+  // Format purchase_date to YYYY-MM-DD if it's in ISO format
+  let formattedPurchaseDate = actualHolding.purchase_date
+  if (formattedPurchaseDate && formattedPurchaseDate.includes('T')) {
+    formattedPurchaseDate = formattedPurchaseDate.split('T')[0]
+  }
+  
+  partialSellForm.value = {
+    id: actualHolding.id,
+    symbol: actualHolding.symbol,
+    name: actualHolding.name,
+    current_quantity: actualHolding.quantity,
+    sell_quantity: 0,
+    current_price: currentPrice,
+    total_value: '0.00',
+    remaining_quantity: actualHolding.quantity.toFixed(6),
+    purchase_price: actualHolding.purchase_price,
+    purchase_date: formattedPurchaseDate,
+    sector: actualHolding.sector,
+    notes: actualHolding.notes
+  }
+  
+  selectedHolding.value = holding
+  showPartialSellDialog.value = true
+}
+
+const getCurrentPrice = async () => {
+  if (!partialSellForm.value.symbol) return
+  
+  fetchingPrice.value = true
+  try {
+    const symbol = partialSellForm.value.symbol
+    const isAStock = /^S[HZ]/.test(symbol)
+    
+    let response
+    if (isAStock) {
+      response = await marketAPI.getCnMultipleQuotes([symbol])
+    } else {
+      response = await marketAPI.getUsMultipleQuotes([symbol])
+    }
+    
+    if (response.data && response.data.success && response.data.data.length > 0) {
+      const stockData = response.data.data[0]
+      partialSellForm.value.current_price = stockData.currentPrice || 0
+      ElMessage.success(t('stock.priceUpdated'))
+    }
+  } catch (error) {
+    console.error('Error fetching current price:', error)
+    ElMessage.error(t('stock.failedToGetCurrentPrice'))
+  } finally {
+    fetchingPrice.value = false
+  }
+}
+
+const executePartialSell = async () => {
+  if (!partialSellFormRef.value) return
+  
+  try {
+    await partialSellFormRef.value.validate()
+  } catch (error) {
+    console.log('Form validation failed:', error)
+    return
+  }
+  
+  const { symbol, sell_quantity, current_price } = partialSellForm.value
+  
+  const confirm = await ElMessageBox.confirm(
+    t('stock.confirmPartialSell', { quantity: sell_quantity, symbol: symbol, price: current_price.toFixed(2) }),
+    t('stock.confirmSale'),
+    {
+      confirmButtonText: t('stock.sell'),
+      cancelButtonText: t('stock.cancel'),
+      type: 'warning',
+    }
+  ).catch(() => false)
+
+  if (confirm) {
+    partialSelling.value = true
+    try {
+      // Update the holding with reduced quantity
+      const updatedQuantity = partialSellForm.value.current_quantity - partialSellForm.value.sell_quantity
+      
+      if (updatedQuantity <= 0) {
+        // If no quantity left, delete the holding
+        await portfolioAPI.deleteHolding(partialSellForm.value.id)
+      } else {
+        // Format purchase_date to YYYY-MM-DD if it's in ISO format
+        let formattedPurchaseDate = partialSellForm.value.purchase_date
+        if (formattedPurchaseDate && formattedPurchaseDate.includes('T')) {
+          formattedPurchaseDate = formattedPurchaseDate.split('T')[0]
+        }
+        
+        // Update the holding with new quantity and preserve all other fields
+        const updateData = {
+          symbol: partialSellForm.value.symbol,
+          name: partialSellForm.value.name,
+          quantity: parseFloat(updatedQuantity),
+          purchase_price: parseFloat(partialSellForm.value.purchase_price || 0),
+          current_price: parseFloat(partialSellForm.value.current_price || 0),
+          purchase_date: formattedPurchaseDate || new Date().toISOString().split('T')[0],
+          sector: partialSellForm.value.sector || 'Other',
+          notes: partialSellForm.value.notes || '',
+          type: 'stock'
+        }
+        await portfolioAPI.updateHolding(partialSellForm.value.id, updateData)
+      }
+      
+      await loadStockData()
+      showPartialSellDialog.value = false
+      ElMessage.success(t('stock.partialSellSuccess', { 
+        quantity: sell_quantity, 
+        symbol: symbol, 
+        price: (sell_quantity * current_price).toFixed(2) 
+      }))
+    } catch (error) {
+      console.error('Error executing partial sell:', error)
+      ElMessage.error(t('stock.failedToSellPartial'))
+    } finally {
+      partialSelling.value = false
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -1927,5 +2341,22 @@ const sellIndividualHolding = async (holding) => {
   .allocation-value {
     text-align: left;
   }
+}
+
+.edit-desc {
+  color: #7f8c8d;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.actions-cell {
+  text-align: center;
 }
 </style>
